@@ -80,3 +80,6 @@ line-length = 100
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 asyncio_mode = "auto"
+# pytest-asyncio 1.4.1 warns at every run while this is unset. There are no
+# async fixtures, so the scope changes nothing today.
+asyncio_default_fixture_loop_scope = "function"

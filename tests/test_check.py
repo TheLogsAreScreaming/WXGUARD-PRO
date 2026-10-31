@@ -26,7 +26,10 @@ def _wx_aus(tmp_path, monkeypatch):
                      "timezone": "America/Chicago", "mqtt_enabled": False, "mqtt_iata": "",
                      "bridge_token": "", "radar_dir": ""}.items():
         monkeypatch.setattr(settings, key, val)
-    monkeypatch.setattr(settings, "_rejected", [])
+    # A private attribute is kept in __pydantic_private__, not __dict__, and
+    # pytest 9.2's setattr undo deletes it instead of putting it back, which
+    # leaves `settings.rejected` broken for every test after this file.
+    monkeypatch.setitem(settings.__pydantic_private__, "_rejected", [])
     monkeypatch.setattr(config, "_tz_from_home", False)
     resolver.load()
     monkeypatch.setattr(resolver, "_home", resolver._home)
@@ -75,7 +78,8 @@ def test_the_timezone_is_taken_from_the_home_city(monkeypatch):
 
 
 def test_settings_a_new_operator_gets_wrong(monkeypatch, tmp_path):
-    monkeypatch.setattr(settings, "_rejected", ["MCW_ADMIN_KEY ignored: 3 hex characters is too short"])
+    monkeypatch.setitem(settings.__pydantic_private__, "_rejected",
+                        ["MCW_ADMIN_KEY ignored: 3 hex characters is too short"])
     monkeypatch.setattr(settings, "admin_key", "")
     monkeypatch.setattr(settings, "status_channel", "#meshwx")
     monkeypatch.setattr(settings, "radio_region", "ZZ")
