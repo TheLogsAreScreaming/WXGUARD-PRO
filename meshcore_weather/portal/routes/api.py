@@ -13,6 +13,7 @@ from meshcore_weather.schedule.models import (
     BroadcastJob,
     LOCATION_TYPES,
     PRODUCT_TYPES,
+    RADAR_LEVELS,
     is_builtin,
 )
 
@@ -206,6 +207,7 @@ PRODUCT_INFO = {
     "observations": {"label": "Observations",  "desc": "Current conditions for the stations around home in one packet, or one station", "locations": ["coverage", "station"]},
     "forecast":     {"label": "Forecast",      "desc": "Seven-day point forecast for home or another place", "locations": ["city", "pfm_point", "coverage"]},
     "coverage":     {"label": "Coverage",      "desc": "What this bot covers: centre, radius, NWS offices and zones, so apps never guess its area", "locations": ["coverage"]},
+    "radar":        {"label": "Radar",         "desc": "The radar tile over the area at each new picture while there is precipitation in it, and once more when it clears", "locations": ["coverage"]},
 }
 
 LOCATION_INFO = {
@@ -223,6 +225,9 @@ ADD_KINDS = {
     "station":  {"label": "Observations from one airport", "product": "observations", "location_type": "station",
                  "field": "Airport", "placeholder": "4-letter ICAO code",
                  "desc": "One airport's current conditions in a packet of its own, for a station outside the hourly batch."},
+    "radar":    {"label": "Radar while there is precipitation", "product": "radar", "location_type": "coverage",
+                 "desc": "The radar tile over your area, one packet per picture while there is precipitation near home, "
+                         "and one more when it clears. Nothing while it is dry."},
 }
 
 
@@ -238,7 +243,14 @@ async def schedule_meta() -> JSONResponse:
         "kinds": ADD_KINDS,
         "interval_choices": {k: list(v) for k, v in INTERVAL_CHOICES.items()},
         "default_interval": DEFAULT_INTERVAL,
+        "radar_levels": RADAR_LEVELS,
+        "radius_km": _radius_km(),
     })
+
+
+def _radius_km() -> int:
+    from meshcore_weather.config import settings
+    return int(settings.home_radius_km or 0)
 
 
 def _home_name() -> str:
@@ -274,6 +286,12 @@ def _describe(job: BroadcastJob, store, others: list[BroadcastJob], check: bool 
     loc = job.location_id.strip()
     if job.product == "observations" and job.location_type == "coverage":
         label = f"Stations within {float(settings.home_radius_km or 0):g} km of home"
+    if job.product == "radar":
+        _describe_radar(job, check, errors, notes)
+        km = job.within_km or _radius_km()
+        label = f"{RADAR_LEVELS[job.min_level or 1]} within {km} km of home"
+        if any(o.product == "radar" for o in others):
+            errors.append("There is already a radar broadcast. Edit that one.")
     if job.product == "forecast":
         lat = lon = None
         if job.location_type == "pfm_point":
@@ -334,6 +352,29 @@ def _describe(job: BroadcastJob, store, others: list[BroadcastJob], check: bool 
     return {"label": label, "errors": errors, "notes": notes}
 
 
+def _describe_radar(job: BroadcastJob, check: bool, errors: list[str], notes: list[str]) -> None:
+    from meshcore_weather.geodata import resolver
+    from meshcore_weather.radar import area
+    from meshcore_weather.radar import service as radar_service
+    home = resolver.home()
+    km = job.within_km or _radius_km()
+    if home is None:
+        errors.append("The bot has no home city. Set one in Settings first.")
+        return
+    if km <= 0:
+        errors.append("Give a distance from home.")
+        return
+    where = area.area_tile(home[0], home[1], km)
+    if where is None:
+        errors.append(f"No radar tile holds {km} km around home. Choose a shorter distance.")
+        return
+    if check:
+        if not radar_service.shared().available:
+            errors.append("This bot has no radar pictures: they come down the satellite dish, and it has none.")
+            return
+        notes.append(f"{area.describe_tile(*where)}. One packet per picture, at most 157 B.")
+
+
 def _airtime_ms(data_len: int, sf: int = 7, bw_khz: float = 62.5, cr: int = 5) -> float:
     """Time on air for one MeshWX packet, RadioLib's LoRa formula with
     MeshCore's 32-symbol preamble (docs/MeshWX_Airtime_Review.md). On air a
@@ -361,7 +402,7 @@ def _job_from_body(body: dict, cfg) -> BroadcastJob:
     """A new job from the add form: {kind, place | station, name, interval_minutes, enabled}."""
     kind = ADD_KINDS.get(str(body.get("kind") or ""))
     if kind is None:
-        raise HTTPException(400, "Choose what to add: a forecast for a place or one airport's observations.")
+        raise HTTPException(400, "Choose what to add: a forecast for a place, one airport's observations or radar.")
     loc = str(body.get("place") or body.get("station") or "").strip()
     if kind["location_type"] == "station":
         loc = loc.upper()
@@ -374,9 +415,37 @@ def _job_from_body(body: dict, cfg) -> BroadcastJob:
     if interval not in INTERVAL_CHOICES[product]:
         raise HTTPException(400, f"Choose one of the intervals offered for {PRODUCT_INFO[product]['label'].lower()}.")
     name = str(body.get("name") or "").strip()[:120]
+    extra = _radar_fields(body) if product == "radar" else {}
     return BroadcastJob(id="pending", name=name or "pending", product=product,
                         location_type=kind["location_type"], location_id=loc,
-                        interval_minutes=interval, enabled=bool(body.get("enabled", True)))
+                        interval_minutes=interval, enabled=bool(body.get("enabled", True)), **extra)
+
+
+def _radar_fields(body: dict) -> dict:
+    """`min_level` and `within_km` from a form. An empty distance is the
+    coverage radius."""
+    out: dict = {}
+    if "min_level" in body:
+        try:
+            level = int(body.get("min_level") or 1)
+        except (TypeError, ValueError):
+            level = 0
+        if level not in RADAR_LEVELS:
+            raise HTTPException(400, "Choose what counts as precipitation.")
+        out["min_level"] = level
+    if "within_km" in body:
+        raw = body.get("within_km")
+        if raw in (None, ""):
+            out["within_km"] = None
+        else:
+            try:
+                km = int(float(raw))
+            except (TypeError, ValueError):
+                km = 0
+            if not 1 <= km <= 1000:
+                raise HTTPException(400, "The distance from home must be 1 to 1000 km.")
+            out["within_km"] = None if km == _radius_km() else km
+    return out
 
 
 def _job_row(scheduler, job: BroadcastJob) -> dict:
@@ -395,6 +464,7 @@ def _job_row(scheduler, job: BroadcastJob) -> dict:
         "last_run_seconds_ago": status.get("last_run_seconds_ago"),
         "next_run_in_seconds": status.get("next_run_in_seconds"),
         "last_result": status.get("last_result"),
+        "last_result_seconds_ago": status.get("last_result_seconds_ago"),
         "waiting_since": status.get("waiting_since"),
         "total_runs": status.get("total_runs", 0),
         "total_bytes": status.get("total_bytes", 0),
@@ -443,21 +513,27 @@ async def preview_job(request: Request) -> JSONResponse:
     else:
         job = _job_from_body(body, cfg)
         others, existing = list(cfg.jobs), None
+    if job.product == "radar":
+        job = job.model_copy(update=_radar_fields(body))
     desc = _describe(job, scheduler.store, others)
     built = {"packets": [], "reason": None}
     if not desc["errors"]:
-        built = scheduler.preview(job)
+        if job.product == "radar":
+            # Reading a radar picture takes a few hundred milliseconds on a Pi.
+            from starlette.concurrency import run_in_threadpool
+            built = await run_in_threadpool(scheduler.preview, job)
+        else:
+            built = scheduler.preview(job)
     sizes = built.get("packets") or []
     sf, bw, cr = await _radio_shape(request)
     airtime = sum(_airtime_ms(n, sf, bw, cr) for n in sizes)
     runs_per_hour = 60.0 / job.interval_minutes
     est = scheduler.scheduled_packets_per_hour()
-    if existing is not None and existing.enabled and existing.product != "warnings":
-        last = (scheduler.job_status(existing.id).get("last_result") or {}).get("packets") or 1
-        est -= last * 60.0 / existing.interval_minutes
+    if existing is not None:
+        est -= scheduler.job_packets_per_hour(existing)
     adds = 0.0 if job.product == "warnings" else max(len(sizes), 1) * runs_per_hour
     name = job.name if job.name != "pending" else (
-        f"{PRODUCT_INFO[job.product]['label']}: {desc['label']}")
+        "Radar" if job.product == "radar" else f"{PRODUCT_INFO[job.product]['label']}: {desc['label']}")
     return JSONResponse({
         "ok": not desc["errors"],
         "label": desc["label"], "name": name,
@@ -465,6 +541,7 @@ async def preview_job(request: Request) -> JSONResponse:
         "packets": len(sizes), "bytes": sum(sizes),
         "airtime_ms": round(airtime), "runs_per_day": round(24 * runs_per_hour, 2),
         "reason": built.get("reason"), "active_warnings": built.get("active_warnings"),
+        "note": built.get("note"), "radar": built.get("radar"), "product": job.product,
         "per_hour": {"cap": scheduler.ceiling_status()["cap"], "others": round(max(est, 0.0), 1),
                      "this": round(adds, 2)},
     })
@@ -472,8 +549,9 @@ async def preview_job(request: Request) -> JSONResponse:
 
 @router.post("/schedule/jobs")
 async def create_job(request: Request) -> JSONResponse:
-    """Add a broadcast: {kind: "forecast" | "station", place | station,
-    name, interval_minutes, enabled}. The id is made from the name."""
+    """Add a broadcast: {kind: "forecast" | "station" | "radar", place |
+    station, name, interval_minutes, enabled, and for radar min_level and
+    within_km}. The id is made from the name."""
     from meshcore_weather.schedule.store import new_job_id
     scheduler = _get_scheduler(request)
     body = await request.json()
@@ -482,7 +560,8 @@ async def create_job(request: Request) -> JSONResponse:
     desc = _describe(job, scheduler.store, list(cfg.jobs))
     if desc["errors"]:
         raise HTTPException(400, " ".join(desc["errors"]))
-    name = job.name if job.name != "pending" else f"{PRODUCT_INFO[job.product]['label']}: {desc['label']}"
+    name = job.name if job.name != "pending" else (
+        "Radar" if job.product == "radar" else f"{PRODUCT_INFO[job.product]['label']}: {desc['label']}")
     job = job.model_copy(update={"id": new_job_id(cfg, name), "name": name})
     cfg.upsert_job(job)
     await scheduler.save_config(cfg)
@@ -491,8 +570,9 @@ async def create_job(request: Request) -> JSONResponse:
 
 @router.put("/schedule/jobs/{job_id}")
 async def update_job(job_id: str, request: Request) -> JSONResponse:
-    """Change a job's name, interval or on/off. What it sends and for where are
-    fixed: to broadcast something else, add a new one."""
+    """Change a job's name, interval or on/off, and radar's level and distance.
+    What it sends and for where are fixed: to broadcast something else, add a
+    new one."""
     scheduler = _get_scheduler(request)
     body = await request.json()
     cfg = scheduler.current_config()
@@ -515,6 +595,12 @@ async def update_job(job_id: str, request: Request) -> JSONResponse:
         update["interval_minutes"] = interval
     if "enabled" in body:
         update["enabled"] = bool(body["enabled"])
+    if job.product == "radar":
+        update.update(_radar_fields(body))
+        errors = _describe(job.model_copy(update=update), scheduler.store,
+                           [j for j in cfg.jobs if j.id != job.id], check=False)["errors"]
+        if errors:
+            raise HTTPException(400, " ".join(errors))
     job = job.model_copy(update=update)
     cfg.upsert_job(job)
     await scheduler.save_config(cfg)

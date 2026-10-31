@@ -914,9 +914,10 @@ no radar from the internet, has none, and answers `>radar` with Not available `x
 These are `protocol.json` `v5.radar.products` and `product_names`, in wire order; the list is
 append-only.
 
-**Request only, never scheduled.** It answers `>radar` (section 14.2). It is flooded like every
-answer, and tiles sit on a fixed lattice precisely so that a tile one phone asked for is a tile
-every phone can use.
+It answers `>radar` (section 14.2), and a bot can also broadcast the tile over its own area while
+there is precipitation in it (section 15). Either way it is flooded, and tiles sit on a fixed
+lattice precisely so that a tile one phone asked for, or the bot sent unasked, is a tile every
+phone can use.
 
 ### 13.1 The tile
 
@@ -1214,9 +1215,18 @@ its own coverage (section 10):
 | Observations (section 6) | Every hour |
 | Forecast (section 7) | For the bot's home point, every 6 hours |
 | Coverage (section 10) | Every 3 hours |
+| Radar (section 13) | Only when the operator adds it: each new picture while there is precipitation near home, at most one every 15 minutes, and one picture more when it clears |
 
-The intervals are the defaults; an operator can change them. Nothing else is ever broadcast on a
-schedule: Text, Area sweeps and Radar answer requests only.
+The intervals are the defaults; an operator can change them. Text and Area sweeps answer requests
+only.
+
+- **Radar.** The operator sets a distance from the home point (the coverage radius unless they
+  change it) and what counts: any precipitation, moderate and heavier, or heavy only. The tile is
+  the narrowest one on the lattice (13.1) that holds the whole circle, one packet per picture. The
+  bot looks for a new picture every minute and judges each picture once: precipitation at or above
+  the level in a cell within the distance sends it, at most one picture per 15, 30 or 60 minutes
+  as the operator chooses. A tile sent as an answer in the last 5 minutes is not sent again, and a
+  broadcast tile starts the same 5 minutes for `>radar` (13.4).
 
 - **A ceiling on the schedule.** A bot sends at most 120 scheduled packets an hour (by default). New,
   changed and repeated tornado, severe thunderstorm, flash flood and extreme wind warnings always
@@ -1750,7 +1760,8 @@ bytes it sent before, so nobody has to redraw what they hold. File what comes ba
 ### 19.6 Radar
 
 One packet, and a new picture exists only every 15 minutes. Ask when a person asks, and use any tile
-you hear that holds the place on screen. Send the coordinate with three decimals, and leave out
+you hear that holds the place on screen, including those a bot broadcasts while there is
+precipitation near it (section 15). Send the coordinate with three decimals, and leave out
 `z0`. A refusal inside 5 minutes of the same picture going out costs the mesh a packet too, so tell
 the person when the picture they hold was taken instead of inviting a refresh. A loop is up to five
 packets: offer it on its own control, send the pictures you already hold after `loop` (UTC `HHMM`,

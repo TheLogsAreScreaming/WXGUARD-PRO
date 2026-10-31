@@ -12,6 +12,7 @@ import logging
 import time
 from dataclasses import dataclass, field
 
+from meshcore_weather.config import settings
 from meshcore_weather.geodata import resolver
 from meshcore_weather.parser.weather import WeatherStore
 from meshcore_weather.protocol import v5_builders as b
@@ -22,6 +23,7 @@ from meshcore_weather.schedule.models import BroadcastJob
 logger = logging.getLogger(__name__)
 
 REPEAT_AFTER_S = 90          # life-safety warnings go out once more after this
+RADAR_LOOK_AGAIN_S = 60      # radar with no new picture yet: look again after this
 
 
 @dataclass
@@ -44,9 +46,28 @@ class ExecutorContext:
     # past it is held back, with its state untouched, for a later tick.
     budget: int | None = None
     held_back: int = 0
-    # Why the last job sent nothing, in words for the portal (the scheduler
-    # clears it before each job).
+    # Why the last job sent nothing, in words for the portal, and what a job
+    # that sent something saw (the scheduler clears both before each job).
     reason: str | None = None
+    note: str | None = None
+    # A job with nothing yet that should be looked at again in this many
+    # seconds without counting as a run (radar waiting for a new picture);
+    # `quiet` leaves its last result as it was; `idle` says the weather, not
+    # something wrong, is why nothing went (radar over a dry area).
+    retry_in_s: float | None = None
+    quiet: bool = False
+    idle: bool = False
+    # Send what there is (the portal's Send now), whatever the weather.
+    force: bool = False
+    # Radar, both owned by the scheduler: what the radar job last judged
+    # ({"judged": taken_min, "wet": bool}), and when each tile last went on
+    # air, keyed (south, west, zoom, taken_min), which the `>radar` answers share.
+    radar_state: dict = field(default_factory=dict)
+    radar_on_air: dict = field(default_factory=dict)
+    # Set by the radar job when it builds a packet: what to record once the
+    # radio takes it. `radar_info` describes the tile, for the portal.
+    radar_sent: dict | None = None
+    radar_info: dict | None = None
 
 
 def area_blocked(job: BroadcastJob, ctx: ExecutorContext) -> bool:
@@ -251,12 +272,84 @@ def _build_coverage(job: BroadcastJob, ctx: ExecutorContext) -> list[bytes]:
     return [msg]
 
 
+def _build_radar(job: BroadcastJob, ctx: ExecutorContext) -> list[bytes]:
+    """The radar tile over the coverage (spec 15): each new picture while
+    there is precipitation within the job's distance of home, one more when it
+    has gone, and nothing while it stays dry. Until there is a picture it has
+    not judged it looks again every minute, so a picture goes out within a
+    minute of reaching the bot."""
+    from meshcore_weather.radar import area
+    from meshcore_weather.radar import service as radar_service
+    if area_blocked(job, ctx):
+        return []
+    if ctx.home is None:
+        ctx.reason = "the bot has no home point (set the home city in Settings)"
+        return []
+    km = float(job.within_km or ctx.radius_km or 0)
+    if km <= 0:
+        ctx.reason = "no distance from home is set"
+        return []
+    where = area.area_tile(ctx.home[0], ctx.home[1], km)
+    if where is None:
+        ctx.reason = f"no radar tile holds {km:g} km around home"
+        return []
+    ctx.radar_info = {"tile": area.describe_tile(*where)}
+    radar = radar_service.shared()
+    if not radar.available:
+        ctx.reason = "the bot has no radar pictures: they come down the satellite dish"
+        return []
+    found = radar.tile_at(*where)
+    if found is None:
+        ctx.reason = "no radar picture of the area from the last hour"
+        ctx.retry_in_s = RADAR_LOOK_AGAIN_S
+        return []
+    tile, picture, frame = found
+    taken = int(picture.taken.timestamp() // 60)
+    at = picture.taken.strftime("%H:%MZ")
+    ctx.radar_info.update(picture=frame.name, taken=at)
+    state = ctx.radar_state
+    level = job.min_level or 1
+    seen = area.judge(tile, ctx.home[0], ctx.home[1], km, level)
+    wet = seen["cells"] > 0
+    key = (tile.south, tile.west, tile.zoom, taken)
+    on_air = time.time() - ctx.radar_on_air.get(key, 0.0) < settings.radar_window_s
+    if not ctx.force:
+        if taken <= state.get("judged", -1):
+            ctx.retry_in_s, ctx.quiet = RADAR_LOOK_AGAIN_S, True
+            return []
+        dry = (f"{area.RADAR_DRY[level]} within {km:g} km of home on the {at} picture" if seen["known"]
+               else f"the {at} picture does not reach home")
+        if not wet and not state.get("wet"):
+            state["judged"] = taken
+            ctx.reason, ctx.retry_in_s, ctx.idle = dry, RADAR_LOOK_AGAIN_S, bool(seen["known"])
+            return []
+        if on_air:
+            # A `>radar` answer put this very picture on the air minutes ago.
+            state.update(judged=taken, wet=wet)
+            ctx.reason, ctx.retry_in_s = f"the {at} picture went out as an answer just now", RADAR_LOOK_AGAIN_S
+            ctx.idle = True
+            return []
+    elif on_air:
+        ctx.reason = f"the {at} picture went out in the last {settings.radar_window_s // 60 or 1} min"
+        return []
+    msg = b.radar_message(ctx.seq.next(), ctx.bot, tile, picture, frame)
+    if msg is None:
+        ctx.reason = f"the {at} picture holds too little of the area to send"
+        ctx.retry_in_s = RADAR_LOOK_AGAIN_S
+        return []
+    ctx.radar_info["now"] = area.in_words(seen, km, level) if wet else "no precipitation left in the area"
+    ctx.note = f"{ctx.radar_info['now']} ({at} picture)"
+    ctx.radar_sent = {"key": key, "judged": taken, "wet": wet, "cut": (tile, picture, frame)}
+    return [msg]
+
+
 PRODUCT_BUILDERS = {
     "warnings": _build_warnings,
     "digest": _build_digest,
     "observations": _build_observations,
     "forecast": _build_forecast,
     "coverage": _build_coverage,
+    "radar": _build_radar,
 }
 
 

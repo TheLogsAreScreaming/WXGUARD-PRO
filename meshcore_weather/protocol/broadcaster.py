@@ -187,8 +187,10 @@ class AppResponder:
         # state code -> (when a sweep last covered it, with advisories or not).
         # A national sweep covers every state; a scoped one covers its own.
         self._last_sweep_state: dict[str, tuple[float, bool]] = {}
-        # (south, west, zoom, taken_min) -> when that radar tile last went on air.
-        self._last_radar: dict[tuple[int, int, int, int], float] = {}
+        # (south, west, zoom, taken_min) -> when that radar tile last went on
+        # air, as an answer or as the scheduled radar broadcast: one dict, the
+        # scheduler's.
+        self._last_radar: dict[tuple[int, int, int, int], float] = self._scheduler.radar_on_air
         # packet bytes -> (tile, picture, frame), from the thread that cut the
         # tile to the coroutine that sends it, for the audit line (radar/audit.py).
         self._radar_cut: dict[bytes, tuple] = {}

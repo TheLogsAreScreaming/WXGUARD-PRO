@@ -687,7 +687,7 @@ var Portal = {
   // -- Scheduled broadcasts: jobs, counters, the data channel log ------------------
 
   broadcasts: {
-    _meta: null, _timer: null, _sse: null, _n: 0, _jobs: [], _previewN: 0, _previewTimer: null,
+    _meta: null, _timer: null, _sse: null, _n: 0, _jobs: [], _previewN: 0, _previewTimer: null, _editing: null,
     _labels: { broadcast: "Broadcast", beacon: "Discovery beacon", app_request: "App request", app_response: "App reply",
                refresh: "App refresh", throttled: "Throttled" },
 
@@ -741,7 +741,7 @@ var Portal = {
     },
     _sent: function (r) {
       if (!r) return "";
-      if (r.packets) return r.packets + (r.packets === 1 ? " packet, " : " packets, ") + r.bytes + " B";
+      if (r.packets) return r.packets + (r.packets === 1 ? " packet, " : " packets, ") + r.bytes + " B" + (r.note ? ": " + r.note : "");
       return "nothing sent: " + (r.reason || "nothing to send");
     },
 
@@ -760,11 +760,13 @@ var Portal = {
         if (!self._jobs.length) { tbody.innerHTML = '<tr><td colspan="5" class="hint">No broadcasts.</td></tr>'; return; }
         tbody.innerHTML = self._jobs.map(function (j) {
           var id = esc(j.id), r = j.last_result;
-          var last = j.last_run_seconds_ago != null ? ago(j.last_run_seconds_ago) + " ago" : "never";
+          var age = j.last_result_seconds_ago != null ? j.last_result_seconds_ago : j.last_run_seconds_ago;
+          var last = age != null ? ago(age) + " ago" : "never";
           var sent = self._sent(r);
           if (j.waiting_since) sent = "waiting for room under the hourly ceiling";
-          var warn = j.waiting_since || (r && !r.packets && j.product !== "warnings");
+          var warn = j.waiting_since || (r && !r.packets && !r.idle && j.product !== "warnings");
           var next = !j.enabled ? "off" : j.waiting_since ? "when there is room" :
+            j.product === "radar" && (j.next_run_in_seconds || 0) <= 90 ? "at the next picture" :
             j.next_run_in_seconds ? "in " + ago(j.next_run_in_seconds) : "now";
           return "<tr" + (j.enabled ? "" : ' class="off"') + "><td><b>" + esc(j.name) + "</b>" +
             (j.builtin ? ' <span class="tag">built in</span>' : "") +
@@ -797,7 +799,12 @@ var Portal = {
       if (d.errors && d.errors.length) return '<div class="notice bad">' + d.errors.map(esc).join("<br>") + "</div>";
       if (d.label) out.push("<b>" + esc(d.label) + "</b>");
       (d.notes || []).forEach(function (n) { out.push(esc(n)); });
-      if (d.active_warnings != null) {
+      if (d.product === "radar") {
+        var rd = d.radar || {};
+        if (d.packets) out.push("On the " + esc(rd.taken) + " " + esc(rd.picture) + " picture: " + esc(rd.now) + ". It would send " +
+          d.bytes + " B now, about " + (d.airtime_ms / 1000).toFixed(1) + " s on air before repeaters pass it on.");
+        else if (d.reason) out.push("Now it would send nothing: " + esc(d.reason) + ".");
+      } else if (d.active_warnings != null) {
         out.push("Sends a warning when one appears or changes, and a cancel when one ends early. " + d.active_warnings + " active in coverage now.");
       } else if (d.packets) {
         out.push("Each run: " + d.packets + (d.packets === 1 ? " packet, " : " packets, ") + d.bytes + " B, about " +
@@ -808,7 +815,8 @@ var Portal = {
       var h = d.per_hour || {};
       var n = function (x) { return x < 10 ? x.toFixed(1) : String(Math.round(x)); };
       if (h.cap) out.push("Scheduled broadcasts: about " + n(h.others) + " packets an hour" +
-        (h.this ? ", " + n(h.others + h.this) + " with this one" : "") + ", of " + h.cap + " allowed.");
+        (h.this ? ", " + n(h.others + h.this) + (d.product === "radar" ? " while there is precipitation" : " with this one") : "") +
+        ", of " + h.cap + " allowed.");
       return '<div class="notice info">' + out.join("<br>") + "</div>";
     },
 
@@ -822,21 +830,45 @@ var Portal = {
         "<h2>Add a broadcast</h2>" +
         '<form onsubmit="Portal.broadcasts.saveAdd(event)">' +
         '<fieldset class="f"><legend>What to send</legend>' + radios + "</fieldset>" +
-        '<div class="f mt"><label for="jf-where" id="jf-where-label"></label><input type="text" id="jf-where" autocomplete="off" oninput="Portal.broadcasts._schedulePreview()"></div>' +
-        '<div class="f mt"><label for="jf-interval">How often</label><select id="jf-interval" onchange="Portal.broadcasts._schedulePreview()"></select></div>' +
+        '<div class="f mt" id="jf-where-row"><label for="jf-where" id="jf-where-label"></label><input type="text" id="jf-where" autocomplete="off" oninput="Portal.broadcasts._schedulePreview()"></div>' +
+        this._radarFields(1, null) +
+        '<div class="f mt"><label for="jf-interval">How often</label><select id="jf-interval" onchange="Portal.broadcasts._schedulePreview()"></select>' +
+        '<div class="hint" id="jf-interval-hint"></div></div>' +
         '<div class="f mt"><label for="jf-name">Name</label><input type="text" id="jf-name" maxlength="120"></div>' +
         '<div id="jf-preview" class="mt" aria-live="polite"></div>' +
         '<label class="hint mt"><input type="checkbox" id="jf-enabled" checked> On</label>' +
         '<div class="row mt"><button type="submit" class="primary" id="jf-save" disabled>Add</button><button type="button" onclick="Portal.ui.closeModal()">Cancel</button></div></form>');
+      this._editing = null;
       this._onKind();
       $("jf-where").focus();
     },
+    // Radar's own settings: what counts as precipitation, and how far from home.
+    _radarFields: function (level, km) {
+      var meta = this._meta || {}, levels = meta.radar_levels || {}, r = meta.radius_km || "";
+      var opts = Object.keys(levels).map(function (v) {
+        return '<option value="' + v + '"' + (Number(v) === (level || 1) ? " selected" : "") + ">" + esc(levels[v]) + "</option>";
+      }).join("");
+      return '<div id="jf-radar" hidden><div class="f mt"><label for="jf-level">Send while there is</label>' +
+        '<select id="jf-level" onchange="Portal.broadcasts._fieldsChanged()">' + opts + "</select></div>" +
+        '<div class="f mt"><label for="jf-km">Within this many km of home</label>' +
+        '<input type="number" id="jf-km" min="1" max="1000" step="1" value="' + esc(String(km || r)) + '" oninput="Portal.broadcasts._fieldsChanged()">' +
+        '<div class="hint">The coverage radius is ' + esc(String(r)) + " km. The bot sends the narrowest radar tile that holds all of it.</div></div></div>";
+    },
+    _radarBody: function (body) {
+      var el = $("jf-radar");
+      if (el && !el.hidden) { body.min_level = parseInt($("jf-level").value, 10); body.within_km = $("jf-km").value.trim(); }
+      return body;
+    },
+    _fieldsChanged: function () { if (this._editing) this._editPreview(this._editing); else this._schedulePreview(); },
     _kind: function () { var el = document.querySelector('input[name="jf-kind"]:checked'); return el ? el.value : ""; },
     _onKind: function () {
       var meta = this._meta || {}, k = (meta.kinds || {})[this._kind()] || {};
+      $("jf-where-row").hidden = !k.field;
+      $("jf-radar").hidden = k.product !== "radar";
       $("jf-where-label").textContent = k.field || "Where";
       $("jf-where").placeholder = k.placeholder || "";
       $("jf-interval").innerHTML = this._intervalOptions((meta.interval_choices || {})[k.product] || [], (meta.default_interval || {})[k.product]);
+      $("jf-interval-hint").textContent = k.product === "radar" ? "A new radar picture comes every 15 minutes." : "";
       this._schedulePreview();
     },
     _schedulePreview: function () {
@@ -847,8 +879,8 @@ var Portal = {
     },
     _preview: function () {
       var where = $("jf-where").value.trim(), out = $("jf-preview"), self = this, n = ++this._previewN;
-      if (!where) { out.innerHTML = ""; return; }
-      var body = { kind: this._kind(), interval_minutes: parseInt($("jf-interval").value, 10) };
+      if (!where && !$("jf-where-row").hidden) { out.innerHTML = ""; return; }
+      var body = this._radarBody({ kind: this._kind(), interval_minutes: parseInt($("jf-interval").value, 10) });
       body[this._kind() === "station" ? "station" : "place"] = where;
       api("/api/schedule/preview", { method: "POST", body: body }).then(function (d) {
         if (n !== self._previewN) return;                 // a newer preview is on its way
@@ -860,8 +892,8 @@ var Portal = {
     saveAdd: function (ev) {
       ev.preventDefault();
       var self = this, where = $("jf-where").value.trim();
-      var body = { kind: this._kind(), name: $("jf-name").value.trim(), interval_minutes: parseInt($("jf-interval").value, 10),
-                   enabled: $("jf-enabled").checked };
+      var body = this._radarBody({ kind: this._kind(), name: $("jf-name").value.trim(), interval_minutes: parseInt($("jf-interval").value, 10),
+                   enabled: $("jf-enabled").checked });
       body[this._kind() === "station" ? "station" : "place"] = where;
       api("/api/schedule/jobs", { method: "POST", body: body }).then(function (d) {
         Portal.ui.toast("Added " + d.job.name); Portal.ui.closeModal(); self.loadJobs();
@@ -879,17 +911,30 @@ var Portal = {
         '<div class="f"><label for="jf-name">Name</label><input type="text" id="jf-name" required maxlength="120" value="' + esc(j.name) + '"></div>' +
         '<div class="f mt"><label for="jf-interval">How often</label><select id="jf-interval" onchange="Portal.broadcasts._editPreview(\'' + esc(id) + '\')">' +
         this._intervalOptions(j.interval_choices || [j.interval_minutes], j.interval_minutes) + "</select>" +
-        (j.product === "warnings" ? '<div class="hint">How often the bot checks for new and changed warnings. Each goes out at the next check.</div>' : "") + "</div>" +
+        (j.product === "warnings" ? '<div class="hint">How often the bot checks for new and changed warnings. Each goes out at the next check.</div>' : "") +
+        (j.product === "radar" ? '<div class="hint">At most one picture per interval. A new radar picture comes every 15 minutes.</div>' : "") + "</div>" +
+        (j.product === "radar" ? this._radarFields(j.min_level, j.within_km) : "") +
         '<div id="jf-preview" class="mt" aria-live="polite"></div>' +
         '<label class="hint mt"><input type="checkbox" id="jf-enabled"' + (j.enabled ? " checked" : "") + "> On</label>" +
         '<div class="row mt"><button type="submit" class="primary">Save</button><button type="button" onclick="Portal.ui.closeModal()">Cancel</button></div></form>');
+      this._editing = id;
+      if ($("jf-radar")) $("jf-radar").hidden = false;
       this._editPreview(id);
     },
     _editPreview: function (id) {
       var self = this;
-      api("/api/schedule/preview", { method: "POST", body: { job_id: id, interval_minutes: parseInt($("jf-interval").value, 10) } })
-        .then(function (d) { var el = $("jf-preview"); d.label = null; if (el) el.innerHTML = self._previewHtml(d); })
-        .catch(function () {});
+      clearTimeout(this._previewTimer);
+      this._previewTimer = setTimeout(function () {
+        var n = ++self._previewN, j = self._job(id) || {};
+        api("/api/schedule/preview", { method: "POST", body: self._radarBody({ job_id: id, interval_minutes: parseInt($("jf-interval").value, 10) }) })
+          .then(function (d) {
+            var el = $("jf-preview");
+            if (n !== self._previewN || !el) return;
+            if (j.product !== "radar") d.label = null;     // the radar label changes with its settings
+            el.innerHTML = self._previewHtml(d);
+          })
+          .catch(function (e) { var el = $("jf-preview"); if (el && n === self._previewN) el.innerHTML = '<div class="notice bad">' + esc(e.message) + "</div>"; });
+      }, 300);
     },
     _confirmWarningsOff: function () {
       return confirm("Turn off warnings? This bot stops sending alerts to MeshWX apps until you turn it back on.");
@@ -899,7 +944,7 @@ var Portal = {
       var j = this._job(id) || {}, self = this, enabled = $("jf-enabled").checked;
       if (j.product === "warnings" && j.enabled && !enabled && !this._confirmWarningsOff()) return;
       api("/api/schedule/jobs/" + encodeURIComponent(id), { method: "PUT",
-        body: { name: $("jf-name").value.trim(), interval_minutes: parseInt($("jf-interval").value, 10), enabled: enabled } })
+        body: this._radarBody({ name: $("jf-name").value.trim(), interval_minutes: parseInt($("jf-interval").value, 10), enabled: enabled }) })
         .then(function () { Portal.ui.toast("Saved"); Portal.ui.closeModal(); self.loadJobs(); Portal.poll.tick(); })
         .catch(function (e) { Portal.ui.toast(e.message, false); });
     },

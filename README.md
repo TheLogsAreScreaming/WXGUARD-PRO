@@ -22,7 +22,7 @@ NOAA EMWIN over the internet ───────┘    │ parse, schedule, �
 - **One request grammar for apps and people.** An app sends `>f 102` and gets a binary answer on the channel for every listener; a person sends `forecast austin tx` and gets text. An app's `>` arrives as a flooded Request datagram (v5 type 9), by DM, or as channel text; the answer is the same either way.
 - **Delivery confirmation.** The radio hears a repeater's copy of each channel packet the bot sends. When none comes back within the echo window, the packet goes out once more, byte for byte the same, so nobody sees it twice. DM replies wait for the recipient's ACK instead: about 2 s after the request, one at a time per person, one timestamp for all tries (attempts 0 and 1 on the route, then one by flood). A phone's resend of a request is not answered twice.
 - **Discovery by advert.** The node is named `WX-<city>` (e.g. `WX-AUS`); apps list adverts whose name starts with `WX-`. No discovery channel, no beacon.
-- **A broadcast schedule**: five built-in broadcasts (warnings on change, the digest, observations, the home forecast, the coverage statement), plus any forecast for another place or single airport an operator adds in the portal. Kept in `data/broadcast_config.json`.
+- **A broadcast schedule**: five built-in broadcasts (warnings on change, the digest, observations, the home forecast, the coverage statement), plus what an operator adds in the portal: radar while there is precipitation near home, a forecast for another place, a single airport. Kept in `data/broadcast_config.json`.
 - **Radio swaps.** The bot keeps a profile of its node (identity key, name, position, LoRa settings, contacts) and can write it onto a replacement radio, asking first by default. See [`docs/Radio_Swap.md`](docs/Radio_Swap.md).
 - **Receiver status on the mesh.** `sat` (or `>sat` from an app) answers with the dish's lock, signal quality, packets dropped in the last minute and the age of the newest EMWIN file, how far behind the uplink the products run when that is half an hour or more (`products ~5h behind`: on 2026-10-16 NOAA replayed a backlog for ten hours while every file was seconds old), and since when the internet fill is filling in. With `MCW_STATUS_CHANNEL` set, the bot also reports trouble unasked: one short line on a status channel of its own when the lock is lost or back, the internet fill starts or stops filling in, or the products fall an hour behind.
 - **An admin portal** for the radio, receiver, text bot, schedule, logs and settings, and a **public dashboard** on the Pi that shows the receiver and a redacted live feed of the bot.
@@ -45,7 +45,7 @@ NOAA EMWIN over the internet ───────┘    │ parse, schedule, �
 | Radio swap: node profile, adoption, health verdict | shipped |
 | Receiver status (`sat`, `>sat`), feed lag, status channel (`MCW_STATUS_CHANNEL`) | shipped |
 | Coverage statement (`cov`, `>cov`, broadcast every 3 h) | shipped |
-| Radar tiles from the dish's EMWIN radar pictures (`radar`, `>radar`), the last hour as a loop | shipped, request only |
+| Radar tiles from the dish's EMWIN radar pictures (`radar`, `>radar`), the last hour as a loop; broadcast while there is precipitation near home, if the operator adds it | shipped |
 | Admin portal and public dashboard | shipped |
 | Accuracy audit (`scripts/audit.py`) | shipped |
 | MQTT packet publishing for CoreScope | shipped, off by default |
@@ -150,7 +150,7 @@ byte, when it hears no echo.
 | 8 | Coverage: centre, radius, NWS offices and the zone runs this bot carries | 14 B + 1 per office + 4 per run | every 3 h, on request |
 | 9 | Request: an app's `>` request, the one message that travels app -> bot | 14 B + the text (a `>d` is 16 B) | sent by the app, flooded on `#meshwx` |
 | 10 | Area sweep: what is active, for the country or the states asked about, as runs of UGC numbers | up to 8 packets of 36 runs | on request only |
-| 11 | Radar: one tile of a radar picture, 32 x 32 cells in four precipitation levels | always one packet, 13 to 157 B | on request only |
+| 11 | Radar: one tile of a radar picture, 32 x 32 cells in four precipitation levels | always one packet, 13 to 157 B | on request; each new picture while there is precipitation near home, if the operator adds it |
 
 Requests start with `>` and are normally flooded on `#meshwx` as a Request
 datagram, which names the bot it asks; a DM and channel text work too. The
@@ -300,8 +300,7 @@ ranked) and, when `MCW_TIMEZONE` is empty, the time zone with it.
 ### The default schedule
 
 On first start the bot writes `data/broadcast_config.json` with five jobs.
-Only these five products can be scheduled; everything narrative is
-request-only.
+Radar can be added (below); everything narrative is request-only.
 
 | Job | Every | Sends |
 |---|---|---|
@@ -315,7 +314,9 @@ The scheduler checks every 30 s and spaces packets 2 s apart; the radio
 keeps the same gap between any two transmissions, resends, text replies
 and DMs included. A job's
 location is `coverage`, `city`, `pfm_point` or `station` (observations for
-one station). A v4 job file is migrated when it loads: retired products are
+one station). A `radar` job also carries `min_level` (1 any precipitation, 2
+moderate and heavier, 3 heavy) and `within_km` (absent: the coverage radius).
+A v4 job file is migrated when it loads: retired products are
 dropped and a forecast job runs no more often than every 3 h. A forecast job
 that names the configured home city (`Austin TX`, as every file written
 before 2026-10-17 does) becomes the `home` job when it loads, so a copied
@@ -783,7 +784,9 @@ box) and `deploy/pi.env.example` (receiver Pi) are starting points.
 | `MCW_LOG_LEVEL` | `INFO` | `DEBUG`, `INFO`, `WARNING` or `ERROR` |
 | `MCW_MESHWX_REFRESH_COOLDOWN` | `300` | Not read by the current code (left from v4) |
 
-Once the bot is running, **the broadcast schedule is managed in the portal** (Mesh › Scheduled broadcasts) and kept in `data/broadcast_config.json`, not in environment variables. The five built-in broadcasts can be turned off or run less often, not removed. Add a broadcast offers the two things worth adding: a forecast for another place (city and state, ZIP code or lat,lon) and one airport's observations. It shows what one run sends, its airtime and its share of the hourly ceiling before you save. Each row then says what the last run sent, or why it sent nothing.
+Once the bot is running, **the broadcast schedule is managed in the portal** (Mesh › Scheduled broadcasts) and kept in `data/broadcast_config.json`, not in environment variables. The five built-in broadcasts can be turned off or run less often, not removed. Add a broadcast offers three things: radar while there is precipitation near home, a forecast for another place (city and state, ZIP code or lat,lon) and one airport's observations. It shows what one run sends, its airtime and its share of the hourly ceiling before you save. Each row then says what the last run sent, or why it sent nothing.
+
+Radar sends the radar tile over your area, one packet per picture, while there is precipitation within a distance of home you set (the coverage radius by default), and one picture more when it clears; nothing while it is dry. You choose what counts (any precipitation, moderate and heavier, or heavy only) and how often a picture may go: every new picture (15 min), every 30 min or every hour. The bot looks for a new picture every minute. The tile is the narrowest that holds the whole circle. In the lower 48, 40 km around home is the 2° Local tile almost everywhere, 80 km mostly the 4° Regional one, and 120 km the Regional or the 8° Wide one about equally often. It needs the dish's radar pictures.
 
 ## Data sources
 

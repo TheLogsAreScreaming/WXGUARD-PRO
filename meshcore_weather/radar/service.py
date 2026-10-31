@@ -3,12 +3,14 @@ request and the `radar` text command both come through it.
 
 It holds no schedule and no thread.  A question reads the newest picture of
 the best product for the tile (cached until a newer file arrives) and cuts the
-tile out of it.
+tile out of it.  Requests and the scheduled radar broadcast ask from worker
+threads, so one lock covers the picture cache.
 """
 
 from __future__ import annotations
 
 import logging
+import threading
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
@@ -29,6 +31,7 @@ class RadarService:
                  extra_roots: "list[str | Path] | None" = None):
         self.source = RadarSource(root, extra_roots) if root else None
         self.frames = frames if frames is not None else load_frames()
+        self._lock = threading.RLock()
 
     @property
     def available(self) -> bool:
@@ -38,23 +41,29 @@ class RadarService:
     def tile_for(self, lat: float, lon: float, zoom: int = 0, now: "datetime | None" = None
                  ) -> "tuple[RadarTile, RadarPicture, Frame] | None":
         """The tile for a coordinate, from the best picture that can give one."""
+        south, west = v5.radar_tile(lat, lon, zoom)
+        return self.tile_at(south, west, zoom, now)
+
+    def tile_at(self, south: int, west: int, zoom: int, now: "datetime | None" = None
+                ) -> "tuple[RadarTile, RadarPicture, Frame] | None":
+        """One tile of the lattice, from the best picture that can give one."""
         if not self.available:
             return None
         now = now or datetime.now(timezone.utc)
-        south, west = v5.radar_tile(lat, lon, zoom)
-        for frame in candidates(self.frames, south, west, zoom):
-            picture = self.source.newest(frame.id, now)
-            if picture is None:
-                continue
-            if not picture.frame_ok:
-                logger.warning("radar: %s is not drawn on the map it was calibrated on; "
-                               "run scripts/radar_calibrate.py", picture.path.name)
-                continue
-            if now - picture.taken > timedelta(minutes=MAX_AGE_MIN):
-                continue
-            tile = cut_tile(picture, frame, south, west, zoom)
-            if tile is not None:
-                return tile, picture, frame
+        with self._lock:
+            for frame in candidates(self.frames, south, west, zoom):
+                picture = self.source.newest(frame.id, now)
+                if picture is None:
+                    continue
+                if not picture.frame_ok:
+                    logger.warning("radar: %s is not drawn on the map it was calibrated on; "
+                                   "run scripts/radar_calibrate.py", picture.path.name)
+                    continue
+                if now - picture.taken > timedelta(minutes=MAX_AGE_MIN):
+                    continue
+                tile = cut_tile(picture, frame, south, west, zoom)
+                if tile is not None:
+                    return tile, picture, frame
         return None
 
     def loop_for(self, lat: float, lon: float, zoom: int = 0, now: "datetime | None" = None
@@ -66,25 +75,26 @@ class RadarService:
         back to an hour before the newest, five at most.  A picture missing from
         the dish is a gap: filling it from another product would change the
         detail in the middle of the loop."""
-        found = self.tile_for(lat, lon, zoom, now)
-        if found is None:
-            return []
-        tile, newest, frame = found
-        frames = [found]
-        oldest = newest.taken - timedelta(minutes=v5.RADAR_LOOP_WINDOW_MIN)
-        last = newest.taken
-        older = sorted(self.source.older(frame.id, newest, v5.RADAR_LOOP_WINDOW_MIN, now),
-                       key=lambda p: p.taken, reverse=True)
-        for picture in older:
-            if len(frames) >= v5.RADAR_LOOP_MAX_FRAMES or picture.taken < oldest:
-                break
-            if not picture.frame_ok or picture.taken > last - timedelta(minutes=v5.RADAR_LOOP_MIN_SPACING_MIN):
-                continue
-            cut = cut_tile(picture, frame, tile.south, tile.west, tile.zoom)
-            if cut is None:
-                continue
-            frames.append((cut, picture, frame))
-            last = picture.taken
+        with self._lock:
+            found = self.tile_for(lat, lon, zoom, now)
+            if found is None:
+                return []
+            tile, newest, frame = found
+            frames = [found]
+            oldest = newest.taken - timedelta(minutes=v5.RADAR_LOOP_WINDOW_MIN)
+            last = newest.taken
+            older = sorted(self.source.older(frame.id, newest, v5.RADAR_LOOP_WINDOW_MIN, now),
+                           key=lambda p: p.taken, reverse=True)
+            for picture in older:
+                if len(frames) >= v5.RADAR_LOOP_MAX_FRAMES or picture.taken < oldest:
+                    break
+                if not picture.frame_ok or picture.taken > last - timedelta(minutes=v5.RADAR_LOOP_MIN_SPACING_MIN):
+                    continue
+                cut = cut_tile(picture, frame, tile.south, tile.west, tile.zoom)
+                if cut is None:
+                    continue
+                frames.append((cut, picture, frame))
+                last = picture.taken
         frames.reverse()
         return frames
 
@@ -92,7 +102,8 @@ class RadarService:
         if not self.available:
             return {"available": False, "products": {}}
         calibrated = {f.id for f in self.frames if f.calibrated}
-        products = self.source.status()
+        with self._lock:
+            products = self.source.status()
         for name, info in products.items():
             info["calibrated"] = name in calibrated
         return {"available": True, "dir": str(self.source.root), "products": products}

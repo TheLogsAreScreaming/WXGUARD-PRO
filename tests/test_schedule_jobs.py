@@ -148,10 +148,11 @@ def client(tmp_path, monkeypatch, cfg_path):
     return TestClient(create_app(bot), headers={"X-Requested-With": "meshcore-portal"}), sched
 
 
-def test_meta_offers_two_kinds_and_intervals_per_product(client):
+def test_meta_offers_three_kinds_and_intervals_per_product(client):
     c, _ = client
     meta = c.get("/api/schedule/meta").json()
-    assert set(meta["kinds"]) == {"forecast", "station"}
+    assert set(meta["kinds"]) == {"forecast", "station", "radar"}
+    assert meta["interval_choices"]["radar"] == [15, 30, 60]
     assert meta["interval_choices"]["warnings"] == [1, 2, 5]
     assert meta["default_interval"]["forecast"] == 360
 

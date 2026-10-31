@@ -114,6 +114,13 @@ class Scheduler:
         self._tx_lock = asyncio.Lock()
         self._last_tx = 0.0
         self._warning_state: dict[str, dict] = {}
+        # The radar job's last judged picture ({"judged": taken_min, "wet": bool}),
+        # and when each radar tile last went on air, (south, west, zoom,
+        # taken_min) -> unix: the `>radar` answers' five minutes share it, so a
+        # tile the schedule just sent is not sent again as an answer, nor the
+        # other way round.
+        self._radar_state: dict = {}
+        self.radar_on_air: dict[tuple[int, int, int, int], float] = {}
         self._digest_due_at: float | None = None
         self._task: asyncio.Task | None = None
         self._running = False
@@ -218,7 +225,8 @@ class Scheduler:
         # A scratch counter: builders number their messages, transmit restamps them.
         return ExecutorContext(store=self.store, coverage=self._coverage, seq=b.SeqCounter(), bot=self.bot_id(),
                                warning_state=self._warning_state, home=home,
-                               radius_km=float(settings.home_radius_km or 0), home_offices=offices)
+                               radius_km=float(settings.home_radius_km or 0), home_offices=offices,
+                               radar_state=self._radar_state, radar_on_air=self.radar_on_air)
 
     # -- warning state and seq persistence --
 
@@ -240,6 +248,8 @@ class Scheduler:
                                                 if isinstance(t, (int, float)) and 0 <= now - t <= 3600))
                 self._last_result = {str(k): v for k, v in (d.get("last_result") or {}).items()
                                      if isinstance(v, dict)}
+                if isinstance(d.get("radar"), dict):
+                    self._radar_state = d["radar"]
                 logger.info("Warning state: %d active identities restored, next seq %d, %d job run times",
                             len(self._warning_state), self._next_seq, len(self._last_run))
         except Exception as e:
@@ -263,7 +273,7 @@ class Scheduler:
             state = {"warnings": self._warning_state, "next_seq": seq,
                      "last_run": {k: v for k, v in self._last_run.items() if v > 0},
                      "sched_sent": [t for t in self._sched_sent if now - t <= 3600],
-                     "last_result": self._last_result}
+                     "last_result": self._last_result, "radar": self._radar_state}
             advert = self._advert_record()
             if advert is not None:
                 state["advert"] = advert
@@ -420,9 +430,14 @@ class Scheduler:
             self._ceiling_hit(job.id, 1, now)
             self._waiting.setdefault(job.id, now)
             return 0
-        ctx.reason = None
+        ctx.reason = ctx.note = ctx.retry_in_s = ctx.radar_sent = None
+        ctx.quiet = ctx.idle = False
         try:
-            msgs = self.executor.run_job(job, ctx)
+            if job.product == "radar":
+                # Reading a radar picture takes a few hundred milliseconds on a Pi.
+                msgs = await asyncio.get_running_loop().run_in_executor(None, self.executor.run_job, job, ctx)
+            else:
+                msgs = self.executor.run_job(job, ctx)
         except Exception:
             logger.exception("Scheduler: exception running job %s", job.id)
             msgs = []
@@ -433,6 +448,14 @@ class Scheduler:
             self._waiting.setdefault(job.id, now)
             return 0
         self._waiting.pop(job.id, None)
+        if not msgs and ctx.retry_in_s:
+            # Nothing yet, and not a run: look again soon, the interval
+            # untouched (radar waiting for a picture it has not judged).
+            self._hold_until[job.id] = time.time() + ctx.retry_in_s
+            if not ctx.quiet:
+                self._last_result[job.id] = {"at": time.time(), "packets": 0, "bytes": 0,
+                                             "reason": ctx.reason or "nothing to send", "idle": ctx.idle}
+            return 0
         if job.product == "warnings" and ctx.held_back:
             self._ceiling_hit(job.id, ctx.held_back, now)
         now = time.time()
@@ -453,11 +476,28 @@ class Scheduler:
         self._last_result[job.id] = {"at": now, "packets": n, "bytes": nbytes,
                                      "reason": None if n else ("transmit is off" if not settings.tx_enabled
                                                                else "the radio did not take the packets")}
+        if n and ctx.note:
+            self._last_result[job.id]["note"] = ctx.note
+        if n and ctx.radar_sent:
+            self._radar_on_air(ctx.radar_sent, msgs[0])
         self._total_bytes[job.id] = self._total_bytes.get(job.id, 0) + nbytes
         activity_log.record(EventDir.OUT, "broadcast",
                             f"Job {job.id}: {n} msg(s), {nbytes}B ({job.product})",
                             {"job_id": job.id, "product": job.product, "messages": n, "bytes": nbytes})
         return n
+
+    def _radar_on_air(self, sent: dict, packet: bytes) -> None:
+        """A scheduled radar tile the radio took: it starts the tile's window
+        as an answer would, settles the picture, and goes in the audit log."""
+        from meshcore_weather.radar import audit
+        now = time.time()
+        self.radar_on_air[sent["key"]] = now
+        for key in [k for k, t in self.radar_on_air.items() if now - t > settings.radar_window_s]:
+            del self.radar_on_air[key]
+        self._radar_state.update(judged=sent["judged"], wet=sent["wet"])
+        tile, picture, frame = sent["cut"]
+        audit.record(request="(scheduled)", sender="", tile=tile, picture=picture, frame=frame,
+                     packet=packet, now=now)
 
     async def transmit(self, msgs: list[bytes], label: str, ev: dict | None = None,
                        keep_groups: bool = False, not_before: float = 0.0) -> tuple[int, int]:
@@ -579,8 +619,15 @@ class Scheduler:
             "last_bytes": self._last_bytes.get(job_id, 0),
             "last_msg_count": self._last_msg_count.get(job_id, 0),
             "last_result": self._last_result.get(job_id),
+            # When the job last looked, sent or not: radar looks every minute
+            # and counts only a picture sent as a run.
+            "last_result_seconds_ago": self._result_age(job_id, now),
             "waiting_since": self._waiting.get(job_id),
         }
+
+    def _result_age(self, job_id: str, now: float) -> int | None:
+        at = (self._last_result.get(job_id) or {}).get("at")
+        return max(0, int(now - at)) if isinstance(at, (int, float)) else None
 
     def preview(self, job) -> dict:
         """What `job` would send if it ran now, without sending it or touching
@@ -595,32 +642,35 @@ class Scheduler:
             active = [w for w in extract_active_warnings(self.store, coverage=self._coverage)
                       if b.warning_identity(w) is not None]
             return {"packets": [], "reason": None, "active_warnings": len(active)}
-        ctx.warning_state = {}
+        ctx.warning_state, ctx.radar_state = {}, {}
         try:
             msgs = self.executor.run_job(job, ctx)
         except Exception as exc:
             logger.exception("preview of job %s", job.id)
             return {"packets": [], "reason": f"the bot could not build it: {exc}"}
-        return {"packets": [len(m) for m in msgs], "reason": None if msgs else (ctx.reason or "nothing to send")}
+        return {"packets": [len(m) for m in msgs], "reason": None if msgs else (ctx.reason or "nothing to send"),
+                "note": ctx.note, "radar": ctx.radar_info}
+
+    def job_packets_per_hour(self, job) -> float:
+        """About how many packets a job sends an hour, from what it sent last
+        time (one packet when it has not run yet). Warnings count none: they go
+        when the weather says so, and so does radar while it is dry."""
+        if not job.enabled or job.product == "warnings":
+            return 0.0
+        last = self._last_result.get(job.id) or {}
+        if job.product == "radar" and last and not last.get("packets"):
+            return 0.0
+        return (last.get("packets") or 1) * 60.0 / job.interval_minutes
 
     def scheduled_packets_per_hour(self) -> float:
-        """About how many packets the enabled jobs send an hour, from what each
-        sent last time (one packet when it has not run yet). Warnings are left
-        out: they go when the weather says so."""
-        total = 0.0
-        for job in self._config.jobs:
-            if not job.enabled or job.product == "warnings":
-                continue
-            last = self._last_result.get(job.id) or {}
-            packets = last.get("packets") or 1
-            total += packets * 60.0 / job.interval_minutes
-        return total
+        return sum(self.job_packets_per_hour(job) for job in self._config.jobs)
 
     async def run_job_now(self, job_id: str) -> int:
         job = self._config.get_job(job_id)
         if job is None:
             return 0
         ctx = self.context()
+        ctx.force = True
         n = await self._run(job, ctx)
         self._save_state()
         return n

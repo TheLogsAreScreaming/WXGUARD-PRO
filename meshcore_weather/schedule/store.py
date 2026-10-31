@@ -121,7 +121,8 @@ def save_config(cfg: BroadcastConfig) -> None:
     """
     CONFIG_PATH.parent.mkdir(parents=True, exist_ok=True)
     tmp_path = CONFIG_PATH.with_suffix(".json.tmp")
-    json_text = cfg.model_dump_json(indent=2)
+    # Unset fields stay out: a forecast job carries no radar distance.
+    json_text = cfg.model_dump_json(indent=2, exclude_none=True)
     tmp_path.write_text(json_text + "\n")
     os.replace(tmp_path, CONFIG_PATH)
     logger.debug("Wrote broadcast config to %s (%d jobs)", CONFIG_PATH, len(cfg.jobs))
@@ -133,8 +134,8 @@ def save_config(cfg: BroadcastConfig) -> None:
 def default_config_for_bootstrap() -> BroadcastConfig:
     """The v5 schedule a fresh deployment gets: warnings on change (checked
     every 2 min), the digest every 3 h, one observations packet an hour, the
-    home forecast every 6 h, and the coverage statement every 3 h. Everything
-    else is request-only."""
+    home forecast every 6 h, and the coverage statement every 3 h. Radar,
+    more forecasts and single stations are the operator's to add."""
     cfg = BroadcastConfig(version=2, jobs=[])
     _ensure_core_jobs(cfg)
     logger.info("Bootstrap schedule: %d default jobs", len(cfg.jobs))
@@ -142,8 +143,10 @@ def default_config_for_bootstrap() -> BroadcastConfig:
 
 
 _V4_TO_V5 = {"warnings_delta": "warnings", "observation": "observations"}
+# v4's radar (an internet composite, a region per job) is retired; v5's is a
+# coverage job (executor._build_radar).
 _RETIRED = {"outlook", "storm_reports", "rain_obs", "metar", "taf", "warnings_near", "afd",
-            "space_weather", "fire_weather", "daily_climate", "nowcast", "radar"}
+            "space_weather", "fire_weather", "daily_climate", "nowcast"}
 
 
 def _migrate_jobs(jobs: list[dict]) -> list[dict]:
@@ -172,7 +175,8 @@ def _migrate_jobs(jobs: list[dict]) -> list[dict]:
             if j.get("location_type") not in ("city", "pfm_point", "coverage"):
                 continue
             j = {**j, "interval_minutes": max(int(j.get("interval_minutes") or 360), 180)}
-        elif prod in _RETIRED or prod not in PRODUCT_TYPES:
+        elif prod in _RETIRED or prod not in PRODUCT_TYPES or (
+                prod == "radar" and j.get("location_type") != "coverage"):
             logger.warning("Dropping broadcast job %r: product %r is request-only in v5", j.get("id"), prod)
             continue
         if any(o.get("id") == j.get("id") for o in out):
