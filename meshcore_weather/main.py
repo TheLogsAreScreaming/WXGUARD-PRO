@@ -144,6 +144,7 @@ class WeatherBot:
         self._broadcaster = None  # MeshWXBroadcaster, created if data channel configured
         self._coverage_cache = None  # built from the env config when no broadcaster runs
         self._portal = None  # PortalServer, created if portal enabled
+        self._metrics = None  # MetricsExporter, created if an export is configured
         self._paging: dict[str, dict] = {}  # sender_key -> {full, offset, ts}
         self._rate_limit: dict[str, float] = {}
         self._reply_history: dict[str, list[float]] = {}
@@ -232,6 +233,17 @@ class WeatherBot:
                 await self._portal.start()
             except ImportError as e:
                 logger.warning("Portal disabled: %s (run `pip install meshcore-weather[portal]`)", e)
+
+        # Weather history export (InfluxDB push / Prometheus page), off by default.
+        try:
+            from meshcore_weather.metrics import MetricsExporter
+            self._metrics = MetricsExporter.from_settings(
+                self.store, settings, radio_connected=lambda: self.radio.channel_idx is not None)
+            if self._metrics is not None:
+                await self._metrics.start()
+        except OSError as e:
+            logger.warning("Metrics export disabled: %s", e)
+            self._metrics = None
 
         if self.radio.channel_idx is not None:
             logger.info(
@@ -341,7 +353,8 @@ class WeatherBot:
         await _cancel(self._backlog_task)        # first: it is what starts the refresh loop
         for task in (self._restart_task, self._radio_task, self._refresh_task):
             await _cancel(task)
-        for what, part in (("portal", self._portal), ("receiver monitor", self._sdr_monitor),
+        for what, part in (("metrics export", self._metrics),
+                           ("portal", self._portal), ("receiver monitor", self._sdr_monitor),
                            ("broadcaster", self._broadcaster), ("radio", self.radio),
                            ("EMWIN source", self.emwin)):
             if part is None:

@@ -181,6 +181,24 @@ class Settings(BaseSettings):
     # observer name CoreScope and other consumers display.
     mqtt_origin: str = "meshcore-weather"
 
+    # Weather history export (docs/METRICS_EXPORT.md). Both outputs are off
+    # by default. metrics_influx_url is a full InfluxDB write URL, e.g.
+    # http://influx.lan:8086/api/v2/write?org=home&bucket=weather (v2) or
+    # http://influx.lan:8086/write?db=weather (v1); the token goes in the
+    # Authorization header. The Prometheus page binds localhost only unless
+    # metrics_prometheus_host is changed on purpose.
+    metrics_influx_url: str = ""
+    metrics_influx_token: str = ""
+    metrics_interval_s: int = 60
+    metrics_prometheus_enabled: bool = False
+    metrics_prometheus_host: str = "127.0.0.1"
+    metrics_prometheus_port: int = 9137
+    # Comma-separated ICAO ids to export (e.g. "KAUS,KSAT"). Empty = every
+    # station in the feed with a fresh observation, up to metrics_max_stations.
+    metrics_stations: str = ""
+    metrics_max_age_min: int = 180
+    metrics_max_stations: int = 300
+
     # Local time zone for human-readable replies (IANA name). Wire messages
     # always carry UTC; only the text renderer uses this.
     timezone: str = "America/Chicago"
