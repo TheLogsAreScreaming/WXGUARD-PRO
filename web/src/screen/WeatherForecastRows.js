@@ -343,7 +343,7 @@ export const WeatherForecastCard = Object.freeze({
 
   /**
    * How near a bot-chosen point's *asked* coordinate must be to the place for that answer to be
-   * this place's forecast (design §2). Tighter than `pointReachKilometres` on purpose: a bundled
+   * this place's forecast (docs/MESHWX_UI.md §9). Tighter than `pointReachKilometres` on purpose: a bundled
    * point is a place the Weather Service publishes for, while this is a question somebody typed,
    * and 25 km is about as far as two questions can be apart and still be one place.
    */

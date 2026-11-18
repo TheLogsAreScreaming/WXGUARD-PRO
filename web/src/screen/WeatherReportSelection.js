@@ -2,7 +2,7 @@
 
 import { WeatherRequest } from '../weather/index.js'
 
-/** Two `WeatherRequest` values are the same request when they are the same `>` line (spec §8.2). */
+/** Two `WeatherRequest` values are the same request when they are the same `>` line (spec §14). */
 function sameRequest(lhs, rhs) {
   if (lhs == null || rhs == null) return lhs == null && rhs == null
   return WeatherRequest.wireText(lhs) === WeatherRequest.wireText(rhs)

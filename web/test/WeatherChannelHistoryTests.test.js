@@ -180,7 +180,7 @@ test('content times come from the message, and only where it carries one', () =>
   assert.ok(list != null)
   assert.equal(list.contentAt, t0Minutes * 60000)
   assert.equal(list.receivedAt, t0 - 600 * 1000)
-  // A warning, a text reply and a statement carry no time of their own (spec §3, §7A, §8.1).
+  // A warning, a text reply and a statement carry no time of their own (spec §3, §10, §8).
   assert.equal(heard.find((item) => item.subject.kind === 'warning').contentAt, null)
   assert.equal(heard.find((item) => item.subject.kind === 'coverage').contentAt, null)
 })
@@ -276,7 +276,7 @@ test('nothing held is an empty cache', () => {
 /**
  * A radar tile is one row per square of earth held, whatever its width, and it opens nothing: a
  * cached row knows a tile and not a place, and the radar screen is reached from the card of the
- * place it is about (design §3).
+ * place it is about (docs/MESHWX_UI.md §12).
  */
 test('every radar tile held is a row of its own, named by its square', () => {
   const built = state()

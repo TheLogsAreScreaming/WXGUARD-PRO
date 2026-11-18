@@ -16,6 +16,15 @@ per zone: an SVS that cancels two counties and continues three leaves the
 warning active for three. Products are replayed in issue order so the state
 is exactly what NWS has published, however the products arrived.
 
+An end time of 000000T0000Z means "until further notice": a river flood
+warning, a typhoon warning, a tsunami warning. It used to be read as the
+segment's UGC expiry, so the reply said "til 9:30AM" for a warning NWS said
+had no end, and the event was dropped at that time even though no statement
+had ended it (2026-10-17: the Satilla River flood warning, Guam's typhoon
+warning). Such a zone is now kept as until-further-notice for up to
+`UFN_GRACE` past its segment's UGC expiry, the time by which NWS will have
+issued the next statement; a CAN or EXP ends it sooner, as for any event.
+
 The earlier extractor keyed on whole events, walked newest-first, and treated
 any CAN as "the event is dead"; the audit against api.weather.gov showed both
 resurrected and wrongly-killed events. This module replaces it.
@@ -24,16 +33,23 @@ resurrected and wrongly-killed events. This module replaces it.
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 
 ACTIVE_ACTIONS = {"NEW", "CON", "EXT", "EXA", "EXB", "COR", "ROU"}
 CLEAR_ACTIONS = {"CAN", "EXP", "UPG"}
+
+# How long an until-further-notice zone outlives its segment's UGC expiry
+# without a new statement. The statement is reissued well inside that (the
+# UGC expiry is when the next one is due), so this only matters when the
+# dish missed it; past this the bot no longer claims to know.
+UFN_GRACE = timedelta(hours=24)
 
 
 @dataclass
 class ZoneState:
     begin: datetime | None
-    end: datetime | None          # None = until further notice
+    end: datetime | None          # when the zone stops being active; None = never (no UGC expiry either)
+    until_further_notice: bool = False   # VTEC end 000000T0000Z: `end` is only how long it is kept without news
 
 
 @dataclass
@@ -51,10 +67,25 @@ class EventState:
         return {u: z for u, z in self.zones.items() if z.end is None or z.end > now}
 
     def expires_at(self, now: datetime) -> datetime | None:
-        ends = [z.end for z in self.active_zones(now).values()]
-        if not ends:
+        """The event's end, or None when it has none: in force until further
+        notice in any of its active zones (or, oddly, no time at all)."""
+        zones = self.active_zones(now).values()
+        if not zones or self.until_further_notice(now):
             return None
+        ends = [z.end for z in zones]
         if any(e is None for e in ends):
+            return None
+        return max(ends)
+
+    def until_further_notice(self, now: datetime) -> bool:
+        return any(z.until_further_notice for z in self.active_zones(now).values())
+
+    def kept_until(self, now: datetime) -> datetime | None:
+        """The latest time any active zone is kept to: for an until-further-
+        notice event, when the bot stops carrying it unless a statement
+        arrives. None when a zone has no time at all."""
+        ends = [z.end for z in self.active_zones(now).values()]
+        if not ends or any(e is None for e in ends):
             return None
         return max(ends)
 
@@ -106,9 +137,14 @@ class VtecTracker:
                     continue
                 if action not in ACTIVE_ACTIONS:
                     continue
-                end = vtec.endts if vtec.endts is not None else ugcexpire
+                if vtec.endts is not None:
+                    end, ufn = vtec.endts, False
+                else:
+                    # 000000T0000Z: until further notice. The UGC expiry is
+                    # when the next statement is due, not when it ends.
+                    end, ufn = (ugcexpire or valid) + UFN_GRACE, True
                 for u in ugcs:
-                    ev.zones[u] = ZoneState(begin=vtec.begints, end=end)
+                    ev.zones[u] = ZoneState(begin=vtec.begints, end=end, until_further_notice=ufn)
                 ev.last_seg, ev.last_parsed, ev.last_prod = seg, parsed, prod
                 ev.last_vtec, ev.last_vtec_index = vtec, idx
                 if ev.issued_at is None or action == "NEW":

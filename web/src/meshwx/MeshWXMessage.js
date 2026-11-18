@@ -92,7 +92,7 @@
 //     .windDirection              → wind_dir_deg + wind_dir
 //     .windMph                    → wind_mph       already 0, 5, 10 … 75
 //
-// Type 6, MeshWXText (spec §8.1):
+// Type 6, MeshWXText (spec §8):
 //   subject                       → subject
 //   group                         → group
 //   index                         → idx
@@ -100,12 +100,12 @@
 //   text                          → text
 //   wasCut                        → cut
 //
-// Type 7, MeshWXNotAvailable (spec §8.3) — no `source`:
+// Type 7, MeshWXNotAvailable (spec §9) — no `source`:
 //   requestCode                   → request_code   ASCII code of the request's first letter
 //   requestLetter                 → request        that letter
 //   reason                        → reason
 //
-// Type 8, MeshWXCoverage (spec §7A) — no `source`:
+// Type 8, MeshWXCoverage (spec §10) — no `source`:
 //   latitude                      → lat
 //   longitude                     → lon
 //   radiusKilometres              → radius_km
@@ -115,14 +115,14 @@
 //   areasCut                      → zones_cut
 //   officesCut                    → offices_cut
 //
-// Type 9, MeshWXRequest (spec §7B) — no `source`:
+// Type 9, MeshWXRequest (spec §11) — no `source`:
 //   seq                           → seq
 //   botID                         → bot
 //   senderPrefix                  → sender         12 lower-case hex characters, not bytes
 //   timestamp                     → ts             Unix SECONDS (every other time is minutes)
 //   text                          → text
 //
-// Type 10, MeshWXAreaSweep (spec §7C):
+// Type 10, MeshWXAreaSweep (spec §12):
 //   builtMinutes                  → built_min
 //   group                         → group
 //   index                         → idx
@@ -141,7 +141,7 @@
 //     Entry.start                 → start
 //     Entry.run                   → run            carried less one in six bits
 //
-// Type 11, MeshWXRadar (spec §7D, revision 11) — the types are in MeshWXRadar.js:
+// Type 11, MeshWXRadar (spec §13, revision 11) — the types are in MeshWXRadar.js:
 //   takenMinutes                  → taken_min      the time printed on the radar picture
 //   south                         → south          i8, whole degrees
 //   west                          → west           i16, whole degrees
@@ -245,7 +245,7 @@ export const MeshWXCompass = Object.freeze({
   },
 });
 
-/** Sky condition code (spec §10.1, `protocol.json` `sky_codes`). */
+/** Sky condition code (spec §18.6, `protocol.json` `sky_codes`). */
 export const MeshWXSky = Object.freeze({
   clear: 0,
   few: 1,
@@ -288,7 +288,7 @@ export const MeshWXCoordinate = Object.freeze({
 // MARK: - Warning
 
 /**
- * The key a warning is stored under (spec §2.3), `{ event, office, etn }`.
+ * The key a warning is stored under (spec §2.4), `{ event, office, etn }`.
  *
  * Not `seq`: the bot re-sends a warning whenever its expiry, tags or area change, with a fresh
  * sequence number every time. An app that keys by anything else ends up with the same storm
@@ -553,7 +553,7 @@ export const MeshWXWarning = Object.freeze({
    *
    * This is the product's own header time, kept across continuations, so an SVS update does not
    * restamp a warning as newly issued. It is never when the bot read the file and never when
-   * the phone heard the packet (spec §10.5): a radio out of range for three hours must still
+   * the phone heard the packet (spec §18.1): a radio out of range for three hours must still
    * say *issued 1:29 PM*.
    */
   issuedMinutes(warning) {
@@ -690,7 +690,7 @@ export const MeshWXDigest = Object.freeze({
 
 // MARK: - Observations
 
-/** One METAR station's current conditions (spec §6, 11 bytes on the wire). */
+/** One METAR station's current conditions (spec §6, 21 bytes on the wire). */
 export const MeshWXStationObservation = Object.freeze({
   make({
     station,
@@ -835,7 +835,7 @@ export const MeshWXForecast = Object.freeze({
 // MARK: - Text
 
 /**
- * What a text reply is about (spec §8.1).
+ * What a text reply is about (spec §8).
  *
  * These are the v5 subjects from `protocol.json` `v5.text_subjects`, which are *not* the legacy
  * top-level `text_subjects` in the same file (that table is v3/v4 and its numbering differs).
@@ -857,7 +857,7 @@ export const MeshWXTextSubject = Object.freeze({
 });
 
 /**
- * One chunk of a narrative reply (type 6, spec §8.1).
+ * One chunk of a narrative reply (type 6, spec §8).
  *
  * Reassemble by `(bot, group)` in `idx` order. A chunk that never arrives leaves a hole: show
  * the partial text with a marker rather than nothing, because a warning narrative with one
@@ -885,7 +885,7 @@ export const MeshWXText = Object.freeze({
 
 // MARK: - Not available
 
-/** Why the bot could not serve a request (spec §8.3). */
+/** Why the bot could not serve a request (spec §9). */
 export const MeshWXNotAvailableReason = Object.freeze({
   noData: 0,
   unknownLocation: 1,
@@ -899,7 +899,7 @@ export const MeshWXNotAvailableReason = Object.freeze({
   },
 });
 
-/** The bot declining a request (type 7, spec §8.3). */
+/** The bot declining a request (type 7, spec §9). */
 export const MeshWXNotAvailable = Object.freeze({
   make({ requestCode, reason, seq = 0, bot = 0 }) {
     return {
@@ -923,7 +923,7 @@ export const MeshWXNotAvailable = Object.freeze({
 // MARK: - Coverage
 
 /**
- * What a bot carries, stated by the bot (type 8, spec §7A).
+ * What a bot carries, stated by the bot (type 8, spec §10).
  *
  * The only thing an app may read a bot's area from. Inferring it from the stations in the hourly
  * batches and from the offices of whatever warnings happened to be active told a real phone that
@@ -1003,7 +1003,7 @@ export const MeshWXCoverage = Object.freeze({
 
   /**
    * `n` = 0 and `k` = 0 with neither list cut: the operator set no area filter at all, so the
-   * bot carries every product its feed does and no place is outside it (spec §7A). That is an
+   * bot carries every product its feed does and no place is outside it (spec §10). That is an
    * answer, not an empty message.
    */
   hasNoAreaFilter(coverage) {
@@ -1021,7 +1021,7 @@ export const MeshWXCoverage = Object.freeze({
 // MARK: - Request
 
 /**
- * An app's `>` request, flooded on `#meshwx` as a datagram (type 9, spec §7B).
+ * An app's `>` request, flooded on `#meshwx` as a datagram (type 9, spec §11).
  *
  * The one v5 message this app transmits. A DM rides one stored route hop by hop and fails
  * silently once that route has gone stale — the field record of 16 September lost seven requests
@@ -1029,7 +1029,7 @@ export const MeshWXCoverage = Object.freeze({
  * no route and costs about what a DM costs by its second try.
  */
 export const MeshWXRequest = Object.freeze({
-  /** Every bot on the channel, for an app that has not chosen one (spec §7B, §12). */
+  /** Every bot on the channel, for an app that has not chosen one (spec §11, §20). */
   anyBot: 0xffff,
 
   make({ seq, botID, senderPrefix, timestamp, text }) {
@@ -1067,19 +1067,19 @@ export const MeshWXRequest = Object.freeze({
 // MARK: - Area sweep
 
 /**
- * One packet of a national area sweep (type 10, spec §7C).
+ * One packet of a national area sweep (type 10, spec §12).
  *
  * The sweep is the answer to one question — *where in the country is anything happening?* — and
  * it is the most expensive answer on the channel: up to eight packets, broadcast to everyone
  * listening. Nothing may ask for one on a timer, on appear or on a pull; only a tap.
  *
- * Reassemble by `(bot, group)` in `idx` order exactly as a Text reply is (spec §8.1). A packet
+ * Reassemble by `(bot, group)` in `idx` order exactly as a Text reply is (spec §8). A packet
  * that never arrives leaves a hole: draw the entries that did arrive and say the sweep is
  * partial, because a map of forty states is still worth looking at.
  */
 export const MeshWXAreaSweep = Object.freeze({
   /**
-   * One run of consecutive UGC numbers in one state, under one event (spec §7C).
+   * One run of consecutive UGC numbers in one state, under one event (spec §12).
    *
    * Four bytes for what a Warning spends four bytes on *without* the event, which is the whole
    * point: the country's alerts fit in eight packets because a Winter Weather Advisory over
@@ -1153,7 +1153,7 @@ export const MeshWXAreaSweep = Object.freeze({
   },
 
   /**
-   * The state indices a scoped sweep's packet 0 names (spec §7C, revision 10), or an empty list.
+   * The state indices a scoped sweep's packet 0 names (spec §12, revision 10), or an empty list.
    *
    * A state named here with no alert entries has nothing active at that level: that is an answer,
    * and the reason the scope is on the wire at all. A packet past 0 carries no scope entries, so

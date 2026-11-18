@@ -1,6 +1,6 @@
 // Port of MC1Services/Sources/MeshWX/MeshWXZips.swift
 //
-// MARK: - ZIP codes (spec §9 `zips.json`, §11)
+// MARK: - ZIP codes (spec §16 `zips.json`, §21)
 //
 // A US ZIP code from `zips.json`: the Census ZCTA's internal point, and the bundled place
 // nearest it, which names it.
@@ -26,7 +26,7 @@ export const MeshWXZip = Object.freeze({
   },
 
   /**
-   * `"San Juan, PR 00901"`: the place's label with the ZIP after it (spec §9.1), the same
+   * `"San Juan, PR 00901"`: the place's label with the ZIP after it (spec §16.2), the same
    * characters as the weather bot's reply and as the app's row for the town.
    */
   label(zip) {

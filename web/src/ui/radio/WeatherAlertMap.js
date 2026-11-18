@@ -141,7 +141,7 @@ function uniqueByUGC(areas) {
  * The same lookup an alert's own map does — `MeshWXGeometry.rings` for the outline,
  * `MeshWXPresentation.tint` for the colour — so the two maps cannot drift apart.
  *
- * **Areas are deduplicated, first entry wins.** Entries arrive most severe first (spec §7C), so a
+ * **Areas are deduplicated, first entry wins.** Entries arrive most severe first (spec §12), so a
  * county under both a Tornado Warning and a Flood Advisory is red, once. The shapes are handed
  * over in reverse, so the most severe is drawn **last** and a tap on overlapping shading resolves
  * to it: `MapCanvas.shapesAt` answers topmost first.
@@ -301,7 +301,7 @@ function paint(state, drawing, print) {
   map.setShapes(drawing.shapes ?? [])
   map.setMarkers(drawing.markers ?? [])
   // The radar layer, when the drawing has one: under the shapes and over the basemap's fill, so
-  // an alert outline and the cells under it can both be read (revision 11 §3).
+  // an alert outline and the cells under it can both be read (docs/MESHWX_UI.md §18.2).
   if (drawing.cells != null || drawing.unknownCells != null) {
     map.setCells(drawing.cells ?? [], { unknown: drawing.unknownCells ?? [] })
   }

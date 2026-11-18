@@ -95,7 +95,7 @@ describe('MeshWX vectors', () => {
   });
 
   /**
-   * Spec §7A: WX-AUS's real message is 39 bytes — 14 fixed, four offices, five runs — and it
+   * Spec §10: WX-AUS's real message is 39 bytes — 14 fixed, four offices, five runs — and it
    * says the bot covers its own home county, which is what the app used to get wrong.
    */
   test('theCoverageVectorIsTheMessageTheSpecDescribes', () => {
@@ -148,7 +148,7 @@ describe('MeshWX vectors', () => {
     assert.notEqual(batch.flags & MeshWXWire.flagObservationAges, 0);
     assert.ok(MeshWXObservations.carriesAges(batch));
     assert.deepStrictEqual(batch.stations.map((s) => s.age_min), [0, 20, 110]);
-    // Each station's own time, which is what "as of" reads (spec §10.5). The newest is the batch
+    // Each station's own time, which is what "as of" reads (spec §18.1). The newest is the batch
     // time itself, and the oldest is nearly two hours behind it.
     assert.deepStrictEqual(
       batch.stations.map((s) => MeshWXObservations.reportMinutes(batch, { for: s })),
@@ -238,7 +238,7 @@ describe('MeshWX vectors', () => {
   });
 
   /**
-   * Spec §7B: the app's own `>d`, as the sixteen bytes the spec prints — the one message this
+   * Spec §11: the app's own `>d`, as the sixteen bytes the spec prints — the one message this
    * app transmits, so the encoder's output is checked against the publisher's hex byte for byte
    * in both directions.
    */
@@ -286,13 +286,13 @@ describe('MeshWX vectors', () => {
   });
 
   /**
-   * Spec §7C: where the vector prints them, a sweep entry's codes are checked against the
+   * Spec §12: where the vector prints them, a sweep entry's codes are checked against the
    * publisher's own expansion rather than against this implementation's arithmetic. The
    * published file prints no `ugcs` key today, so this also proves the sweep's runs expand to
    * the codes the spec's worked example names.
    */
   /**
-   * Spec §7C, revision 10. The publisher's own scoped packet, read against the note it carries:
+   * Spec §12, revision 10. The publisher's own scoped packet, read against the note it carries:
    * "`total` is 0x81: bit 7 scoped, one packet. The first two entries are the scope, Oklahoma and
    * Texas; Oklahoma has no alert entry, which says it is clear at this level."
    *
@@ -321,7 +321,7 @@ describe('MeshWX vectors', () => {
   });
 
   /**
-   * Spec §8.2, revision 10: the two new `>` lines, as the publisher prints them. The app sends
+   * Spec §14, revision 10: the two new `>` lines, as the publisher prints them. The app sends
    * these, so the encoder's bytes are checked against the publisher's hex in both directions.
    */
   test('theRevisionTenRequestVectorsRoundTrip', () => {
@@ -343,7 +343,7 @@ describe('MeshWX vectors', () => {
   });
 
   /**
-   * Spec §7D, revision 11: the publisher's own tile, a real one — Dallas under the squall line
+   * Spec §13, revision 11: the publisher's own tile, a real one — Dallas under the squall line
    * of 20 September 2026, 131 bytes for a thousand cells.
    *
    * The two claims worth pinning beyond the deep comparison every vector already gets: the
@@ -396,7 +396,7 @@ describe('MeshWX vectors', () => {
   });
 
   /**
-   * Spec §7D: `>radar` is refused with letter `x`, not `r` — `r` is `>rain`, and a refusal names
+   * Spec §13: `>radar` is refused with letter `x`, not `r` — `r` is `>rain`, and a refusal names
    * no argument, so the letter is the only thing that says which of the two was refused.
    */
   test('theRadarRequestAndItsRefusalUseTheLetterX', () => {

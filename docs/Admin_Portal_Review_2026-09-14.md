@@ -4,6 +4,7 @@
 > - Implemented as described, in d5171e4. `portal/templates/app.html` and `portal/static/portal.js` still render the six sections and the ten Overview tiles.
 > - Added since: Radio has Health and Hardware cards for radio swaps and adoption (cf1da42, ddd48a3, `docs/Radio_Swap.md`). Text Bot > Behaviour and System carry the echo and resend settings (6af542e).
 > - Superseded: the "Kept on purpose" paragraph at the end. ad6dc24 replaced the v4 protocol and scheduler with MeshWX v5 (four job products) and stopped decoding WXQ/MWX requests; the last prefix check went on 2026-09-15. The same commit deleted the iOS brief and dropped the discovery channel role, so Radio now edits two roles, text and data. `MCW_MESHWX_CHANNEL` is still read.
+> - Superseded, 2026-10-19: the six sections and the ten Overview tiles. The portal now has the public dashboard's look and six tabs by job (Overview, Mesh, Radio, Station, Settings, Logs): the Overview opens on a server-built "Needs attention" list (`admin.attention`), every `.env` setting is under Settings with one save bar, and Station proxies the dish's pointing meter and gain.
 > - Where the current truth lives: the portal code above, the README's admin portal section, and `docs/MeshWX_v5_Spec.md` revision 3.
 
 Two adversarial reviews (one on navigation and UX, one on dead code and

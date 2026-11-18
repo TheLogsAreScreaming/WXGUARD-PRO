@@ -2,511 +2,307 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Meshcore Weather Admin</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light dark">
+  <title>mesh-wx admin</title>
   <link rel="stylesheet" href="/static/portal.css?v={{ asset_version }}">
 </head>
 <body>
-  <header class="header">
-    <div class="header-inner">
-      <a href="#overview" class="brand">Meshcore Weather <span class="brand-badge">Admin</span></a>
-      <div class="strip" id="strip" title="Live status, refreshed every 15 s">
-        <a href="#satellite" class="strip-item" id="strip-sat"><span class="dot dot-gray"></span>dish</a>
-        <a href="#radio" class="strip-item" id="strip-radio"><span class="dot dot-gray"></span>radio</a>
-        <a href="#textbot" class="strip-item" id="strip-tx"><span class="dot dot-gray"></span>tx</a>
-      </div>
-      <nav class="nav" id="main-nav">
-        <a href="#overview" data-section="overview">Overview</a>
-        <a href="#textbot" data-section="textbot">Text Bot</a>
-        <a href="#broadcasts" data-section="broadcasts">Broadcasts</a>
-        <a href="#radio" data-section="radio">Radio</a>
-        <a href="#satellite" data-section="satellite">Satellite</a>
-        <a href="#system" data-section="system">System</a>
-      </nav>
-    </div>
-  </header>
-
-  <main class="main">
-
-    <!-- ================= OVERVIEW ================= -->
-    <section id="section-overview" class="section">
-      <div class="page-head">
-        <div><h1 class="page-title">Overview</h1>
-          <p class="page-subtitle">Dish, feed, radio, bot and host at a glance. Refreshes on its own.</p></div>
-        <span class="text-small text-muted" id="ov-updated"></span>
-      </div>
-      <div class="tiles tiles-5 mb-4" id="ov-tiles"></div>
-
-      <div class="grid grid-2">
-        <div class="card">
-          <div class="card-header"><div><div class="card-title">Recent requests</div>
-            <div class="card-subtitle">The last things people asked and what the bot answered</div></div>
-            <a class="btn btn-mini" href="#textbot">Text Bot</a></div>
-          <div id="ov-recent" class="stream stream-short"></div>
-        </div>
-        <div class="card">
-          <div class="card-header"><div><div class="card-title">Accuracy audit</div>
-            <div class="card-subtitle">Hourly comparison of this bot's answers with api.weather.gov, IEM, aviationweather and SWPC</div></div></div>
-          <div id="ov-audit" class="text-small">Not run yet</div>
-        </div>
-      </div>
-    </section>
-
-    <!-- ================= TEXT BOT ================= -->
-    <section id="section-textbot" class="section">
-      <div class="page-head">
-        <div><h1 class="page-title">Text Bot</h1>
-          <p class="page-subtitle">What people ask on the channel and by DM, what the bot answers, and how it behaves.</p></div>
-      </div>
-
-      <div class="tiles tiles-6 mb-4" id="traffic-stats"></div>
-
-      <div class="card">
-        <div class="card-header">
-          <div><div class="card-title"><span class="dot dot-gray" id="traffic-dot"></span>Live: <span id="traffic-title">channel</span> and DMs</div>
-            <div class="card-subtitle">Every request heard, every reply sent, and what was not answered and why. DMs show the sender here; the public page hides them.</div></div>
-          <span class="text-small text-muted" id="traffic-status"></span>
-        </div>
-        <div class="sub-tabs mb-2" id="traffic-kinds">
-          <button class="sub-tab active" data-k="all" onclick="Portal.traffic.setKind('all')">All</button>
-          <button class="sub-tab" data-k="channel" onclick="Portal.traffic.setKind('channel')">Channel</button>
-          <button class="sub-tab" data-k="dm" onclick="Portal.traffic.setKind('dm')">DMs</button>
-          <button class="sub-tab" data-k="dropped" onclick="Portal.traffic.setKind('dropped')">Not answered</button>
-          <button class="sub-tab" data-k="adverts" onclick="Portal.traffic.setKind('adverts')">Adverts</button>
-          <button class="sub-tab" data-k="apps" onclick="Portal.traffic.setKind('apps')">Apps</button>
-        </div>
-        <div id="traffic-body" class="stream stream-tall"></div>
-      </div>
-
-      <div class="card">
-        <div class="card-header">
-          <div><div class="card-title">Limits and cooldowns</div>
-            <div class="card-subtitle">Every gate between a request and an answer: the rule, where it stands, and when it opens. Resetting one spends airtime it was holding back.</div></div>
-          <button class="btn btn-mini" onclick="Portal.limits.refresh()">Refresh</button>
-        </div>
-        <div id="limits-body" class="limits"></div>
-        <div class="mt-4">
-          <label class="form-label">App answers</label>
-          <div class="grid grid-3 mb-2">
-            <div><label class="form-label" for="env-MCW_APP_PACKETS_PER_HOUR">Packets per hour, every app together</label>
-              <input class="input" type="number" min="1" max="5000" id="env-MCW_APP_PACKETS_PER_HOUR"></div>
-            <div><label class="form-label" for="env-MCW_APP_SENDER_GAP_S">One app's requests, at most every (s)</label>
-              <input class="input" type="number" min="0.5" max="60" step="0.5" id="env-MCW_APP_SENDER_GAP_S"></div>
-            <div><label class="form-label" for="env-MCW_PART_RESEND_FLOOR_S">The same missing packet again after (s)</label>
-              <input class="input" type="number" min="0" max="600" id="env-MCW_PART_RESEND_FLOOR_S"></div>
-            <div><label class="form-label" for="env-MCW_SWEEP_WINDOW_S">Alert map of the same area again after (s)</label>
-              <input class="input" type="number" min="0" max="3600" id="env-MCW_SWEEP_WINDOW_S"></div>
-            <div><label class="form-label" for="env-MCW_RADAR_WINDOW_S">The same radar tile again after (s)</label>
-              <input class="input" type="number" min="0" max="3600" id="env-MCW_RADAR_WINDOW_S"></div>
-          </div>
-          <label class="form-label">Text replies</label>
-          <div class="grid grid-3 mb-2">
-            <div><label class="form-label" for="env-MCW_TEXT_REPLIES_PER_HOUR">Per hour, everyone</label>
-              <input class="input" type="number" min="1" max="10000" id="env-MCW_TEXT_REPLIES_PER_HOUR"></div>
-            <div><label class="form-label" for="env-MCW_TEXT_REPLIES_PER_SENDER_PER_HOUR">Per hour, one person</label>
-              <input class="input" type="number" min="1" max="1000" id="env-MCW_TEXT_REPLIES_PER_SENDER_PER_HOUR"></div>
-          </div>
-          <label class="form-label">Channel replies to strangers (reply mode DM only)</label>
-          <div class="grid grid-3 mb-2">
-            <div><label class="form-label" for="env-MCW_STRANGER_REPLIES_PER_HOUR">Per hour</label>
-              <input class="input" type="number" min="1" max="1000" id="env-MCW_STRANGER_REPLIES_PER_HOUR"></div>
-            <div><label class="form-label" for="env-MCW_STRANGER_REPLY_GAP_S">The same person again after (s)</label>
-              <input class="input" type="number" min="0" max="86400" id="env-MCW_STRANGER_REPLY_GAP_S"></div>
-          </div>
-          <span class="form-hint mb-4">Saved to .env and applied at once. Every answer floods the mesh, so a higher limit spends other people's airtime. The apps space their own requests 5 s apart. Once the app packets are spent, a request is answered "busy", once a minute per radio; a radar request gets no reply, because both apps read a radar refusal as "sent a few minutes ago".</span>
-          <div class="flex gap-2 mb-2 mt-2" style="align-items:center">
-            <button class="btn btn-primary" onclick="Portal.limits.save(this)">Save limits</button>
-            <span id="limits-status" class="text-small text-muted"></span>
-          </div>
-        </div>
-      </div>
-
-      <div class="grid grid-2">
-        <div>
-          <div class="card">
-            <div class="card-header"><div><div class="card-title">Try a command</div>
-              <div class="card-subtitle">Type what a user would send. The reply is exactly what they would get by DM; "more" continues a long one.</div></div></div>
-            <div class="input-row mb-2">
-              <input class="input" id="try-input" placeholder="wx round rock tx" onkeydown="if(event.key==='Enter')Portal.textbot.send()">
-              <button class="btn btn-primary" onclick="Portal.textbot.send()">Send</button>
-            </div>
-            <div class="chips mb-4" id="try-examples"></div>
-            <div id="try-log" class="stream stream-mid"></div>
-          </div>
-          <div class="card">
-            <div class="card-header"><div><div class="card-title">Commands</div>
-              <div class="card-subtitle">What "help" returns on the mesh</div></div></div>
-            <pre class="text-small text-mono pre" id="help-text"></pre>
-          </div>
-        </div>
-        <div>
-          <div class="card">
-            <div class="card-header"><div><div class="card-title">Behaviour</div>
-              <div class="card-subtitle">How the bot answers. Applied live and saved to .env.</div></div></div>
-            <label class="form-label" for="env-MCW_REPLY_MODE">Reply mode</label>
-            <select class="input mb-4" id="env-MCW_REPLY_MODE">
-              <option value="dm">DM: private reply; a nearby stranger gets one channel reply and an advert</option>
-              <option value="channel">Channel: every reply floods on the channel (testing and demos only)</option>
-              <option value="dm_only">DM only: never reply on the channel</option>
-            </select>
-            <div class="grid grid-3 mb-4">
-              <div><label class="form-label" for="env-MCW_CHANNEL_REPLY_MAX_HOPS">Stranger reply, max hops</label>
-                <input class="input" type="number" min="0" max="15" id="env-MCW_CHANNEL_REPLY_MAX_HOPS"></div>
-              <div><label class="form-label" for="env-MCW_ADVERT_INTERVAL_HOURS">Advert every (hours)</label>
-                <input class="input" type="number" min="1" max="168" id="env-MCW_ADVERT_INTERVAL_HOURS"></div>
-              <div><label class="form-label" for="env-MCW_PEER_BOT_PREFIX">Peer bot name prefix</label>
-                <input class="input" id="env-MCW_PEER_BOT_PREFIX" placeholder="WX-"></div>
-            </div>
-            <label class="form-label">Delivery</label>
-            <div class="grid grid-3 mb-2">
-              <div><label class="form-label" for="env-MCW_RETRANSMIT_MAX">Resend if not heard, max</label>
-                <select class="input" id="env-MCW_RETRANSMIT_MAX"><option value="0">0 (measure only)</option><option value="1">1</option><option value="2">2</option></select></div>
-              <div><label class="form-label" for="env-MCW_ECHO_WINDOW_S">Echo window (s)</label>
-                <input class="input" type="number" min="1" max="60" step="0.5" id="env-MCW_ECHO_WINDOW_S"></div>
-              <div><label class="form-label" for="env-MCW_RETRANSMIT_PER_HOUR">Resends per hour, max</label>
-                <input class="input" type="number" min="0" max="500" id="env-MCW_RETRANSMIT_PER_HOUR"></div>
-              <div><label class="form-label" for="env-MCW_RELAYED_REPLY_DELAY_S">Wait before answering a relayed request (s)</label>
-                <input class="input" type="number" min="0" max="10" step="0.1" id="env-MCW_RELAYED_REPLY_DELAY_S"></div>
-            </div>
-            <span class="form-hint mb-4">The node hears a repeater's copy of each reply. A reply with no echo inside the window is sent once more, byte for byte the same, so nobody sees it twice. DMs wait for the recipient's ACK instead. Skipped when no repeater has been heard from anyone lately. A request that came through repeaters is answered after the wait, plus up to half as much again at random, so the answer does not go out while the repeaters are still passing the request on. 0 answers at once.</span>
-            <div class="flex gap-2 mb-2 mt-4" style="align-items:center">
-              <button class="btn btn-primary" onclick="Portal.textbot.saveBehaviour(this)">Save</button>
-              <span id="behaviour-status" class="text-small text-muted"></span>
-            </div>
-            <div class="text-small text-muted" id="peer-bots"></div>
-          </div>
-          <div class="card">
-            <div class="card-header"><div><div class="card-title">Listening on</div>
-              <div class="card-subtitle">Channel names are set on the Radio page</div></div>
-              <a class="btn btn-mini" href="#radio">Radio</a></div>
-            <div class="text-small" id="listening">Loading&hellip;</div>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- ================= BROADCASTS ================= -->
-    <section id="section-broadcasts" class="section">
-      <div class="page-head">
-        <div><h1 class="page-title">Broadcasts</h1>
-          <p class="page-subtitle">Binary datagrams for the app on the data channel: scheduled jobs and app requests.</p></div>
-      </div>
-
-      <div class="tiles tiles-4 mb-4" id="bc-tiles"></div>
-
-      <div class="card">
-        <div class="card-header"><div><div class="card-title">Jobs</div>
-          <div class="card-subtitle" id="jobs-sub">Each job sends one product for one location on its own interval</div></div>
-          <div class="flex gap-2">
-            <button class="btn btn-primary" onclick="Portal.broadcasts.openJobModal('create')">+ New job</button>
-            <button class="btn" onclick="Portal.broadcasts.runDue(this)" title="Runs every enabled job whose interval has elapsed">Run due jobs</button>
-            <button class="btn" onclick="Portal.broadcasts.loadJobs()">Refresh</button>
-          </div></div>
-        <div class="table-wrap">
-          <table class="table table-compact">
-            <thead><tr><th>Job</th><th>Product</th><th>Location</th><th>Every</th><th>Last run</th><th>Next</th><th>Last sent</th><th></th><th></th></tr></thead>
-            <tbody id="jobs-body"><tr><td colspan="9" class="text-muted">Loading&hellip;</td></tr></tbody>
-          </table>
-        </div>
-      </div>
-
-      <div class="card">
-        <div class="card-header"><div><div class="card-title"><span class="dot dot-gray" id="bclog-dot"></span>Broadcast log</div>
-          <div class="card-subtitle">What went out on the data channel and what apps asked for</div></div>
-          <span class="text-small text-muted" id="bclog-status"></span></div>
-        <div id="bclog-body" class="stream stream-mid"></div>
-      </div>
-    </section>
-
-    <!-- ================= RADIO ================= -->
-    <section id="section-radio" class="section">
-      <div class="page-head">
-        <div><h1 class="page-title">Radio</h1>
-          <p class="page-subtitle">The MeshCore node on USB: link, identity, LoRa parameters, channels and contacts.</p></div>
-        <button class="btn" onclick="Portal.radio.load()">Refresh</button>
-      </div>
-
-      <div class="tiles tiles-5 mb-4" id="radio-stats"></div>
-
-      <div class="card" id="radio-offline-card" hidden>
-        <div class="card-header"><div><div class="card-title">Radio not connected</div>
-          <div class="card-subtitle" id="radio-offline-reason"></div></div>
-          <button class="btn btn-primary" onclick="Portal.radio.reconnect(this)">Reconnect now</button></div>
-        <div class="text-small text-muted">The bot retries the serial port every minute on its own. The node must run the
-          <strong>Companion Radio (USB)</strong> firmware; a BLE-only companion or a repeater build never answers on serial.
-          The port is set under System &rsaquo; Settings.</div>
-      </div>
-
-      <div class="grid grid-2">
-        <div class="card" id="radio-health-card">
-          <div class="card-header"><div><div class="card-title">Health <span class="badge badge-muted" id="health-badge">?</span></div>
-            <div class="card-subtitle" id="health-reason">Is this radio getting out and hearing the mesh?</div></div>
-            <button class="btn btn-mini" onclick="Portal.radio.loadHealth()">Refresh</button></div>
-          <div class="tiles tiles-3 mb-4" id="health-tiles"></div>
-          <div class="text-small text-muted mb-4" id="health-node"></div>
-          <div class="flex gap-2" style="align-items:center;flex-wrap:wrap">
-            <button class="btn" id="health-testtx" onclick="Portal.radio.testTx(this)">Test transmit</button>
-            <span class="text-small text-muted" id="health-test-result">Sends one 6-byte datagram no app decodes and waits for a repeater's echo.</span></div>
-        </div>
-
-        <div class="card" id="radio-hw-card">
-          <div class="card-header"><div><div class="card-title">Hardware</div>
-            <div class="card-subtitle">This board, and the profile that lets a replacement take over its identity</div></div></div>
-          <div class="text-small mb-4" id="hw-board"></div>
-          <div id="hw-pending" class="mb-4" hidden>
-            <div class="badge badge-warning mb-2">Different radio</div>
-            <div class="text-small" id="hw-pending-text"></div>
-            <div class="flex gap-2 mt-4" style="flex-wrap:wrap">
-              <button class="btn btn-primary" onclick="Portal.radio.adopt(this)">Adopt: make this radio the bot</button>
-              <button class="btn btn-danger" onclick="Portal.radio.saveProfile(true)">Forget the old node, start a new profile</button></div>
-          </div>
-          <div class="text-small mb-4" id="hw-profile"></div>
-          <div class="flex gap-2" style="align-items:center;flex-wrap:wrap">
-            <button class="btn btn-mini" onclick="Portal.radio.saveProfile(false)">Save profile now</button>
-            <span class="text-small text-muted">Swap steps: <a href="https://github.com/digitaino/meshwx/blob/main/docs/Radio_Swap.md" target="_blank" rel="noopener">docs/Radio_Swap.md</a></span></div>
-          <div id="hw-action-result" class="text-small text-muted mt-4"></div>
-        </div>
-
-        <div class="card">
-          <div class="card-header"><div><div class="card-title">Identity</div>
-            <div class="card-subtitle">Advertised name and location, stored on the node</div></div></div>
-          <label class="form-label" for="radio-name">Node name</label>
-          <div class="input-row mb-4"><input class="input" id="radio-name" maxlength="31" placeholder="WX-AUS">
-            <button class="btn btn-primary" onclick="Portal.radio.saveName()">Save</button></div>
-          <div class="grid grid-2 mb-4">
-            <div><label class="form-label" for="radio-lat">Latitude</label><input class="input" id="radio-lat" placeholder="30.27"></div>
-            <div><label class="form-label" for="radio-lon">Longitude</label><input class="input" id="radio-lon" placeholder="-97.74"></div>
-          </div>
-          <div class="flex gap-2 mb-4"><button class="btn" onclick="Portal.radio.saveCoords()">Save location</button></div>
-          <div class="text-small text-muted text-mono" id="radio-pubkey"></div>
-        </div>
-
-        <div class="card">
-          <div class="card-header"><div><div class="card-title">LoRa and transmit</div>
-            <div class="card-subtitle">Every node on the mesh must use the same radio parameters</div></div></div>
-          <label class="form-label" for="radio-preset">Preset</label>
-          <select class="input mb-2" id="radio-preset" onchange="Portal.radio.pickPreset()"><option value="">custom</option></select>
-          <div class="grid grid-4 mb-4">
-            <div><label class="form-label" for="radio-freq">Freq (MHz)</label><input class="input" id="radio-freq"></div>
-            <div><label class="form-label" for="radio-bw">BW (kHz)</label><input class="input" id="radio-bw"></div>
-            <div><label class="form-label" for="radio-sf">SF</label><input class="input" id="radio-sf"></div>
-            <div><label class="form-label" for="radio-cr">CR</label><input class="input" id="radio-cr"></div>
-          </div>
-          <div class="flex gap-2 mb-4"><button class="btn btn-primary" onclick="Portal.radio.saveParams()">Apply parameters</button></div>
-          <div class="grid grid-2 mb-4">
-            <div><label class="form-label" for="radio-txpower">TX power (dBm)</label>
-              <div class="input-row"><input class="input" id="radio-txpower" type="number" min="0" max="30"><button class="btn" onclick="Portal.radio.saveTxPower()">Set</button></div></div>
-            <div><label class="form-label">Transmit</label>
-              <div class="flex gap-2" style="align-items:center"><span id="radio-tx-badge" class="badge badge-muted">?</span>
-                <button class="btn" id="radio-tx-toggle" onclick="Portal.radio.toggleTx()">Toggle</button></div>
-              <span class="form-hint">Off = receive only: no adverts, replies or broadcasts. Turning it on sends an advert.</span></div>
-          </div>
-          <div class="mb-4"><label class="form-label" for="radio-pathhash">Path hash size</label>
-            <div class="input-row" style="max-width:16rem"><select class="input" id="radio-pathhash">
-              <option value="1">1 byte</option><option value="2">2 bytes</option><option value="3">3 bytes</option>
-            </select><button class="btn" id="radio-pathhash-set" onclick="Portal.radio.savePathHash()">Set</button></div>
-            <span class="form-hint" id="radio-pathhash-hint">Bytes each repeater adds to the path of packets this node sends. 2 or 3 tell repeaters apart in CoreScope, where 1 often cannot. A repeater too old to know this setting drops packets that use 2 or 3.</span></div>
-          <div class="flex gap-2">
-            <button class="btn" onclick="Portal.radio.advert()">Send advert</button>
-            <button class="btn btn-danger" onclick="Portal.radio.reboot()">Reboot node</button>
-          </div>
-          <div id="radio-action-result" class="text-small text-muted mt-4"></div>
-        </div>
-      </div>
-
-      <div class="card">
-        <div class="card-header"><div><div class="card-title">Channels</div>
-          <div class="card-subtitle">The channels the bot uses. Saved to .env and applied on the node: a slot is renamed in place, a slot that already has the name is reused, or a free one is taken. Slot 0 (public) is never touched.</div></div></div>
-        <div class="grid grid-2 mb-4">
-          <div><label class="form-label" for="ch-text">Text commands</label>
-            <input class="input" id="ch-text" placeholder="#meshwx">
-            <span class="form-hint">People send "wx austin tx" here</span></div>
-          <div><label class="form-label" for="ch-data">Data (app datagrams)</label>
-            <input class="input" id="ch-data" placeholder="#meshwx">
-            <span class="form-hint">The same name as the text channel shares one slot. Empty = broadcasts off</span></div>
-        </div>
-        <div class="flex gap-2 mb-4" style="align-items:center">
-          <button class="btn btn-primary" onclick="Portal.radio.saveRoles(this)">Save channels</button>
-          <span id="ch-status" class="text-small text-muted"></span></div>
-        <details>
-          <summary class="text-small">All slots on the node</summary>
-          <div class="table-wrap mt-4">
-            <table class="table table-compact"><thead><tr><th>Slot</th><th>Name</th><th>Role</th><th>Secret</th><th></th></tr></thead>
-              <tbody id="radio-channels"><tr><td colspan="5" class="text-muted">Loading&hellip;</td></tr></tbody></table>
-          </div>
-        </details>
-      </div>
-
-      <div class="card">
-        <div class="card-header"><div><div class="card-title">Contacts</div>
-          <div class="card-subtitle" id="contacts-sub">People the node has stored (it can only DM someone it has stored)</div></div>
-          <button class="btn" onclick="Portal.radio.loadContacts()">Refresh</button></div>
-        <div class="flex gap-4 mb-4" style="align-items:center;flex-wrap:wrap">
-          <label class="text-small" style="white-space:nowrap"><input type="checkbox" id="env-MCW_CONTACT_HOUSEKEEPING"> keep slots for people</label>
-          <label class="text-small" style="white-space:nowrap">keep free <input class="input input-xs" type="number" min="0" id="env-MCW_CONTACT_KEEP_FREE"></label>
-          <button class="btn btn-mini" onclick="Portal.radio.saveHousekeeping()">Save</button>
-          <button class="btn btn-mini" onclick="Portal.radio.housekeepNow()">Run housekeeping now</button>
-        </div>
-        <div class="text-small text-muted mb-4" id="contacts-help"></div>
-        <div class="table-wrap" style="max-height:360px;overflow-y:auto">
-          <table class="table table-compact"><thead><tr><th>Name</th><th>Type</th><th>Heard</th><th>Path</th><th>Key</th></tr></thead>
-            <tbody id="radio-contacts"><tr><td colspan="5" class="text-muted">Loading&hellip;</td></tr></tbody></table>
-        </div>
-      </div>
-    </section>
-
-    <!-- ================= SATELLITE ================= -->
-    <section id="section-satellite" class="section">
-      <div class="page-head">
-        <div><h1 class="page-title">Satellite and feed</h1>
-          <p class="page-subtitle">goesrecv and goesproc on this Pi, what the EMWIN feed delivers, and the products in the store.</p></div>
-        <a class="btn" id="sat-dashboard-link" href="#" target="_blank" rel="noopener">Public dashboard</a>
-      </div>
-
-      <div class="tiles tiles-5 mb-4" id="sat-stats"></div>
-
-      <div class="grid grid-2">
-        <div class="card">
-          <div class="card-header"><div><div class="card-title">Signal</div>
-            <div class="card-subtitle" id="sat-signal-sub"></div></div>
-            <div class="flex gap-2">
-              <button class="btn" id="sat-mode-point" onclick="Portal.satellite.setMode('point')">Pointing mode</button>
-              <button class="btn" id="sat-mode-receive" onclick="Portal.satellite.setMode('receive')">Receive mode</button>
-            </div></div>
-          <canvas id="sat-chart" height="140" style="width:100%"></canvas>
-          <div class="text-small text-muted mt-2">Viterbi errors (line) and dropped packets (bars), last 15 minutes. Lower is better; drops should be zero.</div>
-          <div class="tiles tiles-3 mt-4" id="sat-totals"></div>
-        </div>
-        <div class="card">
-          <div class="card-header"><div><div class="card-title">EMWIN feed</div>
-            <div class="card-subtitle" id="sat-feed-sub"></div></div></div>
-          <div class="tiles tiles-2 mb-4" id="sat-services"></div>
-          <div class="table-wrap" style="max-height:300px;overflow-y:auto">
-            <table class="table table-compact"><thead><tr><th>Product</th><th>Last hour</th></tr></thead>
-              <tbody id="sat-feed-types"></tbody></table>
-          </div>
-        </div>
-      </div>
-
-      <div class="card">
-        <div class="card-header"><div><div class="card-title">Products in the store</div>
-          <div class="card-subtitle" id="products-summary">Everything the feed delivered in the last 12 hours</div></div></div>
-        <div class="grid grid-4 mb-4">
-          <div><label class="form-label" for="filter-type">Type</label>
-            <select class="input" id="filter-type" onchange="Portal.products.load()"><option value="">All types</option></select></div>
-          <div><label class="form-label" for="filter-office">Office</label>
-            <select class="input" id="filter-office" onchange="Portal.products.load()"><option value="">All offices</option></select></div>
-          <div><label class="form-label" for="filter-state">State</label>
-            <select class="input" id="filter-state" onchange="Portal.products.load()"><option value="">All states</option></select></div>
-          <div><label class="form-label" for="filter-q">Search</label>
-            <input type="search" class="input" id="filter-q" placeholder="Text contains&hellip;" oninput="Portal.products.debouncedLoad()"></div>
-        </div>
-        <div class="table-wrap">
-          <table class="table table-compact table-click">
-            <thead><tr><th>Type</th><th>Office</th><th>State</th><th>Time (UTC)</th><th>Preview</th></tr></thead>
-            <tbody id="products-tbody"></tbody>
-          </table>
-        </div>
-      </div>
-    </section>
-
-    <!-- ================= SYSTEM ================= -->
-    <section id="section-system" class="section">
-      <div class="page-head">
-        <div><h1 class="page-title">System</h1>
-          <p class="page-subtitle">Logs from every part of the system, and the settings that do not belong to one page.</p></div>
-      </div>
-      <div class="sub-tabs mb-4" id="system-tabs">
-        <a class="sub-tab" data-tab="logs" href="#system/logs">Logs <span class="badge badge-muted" id="logs-n-problems" hidden></span></a>
-        <a class="sub-tab" data-tab="settings" href="#system/settings">Settings</a>
-      </div>
-
-      <div id="system-tab-logs" class="sub-tab-content">
-        <div class="card">
-          <div class="flex gap-2 mb-4" style="flex-wrap:wrap;align-items:center">
-            <div class="sub-tabs" id="logs-cats" style="margin:0;border:0">
-              <button class="sub-tab active" data-cat="all" onclick="Portal.logs.setCat('all')">All</button>
-              <button class="sub-tab" data-cat="satellite" onclick="Portal.logs.setCat('satellite')">Satellite <span class="badge badge-muted" id="logs-n-satellite"></span></button>
-              <button class="sub-tab" data-cat="radio" onclick="Portal.logs.setCat('radio')">Radio <span class="badge badge-muted" id="logs-n-radio"></span></button>
-              <button class="sub-tab" data-cat="bot" onclick="Portal.logs.setCat('bot')">Bot <span class="badge badge-muted" id="logs-n-bot"></span></button>
-            </div>
-            <select class="input input-sm" id="logs-level" onchange="Portal.logs.render()">
-              <option value="">All levels</option><option value="INFO">Info+</option><option value="WARNING">Warnings+</option><option value="ERROR">Errors</option></select>
-            <input class="input input-sm" id="logs-q" placeholder="filter text…" oninput="Portal.logs.render()">
-            <button class="btn" id="logs-pause" onclick="Portal.logs.togglePause()">Pause</button>
-            <button class="btn" onclick="Portal.logs.clear()">Clear</button>
-            <span class="text-small text-muted"><span class="dot dot-gray" id="logs-dot"></span><span id="logs-status"></span></span>
-          </div>
-          <div id="logs-body" class="stream stream-page"></div>
-        </div>
-      </div>
-
-      <div id="system-tab-settings" class="sub-tab-content">
-        <div class="tiles tiles-5 mb-4" id="sys-tiles"></div>
-
-        <div class="grid grid-2">
-          <div class="card">
-            <div class="card-header"><div><div class="card-title">Coverage</div>
-              <div class="card-subtitle">Which area the broadcasts and the "nearest bot" rule use. Applied live.</div></div></div>
-            <div class="mb-4"><label class="form-label" for="env-MCW_HOME_CITIES">Home city, then any extra cities</label>
-              <input class="input" id="env-MCW_HOME_CITIES" placeholder="Austin TX, San Antonio TX">
-              <span class="form-hint">Comma separated. The radius is drawn around the first one.</span></div>
-            <div class="grid grid-3 mb-4">
-              <div><label class="form-label" for="env-MCW_HOME_RADIUS_KM">Radius (km)</label><input class="input" type="number" min="0" id="env-MCW_HOME_RADIUS_KM"></div>
-              <div><label class="form-label" for="env-MCW_HOME_STATES">States</label><input class="input" id="env-MCW_HOME_STATES" placeholder="TX,OK"></div>
-              <div><label class="form-label" for="env-MCW_HOME_WFOS">Forecast offices</label><input class="input" id="env-MCW_HOME_WFOS" placeholder="EWX,FWD"></div>
-            </div>
-            <div class="flex gap-2 mb-4" style="align-items:center">
-              <button class="btn btn-primary" onclick="Portal.settings.save(this, 'coverage')">Save coverage</button>
-              <span id="coverage-status" class="text-small text-muted"></span></div>
-            <div class="text-small" id="coverage-summary"></div>
-          </div>
-
-          <div class="card">
-            <div class="card-header"><div><div class="card-title">Host and feed</div>
-              <div class="card-subtitle">Saved to .env. Fields marked "restart" take effect after a bot restart.</div></div></div>
-            <div class="grid grid-2 mb-4">
-              <div><label class="form-label" for="env-MCW_SERIAL_PORT">Serial port <span class="badge badge-muted">live</span></label><input class="input" id="env-MCW_SERIAL_PORT"></div>
-              <div><label class="form-label" for="env-MCW_SERIAL_BAUD">Baud <span class="badge badge-muted">live</span></label><input class="input" type="number" id="env-MCW_SERIAL_BAUD"></div>
-              <div><label class="form-label" for="env-MCW_EMWIN_SOURCE">EMWIN source <span class="badge badge-warning">restart</span></label>
-                <select class="input" id="env-MCW_EMWIN_SOURCE"><option value="sdr">sdr (goesproc directory)</option><option value="internet">internet (NOAA bundle)</option></select></div>
-              <div><label class="form-label" for="env-MCW_SDR_EMWIN_DIR">EMWIN directory <span class="badge badge-warning">restart</span></label><input class="input" id="env-MCW_SDR_EMWIN_DIR"></div>
-              <div><label class="form-label" for="env-MCW_SDR_POLL_INTERVAL">Directory scan (s) <span class="badge badge-warning">restart</span></label><input class="input" type="number" min="5" id="env-MCW_SDR_POLL_INTERVAL"></div>
-              <div><label class="form-label" for="env-MCW_SDR_DASHBOARD_URL">goestools dashboard URL <span class="badge badge-muted">live</span></label><input class="input" id="env-MCW_SDR_DASHBOARD_URL"></div>
-              <div><label class="form-label" for="env-MCW_TIMEZONE">Timezone <span class="badge badge-muted">live</span></label><input class="input" id="env-MCW_TIMEZONE"></div>
-              <div><label class="form-label" for="env-MCW_LOG_LEVEL">Log level <span class="badge badge-muted">live</span></label>
-                <select class="input" id="env-MCW_LOG_LEVEL"><option>INFO</option><option>DEBUG</option><option>WARNING</option><option>ERROR</option></select></div>
-              <div><label class="form-label" for="env-MCW_SCOPE_URL">CoreScope URL <span class="badge badge-muted">live</span></label>
-                <input class="input" id="env-MCW_SCOPE_URL" placeholder="https://scope.digitaino.com">
-                <span class="form-hint">Optional, internet. Empty = off.</span></div>
-              <div><label class="form-label" for="env-MCW_SCOPE_MODE">CoreScope use <span class="badge badge-muted">live</span></label>
-                <select class="input" id="env-MCW_SCOPE_MODE"><option value="stats">stats: note who heard each reply</option><option value="decide">decide: also skip a resend the mesh observed</option></select></div>
-              <div><label class="form-label" for="env-MCW_SCOPE_MIN_OBSERVERS">Observers of a repeat needed <span class="badge badge-muted">live</span></label>
-                <input class="input" type="number" min="1" max="20" id="env-MCW_SCOPE_MIN_OBSERVERS">
-                <span class="form-hint">Only observers whose copy went through a repeater count, and one is proof enough. A neighbour hearing us direct proves nothing.</span></div>
-              <div><label class="form-label" for="env-MCW_RADIO_ADOPT">Replacement radio <span class="badge badge-muted">live</span></label>
-                <select class="input" id="env-MCW_RADIO_ADOPT"><option value="manual">manual: ask first, under Radio &rsaquo; Hardware</option><option value="auto">auto: a new radio takes over the saved identity on its own</option><option value="off">off: never adopt</option></select>
-                <span class="form-hint">The profile (key, name, position, LoRa settings, contacts) is saved on every connect either way.</span></div>
-              <div><label class="form-label" for="env-MCW_RADIO_RX_SILENT_MIN">Receiver silent after (min) <span class="badge badge-muted">live</span></label>
-                <input class="input" type="number" min="1" max="1440" id="env-MCW_RADIO_RX_SILENT_MIN">
-                <span class="form-hint">Nothing heard from anyone for this long is flagged as a deaf radio.</span></div>
-            </div>
-            <div class="flex gap-2" style="align-items:center;flex-wrap:wrap">
-              <button class="btn btn-primary" onclick="Portal.settings.save(this, 'host')">Save</button>
-              <button class="btn btn-danger" onclick="Portal.settings.restart()">Restart bot</button>
-              <span id="host-status" class="text-small text-muted"></span></div>
-          </div>
-        </div>
-      </div>
-    </section>
-
-  </main>
-
-  <div class="modal" id="modal-overlay" hidden onclick="if(event.target===this)Portal.ui.closeModal()">
-    <div class="modal-content" id="modal-content"></div>
+<header class="top"><div class="wrap">
+  <a class="brand" href="#overview"><h1>mesh-wx</h1><span class="pill info">admin</span></a>
+  <nav class="tabs" id="main-nav" aria-label="Admin">
+    <a href="#overview" data-section="overview">Overview</a>
+    <a href="#mesh" data-section="mesh">Mesh</a>
+    <a href="#radio" data-section="radio">Radio</a>
+    <a href="#station" data-section="station">Station</a>
+    <a href="#settings" data-section="settings">Settings</a>
+    <a href="#logs" data-section="logs">Logs <span class="pill bad" id="logs-n-errors" hidden></span></a>
+  </nav>
+  <div class="strip" aria-label="Live status, refreshed every 15 s">
+    <a href="#station" class="pill" id="strip-sat"><i></i>dish</a>
+    <a href="#radio" class="pill" id="strip-radio"><i></i>radio</a>
+    <a href="#radio" class="pill" id="strip-tx"><i></i>transmit</a>
+    <a class="pub" id="pub-link" href="#" target="_blank" rel="noopener">Public page ↗</a>
   </div>
-  <div id="toast" class="toast" hidden></div>
+</div></header>
 
-  <script src="/static/portal.js?v={{ asset_version }}"></script>
+<main class="wrap">
+
+<!-- ================= OVERVIEW ================= -->
+<div class="tab" id="tab-overview">
+  <section class="summary" id="ov-cards" aria-label="Status at a glance"></section>
+
+  <section class="block" aria-labelledby="hAttn">
+    <div class="bh"><h2 id="hAttn">Needs attention</h2><div class="right"><span class="hint" id="ov-updated"></span></div></div>
+    <ul class="attn" id="ov-attn"><li class="hint">Checking…</li></ul>
+  </section>
+
+  <section class="block" aria-labelledby="hOvAct">
+    <div class="bh"><h2 id="hOvAct">Mesh activity · last 24 hours</h2><div class="right"><a class="hint" href="#mesh">Everything on the mesh →</a></div></div>
+    <div class="grid2 narrow">
+      <div class="tiles" id="ov-act"></div>
+      <div><div class="feed short" id="ov-recent"></div><p class="cap">The last requests and what the bot answered. DMs show the sender here; the public page hides them.</p></div>
+    </div>
+  </section>
+
+  <section class="block" id="overview-audit" aria-labelledby="hAudit">
+    <div class="bh"><h2 id="hAudit">Accuracy audit</h2><span class="pill" id="ov-audit-pill"></span><div class="right"><span class="hint" id="ov-audit-when"></span></div></div>
+    <p class="why">Every hour the Pi compares what the bot holds with sources that are not EMWIN: active alerts for every state (api.weather.gov), storm reports (IEM), 30 airports (aviationweather.gov), 20 forecasts and space weather (SWPC).</p>
+    <div id="ov-audit"></div>
+  </section>
+</div>
+
+<!-- ================= MESH ================= -->
+<div class="tab" id="tab-mesh">
+  <div class="subnav" aria-label="Mesh sections"><button data-go="mesh-live">Live</button><button data-go="mesh-jobs">Scheduled broadcasts</button><button data-go="mesh-limits">Limits and cooldowns</button><button data-go="mesh-try">Try a command</button></div>
+
+  <section class="block" id="mesh-live" aria-labelledby="hLive">
+    <div class="bh"><h2 id="hLive">Live on <span id="traffic-title">the channel</span> and DMs</h2><span class="live" id="traffic-dot"></span><div class="right"><span class="hint" id="traffic-status"></span></div></div>
+    <div class="tiles" id="traffic-stats"></div>
+    <div class="chips mt" id="traffic-kinds" role="group" aria-label="Show">
+      <button data-k="all" class="on">All</button><button data-k="channel">Channel</button><button data-k="dm">DMs</button>
+      <button data-k="dropped">Not answered</button><button data-k="adverts">Adverts</button><button data-k="apps">Apps</button>
+    </div>
+    <div class="feed tall mt" id="traffic-body" aria-live="off"></div>
+    <p class="cap" id="mesh-listen"></p>
+  </section>
+
+  <section class="block" id="mesh-jobs" aria-labelledby="hJobs">
+    <div class="bh"><h2 id="hJobs">Scheduled broadcasts</h2><span class="hint" id="jobs-sub"></span>
+      <div class="right"><button class="primary" onclick="Portal.broadcasts.openAdd()">Add a broadcast</button></div></div>
+    <p class="why">What this bot sends on its own, on the data channel. The five built-in broadcasts are what every MeshWX app expects: you can turn one off or run it less often, not remove it. Add radar while there is precipitation near home, a forecast for another place, or one airport's observations, if your mesh needs them.</p>
+    <div id="jobs-problems"></div>
+    <div class="tiles" id="bc-tiles"></div>
+    <div class="tbl mt"><table>
+      <thead><tr><th>Broadcast</th><th>Every</th><th>Last run</th><th>Next</th><th></th></tr></thead>
+      <tbody id="jobs-body"><tr><td colspan="5" class="hint">Loading…</td></tr></tbody>
+    </table></div>
+    <h3 class="sm mt">Data channel log <span class="live" id="bclog-dot"></span> <span class="hint" id="bclog-status"></span></h3>
+    <div class="feed" id="bclog-body"></div>
+  </section>
+
+  <section class="block" id="mesh-limits" aria-labelledby="hLim">
+    <div class="bh"><h2 id="hLim">Limits and cooldowns</h2><div class="right"><a class="hint" href="#settings/limits">Change the limits →</a><button class="mini" onclick="Portal.limits.refresh()">Refresh</button></div></div>
+    <p class="why">Every gate between a request and an answer: the rule, where it stands, and when it opens. Resetting one spends airtime it was holding back.</p>
+    <div class="limits" id="limits-body"></div>
+  </section>
+
+  <section class="block" id="mesh-try" aria-labelledby="hTry">
+    <div class="bh"><h2 id="hTry">Try a command</h2></div>
+    <p class="why">Type what someone would send. The reply is exactly what they would get by DM, and nothing goes on the air; "more" continues a long one.</p>
+    <div class="inrow"><input id="try-input" placeholder="wx round rock tx" aria-label="Command" onkeydown="if(event.key==='Enter')Portal.textbot.send()">
+      <button class="primary" onclick="Portal.textbot.send()">Send</button></div>
+    <div class="chips mt" id="try-examples"></div>
+    <div class="feed short mt" id="try-log"></div>
+    <details class="mt"><summary>What "help" returns on the mesh</summary><pre class="mono pre" id="help-text"></pre></details>
+  </section>
+</div>
+
+<!-- ================= RADIO ================= -->
+<div class="tab" id="tab-radio">
+  <div class="notice bad" id="radio-offline-card" hidden>
+    <div class="grow"><b>The radio is not connected.</b> <span id="radio-offline-reason"></span>
+      <div class="hint">The bot retries the serial port every minute. The node must run the Companion Radio (USB) firmware; a BLE companion or a repeater build never answers on serial. The port is under Settings › Radio link.</div></div>
+    <button class="primary" onclick="Portal.radio.reconnect(this)">Reconnect now</button>
+  </div>
+
+  <div class="grid2">
+    <section class="block" id="radio-health" aria-labelledby="hHealth">
+      <div class="bh"><h2 id="hHealth">Health</h2><span class="pill" id="health-badge">?</span>
+        <div class="right"><button id="health-testtx" onclick="Portal.radio.testTx(this)" title="Sends one 6-byte datagram no app decodes and waits for a repeater's echo">Test transmit</button><button class="mini" onclick="Portal.radio.loadHealth()">Refresh</button></div></div>
+      <p class="why" id="health-reason">Is this radio getting out and hearing the mesh?</p>
+      <div class="tiles" id="health-tiles"></div>
+      <p class="cap" id="health-node"></p>
+      <p class="cap" id="health-test-result"></p>
+    </section>
+
+    <section class="block" id="radio-node" aria-labelledby="hNode">
+      <div class="bh"><h2 id="hNode">Node</h2><div class="right"><button onclick="Portal.radio.advert()">Send advert</button><button class="danger" onclick="Portal.radio.reboot()">Reboot</button></div></div>
+      <div class="tiles" id="radio-stats"></div>
+      <div class="fields mt">
+        <div class="f wide"><label for="radio-name">Node name</label>
+          <div class="inrow"><input id="radio-name" maxlength="31" placeholder="WX-AUS"><button onclick="Portal.radio.saveName()">Save</button></div></div>
+        <div class="f"><label for="radio-lat">Latitude</label><input id="radio-lat" placeholder="30.27"></div>
+        <div class="f"><label for="radio-lon">Longitude</label>
+          <div class="inrow"><input id="radio-lon" placeholder="-97.74"><button onclick="Portal.radio.saveCoords()">Save</button></div></div>
+      </div>
+      <p class="cap mono" id="radio-pubkey"></p>
+    </section>
+
+    <section class="block" id="radio-lora" aria-labelledby="hLora">
+      <div class="bh"><h2 id="hLora">LoRa and transmit</h2></div>
+      <div class="row"><span class="pill" id="radio-tx-badge">?</span><button id="radio-tx-toggle" onclick="Portal.radio.toggleTx()">Toggle</button>
+        <span class="hint">Off = receive only: no adverts, replies or broadcasts. Turning it on sends an advert.</span></div>
+      <p class="why mt" style="margin-bottom:8px">Every node on the mesh must use the same radio parameters.</p>
+      <div class="fields">
+        <div class="f wide"><label for="radio-preset">Preset</label><select id="radio-preset" onchange="Portal.radio.pickPreset()"><option value="">custom</option></select></div>
+        <div class="f"><label for="radio-freq">Frequency (MHz)</label><input id="radio-freq"></div>
+        <div class="f"><label for="radio-bw">Bandwidth (kHz)</label><input id="radio-bw"></div>
+        <div class="f"><label for="radio-sf">Spreading factor</label><input id="radio-sf"></div>
+        <div class="f"><label for="radio-cr">Coding rate</label><input id="radio-cr"></div>
+      </div>
+      <div class="row mt"><button class="primary" onclick="Portal.radio.saveParams()">Apply parameters</button></div>
+      <div class="fields mt">
+        <div class="f"><label for="radio-txpower">TX power (dBm)</label>
+          <div class="inrow"><input id="radio-txpower" type="number" min="0" max="30"><button onclick="Portal.radio.saveTxPower()">Set</button></div></div>
+        <div class="f"><label for="radio-pathhash">Path hash size</label>
+          <div class="inrow"><select id="radio-pathhash"><option value="1">1 byte</option><option value="2">2 bytes</option><option value="3">3 bytes</option></select>
+            <button id="radio-pathhash-set" onclick="Portal.radio.savePathHash()">Set</button></div>
+          <div class="fh" id="radio-pathhash-hint">Bytes each repeater adds to the path of packets this node sends. 2 or 3 tell repeaters apart in CoreScope, where 1 often cannot; a repeater too old to know this setting drops packets that use 2 or 3.</div></div>
+      </div>
+      <p class="cap" id="radio-action-result"></p>
+    </section>
+
+    <section class="block" id="radio-hw" aria-labelledby="hHw">
+      <div class="bh"><h2 id="hHw">Hardware and swap</h2><div class="right"><button class="mini" onclick="Portal.radio.saveProfile(false)">Save profile now</button></div></div>
+      <p class="why">The board, and the saved profile that lets a replacement radio take over this node's identity. Steps: <a href="https://github.com/digitaino/meshwx/blob/main/docs/Radio_Swap.md" target="_blank" rel="noopener">Radio_Swap.md</a></p>
+      <div id="hw-board"></div>
+      <div class="notice warn mt" id="hw-pending" hidden>
+        <div class="grow"><b>A different radio.</b> <span id="hw-pending-text"></span></div>
+        <div class="row"><button class="primary" onclick="Portal.radio.adopt(this)">Adopt: make this radio the bot</button>
+          <button class="danger" onclick="Portal.radio.saveProfile(true)">Start a new profile</button></div>
+      </div>
+      <p class="hint mt" id="hw-profile"></p>
+      <p class="cap" id="hw-action-result"></p>
+    </section>
+  </div>
+
+  <section class="block" id="radio-channels-block" aria-labelledby="hCh">
+    <div class="bh"><h2 id="hCh">Channels</h2><div class="right"><span class="hint" id="ch-status"></span></div></div>
+    <p class="why">Saved to .env and applied on the node: a slot is renamed in place, a slot that already has the name is reused, or a free one is taken. Slot 0 (public) is never touched.</p>
+    <div class="fields two">
+      <div class="f"><label for="ch-text">Text commands</label><input id="ch-text" placeholder="#meshwx"><div class="fh">People send "wx austin tx" here.</div></div>
+      <div class="f"><label for="ch-data">Data (app datagrams)</label><input id="ch-data" placeholder="#meshwx"><div class="fh">The same name as the text channel shares one slot. Empty = broadcasts off.</div></div>
+    </div>
+    <div class="row mt"><button class="primary" onclick="Portal.radio.saveRoles(this)">Save channels</button></div>
+    <details class="mt"><summary>All slots on the node</summary>
+      <div class="tbl"><table><thead><tr><th>Slot</th><th>Name</th><th>Role</th><th>Secret</th><th></th></tr></thead>
+        <tbody id="radio-channels"><tr><td colspan="5" class="hint">Loading…</td></tr></tbody></table></div>
+    </details>
+  </section>
+
+  <section class="block" id="radio-contacts-block" aria-labelledby="hCo">
+    <div class="bh"><h2 id="hCo">Contacts</h2><span class="hint" id="contacts-sub"></span><div class="right"><button class="mini" onclick="Portal.radio.loadContacts()">Refresh</button></div></div>
+    <p class="why" id="contacts-help">The node can only DM someone it has stored.</p>
+    <div class="row">
+      <label class="hint"><input type="checkbox" id="env-MCW_CONTACT_HOUSEKEEPING">keep slots for people</label>
+      <label class="hint">keep free <input type="number" min="0" id="env-MCW_CONTACT_KEEP_FREE" style="width:80px"></label>
+      <button class="mini" onclick="Portal.radio.saveHousekeeping()">Save</button>
+      <button class="mini" onclick="Portal.radio.housekeepNow()">Run housekeeping now</button>
+    </div>
+    <div class="tbl scroll mt"><table><thead><tr><th>Name</th><th>Type</th><th>Heard</th><th>Path</th><th>Key</th></tr></thead>
+      <tbody id="radio-contacts"><tr><td colspan="5" class="hint">Loading…</td></tr></tbody></table></div>
+  </section>
+</div>
+
+<!-- ================= STATION ================= -->
+<div class="tab" id="tab-station">
+  <section class="block" id="station-notes" aria-labelledby="hNotes">
+    <div class="bh"><h2 id="hNotes">Notes on the public page</h2><span class="pill" id="notes-pill">–</span>
+      <div class="right"><a class="hint" id="notes-page" href="#" target="_blank" rel="noopener">Public page ↗</a></div></div>
+    <p class="why">A note shows above every tab of the public dashboard while it is up, and stays in its events list after. Use it to tell mesh users why something looks wrong, such as EMWIN running late.</p>
+    <div class="fields">
+      <div class="f wide"><label for="note-title">Headline</label><input id="note-title" maxlength="120" placeholder="EMWIN is running about two hours late"></div>
+      <div class="f wide"><label for="note-detail">Details <span class="hint">(optional)</span></label><textarea id="note-detail" maxlength="600" rows="3" placeholder="NOAA is working on the link to the uplink site. Forecasts and warnings still come in, filled in from NWS over the internet."></textarea></div>
+      <div class="f"><label for="note-level">Kind</label><select id="note-level"><option value="info">Information</option><option value="warn">Warning</option><option value="bad">Problem</option></select></div>
+      <div class="f"><label for="note-hours">Up for</label>
+        <div class="inrow"><select id="note-hours"><option value="">until I take it down</option><option value="1">1 hour</option><option value="6">6 hours</option><option value="24">1 day</option><option value="72">3 days</option><option value="168">1 week</option></select>
+          <button class="primary" id="note-post" onclick="Portal.station.postNote()">Post</button></div></div>
+    </div>
+    <div class="tbl mt"><table><tbody id="notes-list"></tbody></table></div>
+  </section>
+
+  <section class="block" id="station-rx" aria-labelledby="hRx">
+    <div class="bh"><h2 id="hRx">Receiver</h2><span class="pill" id="rx-pill">–</span><span class="live" id="rx-dot" title="live from the receiver"></span>
+      <div class="right"><button id="sat-mode-point" onclick="Portal.station.setMode('point')">Pointing mode</button>
+        <button id="sat-mode-receive" class="primary" onclick="Portal.station.setMode('receive')" hidden>Back to receiving</button></div></div>
+    <p class="why" id="sat-signal-sub"></p>
+    <div id="rx-receive">
+      <div class="tiles" id="sat-stats"></div>
+      <canvas id="sat-chart" height="160" class="mt" aria-label="Viterbi errors and dropped packets, last 15 minutes"></canvas>
+      <div class="key"><span><i class="sw" style="background:var(--alert)"></i>Viterbi errors per frame (lower is better, under 200 is good)</span><span><i class="sw" style="background:var(--warn)"></i>dropped packets (should be none)</span><span>last 15 minutes</span></div>
+      <div class="kv mt" id="sat-services"></div>
+    </div>
+    <div id="rx-point" hidden>
+      <p class="hint">goesrecv is stopped while the dish is aimed; this is the live signal meter. 5 dB or more decodes, 8 dB or more is clean.</p>
+      <div class="row" style="gap:16px">
+        <div class="bigsnr"><span id="snr">–</span><span style="font-size:20px;color:var(--dim)"> dB</span></div>
+        <div style="flex:1;min-width:220px"><div class="meter"><div class="fill" id="m-fill"></div><div class="pk" id="m-pk"></div></div>
+          <div class="hint">peak <b id="m-peak">–</b> dB · in-band <b id="m-inb">–</b> · floor <b id="m-oob">–</b> · <span id="m-verdict"></span></div></div>
+        <div class="row"><label class="hint" for="m-gain">gain</label><select id="m-gain" style="width:auto" onchange="Portal.station.setGain(this.value)"></select>
+          <button onclick="Portal.station.resetPeak()">Reset peak</button></div>
+      </div>
+      <canvas id="m-spec" height="220" class="mt" aria-label="Spectrum around the downlink"></canvas>
+      <canvas id="m-snrh" height="110" class="mt" aria-label="Signal over the last minute"></canvas>
+    </div>
+    <p class="cap">Seven days of signal, the per-channel traffic and the events list are on the public page's <a id="pub-station" href="#" target="_blank" rel="noopener">Station tab</a>.</p>
+  </section>
+
+  <section class="block" id="station-trend" aria-labelledby="hTrend">
+    <div class="bh"><h2 id="hTrend">Signal and EMWIN delay</h2>
+      <div class="right chips" id="trend-range" role="group" aria-label="Range"><button data-h="24" onclick="Portal.station.trendRange(24)">1 day</button><button data-h="72" class="on" onclick="Portal.station.trendRange(72)">3 days</button><button data-h="168" onclick="Portal.station.trendRange(168)">7 days</button></div></div>
+    <h3 class="sm">EMWIN delay behind NOAA, and products received, per hour</h3>
+    <canvas id="trend-lag" height="180" aria-label="EMWIN delay and products received per hour"></canvas>
+    <div class="key"><span><i class="sw" style="background:var(--alert)"></i>delay (the hour's median)</span><span><i class="sw" style="background:var(--series2)"></i>products from the dish</span><span><i class="sw" style="background:var(--warn)"></i>from the internet</span></div>
+    <h3 class="sm mt">Signal</h3>
+    <canvas id="trend-vit" height="180" aria-label="Viterbi errors over time"></canvas>
+    <div class="key"><span><i class="sw" style="background:var(--alert)"></i>Viterbi errors per frame (median; the band from the 10th to the 90th percentile)</span><span><i class="sw" style="background:var(--bad);opacity:.35"></i>no lock</span></div>
+    <p class="hint" id="trend-msg" hidden></p>
+  </section>
+
+  <section class="block" id="station-feed" aria-labelledby="hFeed">
+    <div class="bh"><h2 id="hFeed">EMWIN feed and internet fill</h2><span class="pill" id="fill-pill">–</span><div class="right"><a class="hint" href="#settings/feed">Fill settings →</a></div></div>
+    <p class="why" id="fill-why">The feed comes first. Anything it has not delivered within its grace is taken from NWS over the internet.</p>
+    <div class="tiles" id="feed-tiles"></div>
+    <div class="grid2 mt">
+      <div><h3 class="sm">Received in the last hour, by type</h3><div class="tbl scroll"><table><tbody id="sat-feed-types"></tbody></table></div></div>
+      <div><h3 class="sm">Internet fill, last hour</h3><div class="tbl"><table><tbody id="fill-detail"></tbody></table></div></div>
+    </div>
+    <p class="cap"><span id="sat-feed-sub"></span> Products can be read in the public page's <a id="pub-weather" href="#" target="_blank" rel="noopener">product browser</a>.</p>
+  </section>
+</div>
+
+<!-- ================= SETTINGS ================= -->
+<div class="tab" id="tab-settings">
+  <div class="row"><div class="subnav" id="set-nav" aria-label="Settings sections"></div>
+    <button class="mini" id="set-help" style="margin-left:auto" onclick="Portal.settings.toggleHelp()" aria-pressed="false">Show help</button></div>
+  <div class="stack" id="set-groups"></div>
+</div>
+
+<!-- ================= LOGS ================= -->
+<div class="tab" id="tab-logs">
+  <section class="block" aria-labelledby="hLogs">
+    <div class="bh"><h2 id="hLogs">Logs</h2><span class="live" id="logs-dot"></span><span class="hint" id="logs-status"></span>
+      <div class="right"><button id="logs-pause" onclick="Portal.logs.togglePause()">Pause</button><button onclick="Portal.logs.clear()">Clear</button></div></div>
+    <div class="row">
+      <div class="chips" id="logs-cats" role="group" aria-label="Part">
+        <button data-cat="all" class="on">All</button>
+        <button data-cat="satellite">Satellite <span class="c" id="logs-n-satellite"></span></button>
+        <button data-cat="radio">Radio <span class="c" id="logs-n-radio"></span></button>
+        <button data-cat="bot">Bot <span class="c" id="logs-n-bot"></span></button>
+      </div>
+      <select id="logs-level" style="width:auto" onchange="Portal.logs.render()" aria-label="Level">
+        <option value="">All levels</option><option value="INFO">Info and up</option><option value="WARNING">Warnings and up</option><option value="ERROR">Errors</option></select>
+      <input id="logs-q" type="search" placeholder="Filter text" style="flex:1 1 200px;width:auto" oninput="Portal.logs.render()" aria-label="Filter text">
+    </div>
+    <div class="feed page mt" id="logs-body"></div>
+  </section>
+</div>
+
+</main>
+<footer class="wrap">The operator side of mesh-wx: the weather bot on the mesh, its radio and the GOES-19 station. The portal has no login of its own; keep it on localhost, behind an SSH tunnel or Cloudflare Access.</footer>
+
+<div class="savebar" id="savebar" hidden><div class="wrap">
+  <div class="what" id="save-what"></div>
+  <button id="save-discard" onclick="Portal.settings.discard()">Discard</button>
+  <button class="primary" id="save-btn" onclick="Portal.settings.save(this)">Save</button>
+</div></div>
+
+<div class="modal" id="modal-overlay" hidden onclick="if(event.target===this)Portal.ui.closeModal()">
+  <div class="modal-content" id="modal-content" role="dialog" aria-modal="true"></div>
+</div>
+<div id="toast" class="toast" role="status" hidden></div>
+
+<script src="/static/portal.js?v={{ asset_version }}"></script>
 </body>
 </html>

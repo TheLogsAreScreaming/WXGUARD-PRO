@@ -1,4 +1,4 @@
-"""`>part <group> <idx>[,<idx>…]` (spec 7C.2, revision 10).
+"""`>part <group> <idx>[,<idx>…]` (spec 14.5, revision 10).
 
 A phone that heard 4 of 7 packets asks for the other 3 instead of spending a
 whole answer again. Three layers: the cache the scheduler fills as it stamps
@@ -298,7 +298,7 @@ async def test_a_group_the_bot_has_let_go_is_not_available(monkeypatch):
 
 
 # ---------------------------------------------------------------------------
-# The limits around it (spec 7C.2)
+# The limits around it (spec 14.5)
 # ---------------------------------------------------------------------------
 
 

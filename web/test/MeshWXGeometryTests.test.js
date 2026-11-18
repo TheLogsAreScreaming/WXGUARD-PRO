@@ -1,6 +1,6 @@
 // Port of MC1Services/Tests/MeshWXTests/MeshWXGeometryTests.swift
 //
-// The bundled zone and county outlines (spec §9).
+// The bundled zone and county outlines (spec §16).
 //
 // Deviation from Swift, forced by PORTING §8: Swift parses a GeoJSON file synchronously on the
 // first lookup that needs it, so its tests can call `rings(for:)` cold. A browser cannot, so
@@ -74,7 +74,7 @@ describe('MeshWX geometry', () => {
   });
 
   test('unknownCodesReturnNilSoTheAppFallsBackToTheCentroid', () => {
-    // Spec §9: bundling the polygons is not a promise every code has one.
+    // Spec §16: bundling the polygons is not a promise every code has one.
     assert.equal(geometry.rings({ for: 'TXC997' }), null);
     assert.equal(geometry.rings({ for: 'ZZZ001' }), null);
   });

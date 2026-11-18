@@ -140,3 +140,61 @@ def test_a_warning_carries_the_products_own_issue_time_not_the_arrival_time():
     d = v5.decode(b.warning_message(1, 1, w))
     assert d["issued_min"] == int(t_new.timestamp() // 60)
     assert d["expires_min"] - d["issued_min"] == 9 * 60      # issued 3 h ago, expires in 6 h
+
+
+def test_a_product_pyiem_rejects_is_logged_and_still_carried_by_the_fallback(monkeypatch, caplog):
+    """A product pyIEM fails to parse used to be logged at DEBUG and dropped,
+    warning and all. Now it is logged at WARNING with its filename and goes
+    through the regex extractor on its own, so the headline, zones and VTEC
+    expiry survive beside everything pyIEM did parse."""
+    import logging
+    from datetime import datetime, timedelta, timezone
+    from meshcore_weather.parser.weather import WeatherStore
+    from meshcore_weather.protocol import warnings as warnings_mod
+    now = datetime.now(timezone.utc).replace(second=0, microsecond=0)
+    exp = (now + timedelta(hours=6)).strftime("%y%m%dT%H%MZ")
+    day = now.strftime("%d%H%M")
+
+    def prod(office, ugc, vtec, names, headline, seq):
+        text = (f"WWUS74 K{office} {day}\r\r\nNPW{office}\r\r\n\r\r\nURGENT - WEATHER MESSAGE\r\r\n"
+                f"National Weather Service {office}\r\r\n"
+                f"{now.strftime('%I%M %p').lstrip('0')} CDT {now.strftime('%a %b %d %Y')}\r\r\n\r\r\n"
+                f"{ugc}-{day}-\r\r\n{vtec}\r\r\n{names}\r\r\n{headline}\r\r\n\r\r\n$$\r\r\n")
+        return {"filename": f"A_WWUS74K{office}{day}_C_KWIN_{now:%Y%m%d%H%M%S}_{seq:06d}-1-NPW{office}TX.TXT",
+                "raw_text": text}
+
+    bad = prod("EWX", "TXZ171>173-183>194-202>209-217>225-228", f"/O.NEW.KEWX.WI.Y.0012.{now:%y%m%dT%H%MZ}-{exp}/",
+               "Burnet-Williamson-Travis-", "...WIND ADVISORY IN EFFECT UNTIL 7 PM CDT THIS EVENING...", 1)
+    good = prod("HGX", "TXZ213-214-215", f"/O.CON.KHGX.HT.Y.0011.000000T0000Z-{exp}/",
+                "Austin-Waller-Montgomery-", "...HEAT ADVISORY REMAINS IN EFFECT UNTIL 7 PM CDT THIS EVENING...", 2)
+    store = WeatherStore()
+    store.ingest([bad, good])
+
+    real = warnings_mod.pyiem_parser
+
+    def flaky(text, **kw):
+        if "WIND ADVISORY" in text:
+            raise ValueError("simulated pyIEM failure")
+        return real(text, **kw)
+
+    monkeypatch.setattr(warnings_mod, "pyiem_parser", flaky)
+    warnings_mod._parsed_cache.clear()
+    with caplog.at_level(logging.WARNING, logger="meshcore_weather.protocol.warnings"):
+        ws = warnings_mod.extract_active_warnings(store, coverage=None)
+    by_phenomenon = {w["vtec_phenomenon"]: w for w in ws}
+    assert set(by_phenomenon) == {"WI", "HT"}
+    wind = by_phenomenon["WI"]
+    assert wind["filename"] == bad["filename"] and wind["vtec_significance"] == "Y"
+    assert "TXZ192" in wind["zones"] and "Wind Advisory" in wind["headline"].title()
+    assert abs((wind["expires_at"] - (now + timedelta(hours=6))).total_seconds()) < 60
+    assert wind["issued_at"] is None                         # the fallback does not guess at it
+    assert by_phenomenon["HT"]["vtec_etn"] == 11             # pyIEM's own entry, untouched
+    logged = [r for r in caplog.records if r.levelno == logging.WARNING and "pyIEM parse failed" in r.getMessage()]
+    assert len(logged) == 1 and bad["filename"] in logged[0].getMessage()
+    # The failure is remembered, so the next extraction does not log it again.
+    caplog.clear()
+    with caplog.at_level(logging.WARNING, logger="meshcore_weather.protocol.warnings"):
+        again = warnings_mod.extract_active_warnings(store, coverage=None)
+    assert {w["vtec_phenomenon"] for w in again} == {"WI", "HT"}
+    assert not [r for r in caplog.records if "pyIEM parse failed" in r.getMessage()]
+    warnings_mod._parsed_cache.clear()

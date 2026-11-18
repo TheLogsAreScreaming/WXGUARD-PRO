@@ -44,7 +44,10 @@ KINDS = {
     "console": ("in", False),        # portal console (never public)
 }
 
-REQUEST_KINDS = ("channel_in", "dm_in")
+# An app's datagram request is a request like a chat one: before 2026-10-18 it
+# was left out while its answer (reply_data) counted as a reply, so a day of
+# app use read "1 request, 40 replies", the last request "21 h ago".
+REQUEST_KINDS = ("channel_in", "dm_in", "data_request")
 REPLY_KINDS = ("reply_dm", "reply_channel", "reply_data")
 
 _FLUSH_EVERY_S = 60
@@ -320,7 +323,7 @@ class TrafficLog:
         for label, secs in (("1h", 3600), ("24h", 86400), ("7d", 7 * 86400)):
             cut = now - secs
             w = {"requests": 0, "replies": 0, "dropped": 0, "chars_sent": 0, "senders": 0,
-                 "by_command": {}, "channel_replies": 0, "dm_replies": 0}
+                 "by_command": {}, "channel_replies": 0, "dm_replies": 0, "app_replies": 0}
             senders = set()
             for ts, kind, command, sender, chars in tally:
                 if ts < cut:
@@ -332,7 +335,7 @@ class TrafficLog:
                 elif kind in REPLY_KINDS:
                     w["replies"] += 1
                     w["chars_sent"] += chars
-                    w["channel_replies" if kind == "reply_channel" else "dm_replies"] += 1
+                    w[{"reply_channel": "channel_replies", "reply_data": "app_replies"}.get(kind, "dm_replies")] += 1
                     if command:
                         w["by_command"][command] = w["by_command"].get(command, 0) + 1
                 elif kind == "dropped":

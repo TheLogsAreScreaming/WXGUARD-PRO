@@ -31,7 +31,7 @@ export const UNSTATED_SOURCE = MeshWXDataSource.unstated
  */
 export const UNASKED_FORECAST_KEY = '?'
 
-/** The wire's clock: Unix minutes (`seconds / 60`) as u32 (spec §2.4), as a `Date` in ms. */
+/** The wire's clock: Unix minutes (`seconds / 60`) as u32 (spec §1.3), as a `Date` in ms. */
 export function dateFromUnixMinutes(minutes) {
   return minutes * 60_000
 }
@@ -139,7 +139,7 @@ export const WeatherStoredDigest = {
 }
 
 /**
- * The bot's own statement of what it carries (spec §7A), and when it arrived.
+ * The bot's own statement of what it carries (spec §10), and when it arrived.
  *
  * The message carries no time of its own: it says what the bot covers at the moment it is sent,
  * so its age is receipt. It does not go stale either — it is broadcast every three hours, and a
@@ -192,7 +192,7 @@ export const WeatherStoredObservation = {
   },
 
   /**
-   * When this station measured what it reported — the *as of* time (spec §10.5), never when the
+   * When this station measured what it reported — the *as of* time (spec §18.1), never when the
    * packet arrived.
    */
   observedAt(stored) { return dateFromUnixMinutes(stored.timestampMinutes) },
@@ -204,6 +204,14 @@ export const WeatherStoredObservation = {
 
   isStale(stored, { at }) {
     return MeshWXPresentation.isObservationStale({
+      timestampMinutes: stored.timestampMinutes,
+      now: MeshWXPresentation.unixMinutes({ for: at })
+    })
+  },
+
+  /** Past `MeshWXPresentation.observationShownForMinutes`: too old to show even with its age. */
+  isTooOld(stored, { at }) {
+    return MeshWXPresentation.isObservationTooOld({
       timestampMinutes: stored.timestampMinutes,
       now: MeshWXPresentation.unixMinutes({ for: at })
     })
@@ -239,14 +247,14 @@ export const WeatherStoredForecast = {
 }
 
 /**
- * A text reply being reassembled by `(bot, group)` in `idx` order (spec §8.1).
+ * A text reply being reassembled by `(bot, group)` in `idx` order (spec §8).
  *
  * A chunk the bot transmits a second time — the same bytes, when no repeater echoed the first —
  * carries the *original* group byte, so it merges into the same assembly and fills the hole.
  * Asking again gets a reply built afresh (the bot keeps no cache), under a new group byte.
  *
  * `chunks` is keyed by the chunk index as a string (PORTING.md §3); absent indexes never arrived.
- * `wasCut` is spec §8.1 revision 7: any chunk said the product was longer than 8 packets and the
+ * `wasCut` is spec §8 revision 7: any chunk said the product was longer than 8 packets and the
  * bot dropped the tail. Not the same claim as a hole in `orderedChunks` — a hole is a chunk the
  * air ate, and asking again may fill it.
  */
@@ -307,7 +315,7 @@ export const WeatherTextAssembly = {
 }
 
 /**
- * An area sweep being reassembled by `(bot, group)` in `idx` order (spec §7C).
+ * An area sweep being reassembled by `(bot, group)` in `idx` order (spec §12).
  *
  * Revision 9 held one per bot, because a sweep was always the whole country and two pictures of
  * one country are not two things to hold. Revision 10 lets a sweep cover a few states, so a phone
@@ -401,7 +409,7 @@ export const WeatherAreaSweepAssembly = {
 
   /**
    * Every entry received, in packet order then in the order the bot sent them — most severe
-   * first (spec §7C), which is also the order the map lays its tints down in.
+   * first (spec §12), which is also the order the map lays its tints down in.
    */
   entries(assembly) {
     return Object.keys(assembly.packets)
@@ -412,7 +420,7 @@ export const WeatherAreaSweepAssembly = {
 }
 
 /**
- * One tile of a radar picture as the app holds it (spec §7D, revision 11).
+ * One tile of a radar picture as the app holds it (spec §13, revision 11).
  *
  * - `tile`: the lattice square, `{ south, west, zoom }`. It is what the entry is keyed by — the
  *   wire carries the same three numbers, so the square a phone holds and the square another
@@ -429,8 +437,8 @@ export const WeatherAreaSweepAssembly = {
  *
  * A state written by the first build of revision 13 may also hold **detail tiles**: zoom −1,
  * a 1° square with half-degree edges, decoded from a message type that was tried and removed
- * before any release (docs/MESHWX_REV13.md). They still load — the edges are plain numbers — and
- * are dropped as they are read (`WeatherBotState.decode`) and by retention
+ * before any release (docs/MESHWX_UI.md §3.1 U-61). They still load — the edges are plain numbers —
+ * and are dropped as they are read (`WeatherBotState.decode`) and by retention
  * (`WeatherStateReducer.retainRadarTiles`), because no width on screen draws one and no lattice
  * reader knows a zoom below 0.
  */
@@ -480,11 +488,11 @@ export const WeatherSeenMessage = {
   }
 }
 
-/** Ranks for `MeshWXSeverity`, which `activeWarnings` sorts on (spec §10.2). */
+/** Ranks for `MeshWXSeverity`, which `activeWarnings` sorts on (spec §18.2). */
 const SEVERITY_RANK = Object.freeze({ warning: 3, watch: 2, advisory: 1, statement: 0 })
 
 /**
- * Everything the app holds for one bot (spec §12: "keep separate state per bot").
+ * Everything the app holds for one bot (spec §20: "keep separate state per bot").
  *
  * Dictionaries are string-keyed plain objects (PORTING.md §3): `warnings`, `pendingUpgrades` and
  * `recentCancels` by warning identity (`"event.office.etn"`), `observations` by station index,
@@ -497,7 +505,7 @@ export const WeatherBotState = {
   make({ botID }) {
     return {
       botID,
-      /** The newest `seq` accepted, for gap detection (spec §2.3). */
+      /** The newest `seq` accepted, for gap detection (spec §2.4). */
       lastSeq: null,
       /**
        * The last few accepted messages, newest last. A copy of any of them is a duplicate however
@@ -553,12 +561,12 @@ export const WeatherBotState = {
       unbundledForecasts: {},
       texts: {},
       /**
-       * What the bot says it carries (spec §7A). Null until it has said: the station footprint is
+       * What the bot says it carries (spec §10). Null until it has said: the station footprint is
        * the fallback then, and nothing the bot has not stated may put a place outside its area.
        */
       coverage: null,
       /**
-       * The area sweeps this bot sent (spec §7C), complete or partial, **newest first**. Empty
+       * The area sweeps this bot sent (spec §12), complete or partial, **newest first**. Empty
        * until one has been heard — and it never is until somebody on the channel taps for one.
        *
        * Several, since revision 10: a sweep can now cover a few states, so last hour's country
@@ -567,7 +575,7 @@ export const WeatherBotState = {
        */
       areaSweeps: [],
       /**
-       * The radar tiles this bot sent (spec §7D, revision 11), **newest `taken` first**. Empty
+       * The radar tiles this bot sent (spec §13, revision 11), **newest `taken` first**. Empty
        * until somebody on the channel asks for one: there is no scheduled radar broadcast.
        *
        * One entry per lattice square and picture, `(tile, taken)`, since revision 13: the
@@ -621,7 +629,7 @@ export const WeatherBotState = {
     // A file written before the bot stated anything, or before the app could read it: absent is
     // "has not said", which falls back to the station footprint rather than failing the file.
     state.coverage = json.coverage ?? null
-    // Revision 8, §7C. A file written before the app could read a sweep decodes as having none,
+    // Revision 8, §12. A file written before the app could read a sweep decodes as having none,
     // which is exactly right: nobody had asked for one. A file written between revisions 9 and 10
     // held exactly one, under `areaSweep`: it is lifted into the list rather than dropped, so a
     // map that was on screen before an update is still on screen after it.
@@ -632,7 +640,7 @@ export const WeatherBotState = {
     } else {
       state.areaSweeps = []
     }
-    // Revision 11, §7D. Absent in a state file written before it is an empty list, which is
+    // Revision 11, §13. Absent in a state file written before it is an empty list, which is
     // exactly right: nobody had asked for a radar picture, and none had ever been held. The
     // detail tiles of revision 13's first build (zoom −1) are left behind; every other frame
     // reads as it was written.
@@ -643,7 +651,7 @@ export const WeatherBotState = {
   },
 
   /**
-   * Warnings not yet expired at `at`, in the spec's display order (§10.2): the most severe
+   * Warnings not yet expired at `at`, in the spec's display order (§18.2): the most severe
    * first (warnings above watches above advisories), then the soonest expiry. An event the
    * tables cannot rank sorts last.
    *

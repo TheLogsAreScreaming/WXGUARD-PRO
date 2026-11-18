@@ -166,12 +166,15 @@ def test_windows_latency_and_the_feed_survive_a_restart(tmp_path):
     assert t3.stats()["windows"]["24h"]["requests"] == 0 and t3.lifetime["requests"] == 3
 
 
-def test_help_by_dm_does_not_say_dm_me(bot):
+def test_help_is_the_same_line_by_dm_and_on_the_channel(bot):
+    # The channel's used to end "DM me for private replies"; the public page's
+    # address took its place (owner, 2026-10-19).
+    from meshcore_weather.main import help_text
     asyncio.run(bot._handle_dm("ab" * 32, "Tommy", "help"))
     dm = bot.radio.dms[-1][1]
     assert dm.startswith("Weather bot:") and "DM me" not in dm
     asyncio.run(bot._handle_channel_message("1", "Stranger", "help", 1))
-    assert bot.radio.channel_sent[-1][1].endswith("DM me for private replies")
+    assert bot.radio.channel_sent[-1][1].endswith(help_text()) and dm == help_text()
 
 
 def test_unknown_kind_is_refused():
@@ -211,3 +214,19 @@ def test_traffic_and_public_endpoints(client):
     assert rep["kind"] == "reply_dm" and rep["sender"] is None and rep["text"] is None and "key" not in rep
     # No portal header needed: this is the read-only bundle the public page proxies.
     assert TestClient(create_app(bot)).get("/api/public/bot").status_code == 200
+
+
+def test_an_app_request_counts_as_a_request_and_its_answer_as_an_app_reply(tmp_path):
+    # 2026-10-18: a day of the iOS app asking read "1 request, 40 replies, 39 by
+    # DM" on the public page, the last request "21 h ago".
+    t = TrafficLog(path=tmp_path / "traffic.json")
+    req = t.record("data_request", sender="Digitaino", key="cc62182a79ed", text=">o KATT")
+    t.record("reply_data", text="1 packet(s), 21 B", chars=21, req=req)
+    chat = t.record("channel_in", sender="KJ5GFX", text="wx austin", command="wx")
+    t.record("reply_channel", text="x" * 40, chars=40, req=chat)
+    st = t.stats()
+    w = st["windows"]["24h"]
+    assert (w["requests"], w["replies"], w["senders"]) == (2, 2, 2)
+    assert (w["app_replies"], w["channel_replies"], w["dm_replies"]) == (1, 1, 0)
+    assert st["lifetime"]["requests"] == 2
+    assert st["last_request_at"] is not None

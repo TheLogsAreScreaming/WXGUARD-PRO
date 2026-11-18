@@ -42,7 +42,7 @@ export const WeatherCoverageVerdict = Object.freeze({
   outside: 'outside',
   /**
    * Nothing said yet, a list the bot had to cut, or outlines that have not loaded. A cut list
-   * means "not listed", never "not covered" (spec §7A), and unknown is where that lands.
+   * means "not listed", never "not covered" (spec §10), and unknown is where that lands.
    */
   unknown: 'unknown',
 })
@@ -51,7 +51,7 @@ export const WeatherCoverageVerdict = Object.freeze({
  * Whether a place is in a bot's area, and from what evidence:
  * `{ stations, stated, tables, areas }`.
  *
- * First the bot's own statement (Coverage, spec §7A): its circle and the zones it lists. That is
+ * First the bot's own statement (Coverage, spec §10): its circle and the zones it lists. That is
  * the only thing that describes coverage, and the reason the message exists — guessing from the
  * hourly stations and from the offices of whatever warnings were active told a real phone that
  * WX-AUS "may not carry alerts for Travis County", the bot's own home county (§3.1 I-B18).
@@ -88,7 +88,7 @@ export const WeatherCoverage = Object.freeze({
     },
   }),
 
-  /** One bot's own statement of its area (spec §7A), and when it arrived. */
+  /** One bot's own statement of its area (spec §10), and when it arrived. */
   Stated: Object.freeze({
     make({ botID, coverage, receivedAt }) {
       return { botID, coverage, receivedAt }
@@ -201,7 +201,7 @@ export const WeatherCoverage = Object.freeze({
    * - `{ of: botID, covering: point, withinKilometres }` — one bot: its own statement where it has
    *   made one, its station footprint where it has not.
    * - `{ statement, covering: point, withinKilometres }` — what one statement says about a point
-   *   (spec §7A). Inside on the stated circle, on a stated run, or on a statement with no area
+   *   (spec §10). Inside on the stated circle, on a stated run, or on a statement with no area
    *   filter at all. Outside only when both lists are whole, the bot listed zones to test against,
    *   and the place resolved to UGCs that none of the runs covers. Everything else is unknown.
    */
@@ -266,7 +266,7 @@ export const WeatherCoverage = Object.freeze({
 
   /**
    * The place's forecast office when no bot answering for it says it carries that office
-   * (spec §7A, docs/MESHWX_UI.md §3.1 I-B18 and §7.4).
+   * (spec §10, docs/MESHWX_UI.md §3.1 I-B18 and §7.4).
    *
    * The bot's own word and nothing weaker: every bot that could answer for the place must have
    * stated its offices with the office-cut flag clear, and none of them may list the place's

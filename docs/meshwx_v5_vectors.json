@@ -127,7 +127,7 @@
       "issued_min": 29823924,
       "begins_min": null
     },
-    "note": "SV.W.EWX.42 again, with the revision 5 issue time: 53 bytes, the two trailing bytes hold 21 = minutes between the issuance and the expiry"
+    "note": "SV.W.EWX.42 again, with the issue time (flags bit 1): 53 bytes, the two trailing bytes hold 21 = minutes between the issuance and the expiry"
   },
   {
     "name": "severe_thunderstorm_warning_from_goes",
@@ -232,7 +232,7 @@
       "issued_min": 29823900,
       "begins_min": 29825916
     },
-    "note": "FA.A.EWX.8, not in effect until 33 h 36 min after it was issued: after the issue time (4896 = issued_before) two more bytes, 2880 = minutes from the start to the expiry. A revision 11 decoder stops after the issue time and reads this as a watch in effect from issuance"
+    "note": "FA.A.EWX.8, not in effect until 33 h 36 min after it was issued: after the issue time (4896 = issued_before) two more bytes, 2880 = minutes from the start to the expiry, found by length. Shown from Wednesday 19:00 until Friday 19:00, not as in effect now"
   },
   {
     "name": "winter_storm_warning_zones",
@@ -446,7 +446,7 @@
       ],
       "source": 0
     },
-    "note": "the revision 5 form: 44 bytes, ages 0 / 20 / 110 minutes packed as nibbles 0, 2 and 11 in two trailing bytes (0x20, 0x0b)"
+    "note": "with per-station ages (flags bit 0): 44 bytes, ages 0 / 20 / 110 minutes packed as nibbles 0, 2 and 11 in two trailing bytes (0x20, 0x0b)"
   },
   {
     "name": "forecast_seven_periods",
@@ -720,7 +720,7 @@
       "zones_cut": false,
       "offices_cut": false
     },
-    "note": "the live WX-AUS coverage: 36 zones as 5 runs, offices EWX/FWD/HGX/SJT, neither list cut"
+    "note": "WX-AUS's coverage: 36 zones as 5 runs inside 120 km of Austin, offices EWX/FWD/HGX/SJT, neither list cut, a station cap of 13"
   },
   {
     "name": "text_warning_narrative_chunk0",
@@ -739,7 +739,7 @@
       "cut": false,
       "source": 0
     },
-    "note": "group 23, reassemble by (bot, group) in idx order"
+    "note": "group 23, reassemble by (bot, group) in idx order. Chunk 0 is 165 bytes, the transport maximum: past what a bot sends, and a decoder must still read it"
   },
   {
     "name": "text_warning_narrative_chunk1",
@@ -758,7 +758,7 @@
       "cut": false,
       "source": 0
     },
-    "note": "group 23, reassemble by (bot, group) in idx order"
+    "note": "group 23, reassemble by (bot, group) in idx order. Chunk 0 is 165 bytes, the transport maximum: past what a bot sends, and a decoder must still read it"
   },
   {
     "name": "text_afd_cut_from_goes",
@@ -1080,7 +1080,7 @@
       "advisories": false,
       "source": 2
     },
-    "note": "type byte 0xA9: area sweep, flags 0x9 = cut (bit 0) + source 2 internet (bits 2-3); advisories (bit 1) clear, so this is warnings and watches only. Group 32, reassemble by (bot, group) in idx order. `total` has bit 7 clear and the scope is empty: the country, the revision 9 bytes unchanged"
+    "note": "type byte 0xA9: area sweep, flags 0x9 = cut (bit 0) + source 2 internet (bits 2-3); advisories (bit 1) clear, so this is warnings and watches only. Group 32, reassemble by (bot, group) in idx order. `total` has bit 7 clear and there are no scope entries: the country. Packet 0 carries 38 entries (163 bytes), more than a bot sends, and a decoder must still read it"
   },
   {
     "name": "area_sweep_national_packet1",
@@ -1117,7 +1117,7 @@
       "advisories": false,
       "source": 2
     },
-    "note": "type byte 0xA9: area sweep, flags 0x9 = cut (bit 0) + source 2 internet (bits 2-3); advisories (bit 1) clear, so this is warnings and watches only. Group 32, reassemble by (bot, group) in idx order. `total` has bit 7 clear and the scope is empty: the country, the revision 9 bytes unchanged"
+    "note": "type byte 0xA9: area sweep, flags 0x9 = cut (bit 0) + source 2 internet (bits 2-3); advisories (bit 1) clear, so this is warnings and watches only. Group 32, reassemble by (bot, group) in idx order. `total` has bit 7 clear and there are no scope entries: the country. Packet 0 carries 38 entries (163 bytes), more than a bot sends, and a decoder must still read it"
   },
   {
     "name": "area_sweep_scoped_packet0",
@@ -1186,7 +1186,7 @@
       "ts": 1789660000,
       "text": ">d"
     },
-    "note": "app -> bot: 16 bytes, sender prefix 01..06, ts 1789660000 (2026-09-17 15:46:40 UTC); a resend repeats these bytes exactly"
+    "note": "app -> bot: 16 bytes, sender prefix 01..06, ts 1789660000 (2026-09-17 15:46:40 UTC); a resend keeps sender, ts and text and takes the next seq"
   },
   {
     "name": "request_parts",

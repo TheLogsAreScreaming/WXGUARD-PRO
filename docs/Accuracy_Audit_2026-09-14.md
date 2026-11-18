@@ -2,7 +2,8 @@
 
 > **Status, 2026-09-15:**
 > - Implemented as recorded: fixes 1–6 in 6908e27, the segment merge in 7bf15ed, `scripts/audit.py` and its fixes in 8500479 and e52ac9f, the Overview card and grace in d858054 and 5efb14c, and the lifecycle tracker, PFM row repair and fixture corpus in fbe608d. All of it is still in the code: `emwin/retention.py` (48/24/12 h), `protocol/vtec_events.py`, `tests/test_lifecycle.py`, `tests/fixtures/products/`, and the `/api/audit/*` endpoints.
-> - Changed: fbe608d switched off the hourly timer, so the audit is a tool you run on demand, not a dependency. The unit files are still in `deploy/`, and the Overview card still shows the last `data/audit.json`. Whether the Pi runs the timer is not recorded in the repo.
+> - Changed: fbe608d switched off the hourly timer, so the audit is a tool you run on demand, not a dependency. The unit files are still in `deploy/`, and the Overview card still shows the last `data/audit.json`.
+> - Changed again, 2026-10-19: the owner asked for the timer back, and it runs hourly on the Pi (`meshcore-weather-audit.timer`, enabled). The portal had shown the September 14 result for five weeks; its Overview now flags a result older than 3 hours as a stopped timer.
 > - Still open: the "What this audit could not check" list below.
 > - Where the current truth lives: this code, plus `docs/MeshWX_v5_Spec.md` revision 3 for what the answers become on the wire. d649b0a changed how unknown observation fields (§6) and the forecast's `first` (§7) are sent.
 
@@ -68,7 +69,7 @@ Times are 19:50–20:00 UTC.
 
 The manual checks above became a script that runs every hour on the Pi
 (`deploy/meshcore-weather-audit.timer`) [2026-09-15: fbe608d disabled that
-timer; the script is now run on demand] and writes `data/audit.json`, which
+timer; 2026-10-19: enabled again] and writes `data/audit.json`, which
 the portal Overview shows. It compares, for every state, the set of VTEC
 events and their zone lists with api.weather.gov and the last 6 hours of
 storm reports with IEM; for 30 stations nationwide the raw METAR text with

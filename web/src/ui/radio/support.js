@@ -40,7 +40,7 @@ export function copy(app, page = null) {
     duration: (seconds) => WeatherFormatting.duration({ seconds }),
     /**
      * "from Wed 7:00 PM until Fri 7:00 PM", "until 9:41 PM · 40 min left", "until Fri 7:00 PM"
-     * (spec §10.2, revision 12). `beginsAt` is the alert's start (`WeatherAlertItem.beginsAt`), or null.
+     * (spec §18.2, revision 12). `beginsAt` is the alert's start (`WeatherAlertItem.beginsAt`), or null.
      */
     alertWindow: ({ beginsAt = null, expiresAt }) =>
       WeatherFormatting.alertWindow({ beginsAt, expiresAt, ...when }),
@@ -73,7 +73,7 @@ export function copy(app, page = null) {
     channelTimes: (contentAt, receivedAt) => WeatherCopy.channelTimes({ contentAt, receivedAt, ...when }),
     cacheGroup: (group) => WeatherCopy.cacheGroup(group),
 
-    // Radar (revision 11 §3).
+    // Radar (docs/MESHWX_UI.md §18).
     /** "Picture from 6:38 PM · 12 min old", from the minute printed on the picture. */
     radarTime: (picture) => WeatherCopy.radarTime(picture, when),
     radarSummary: (summary, placeName) => WeatherCopy.radarSummary(summary, { placeName }),

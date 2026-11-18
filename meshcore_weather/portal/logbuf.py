@@ -98,6 +98,9 @@ def counts(window_s: int = 3600) -> dict:
     cutoff = time.time() - window_s
     out = {c: 0 for c in CATEGORIES}
     out["problems"] = 0
+    # Errors alone: the Overview's attention list. Warnings are mostly the
+    # dish's dropped-packet notes, a minute apart, so they cannot ask for anyone.
+    out["errors"] = 0
     with _LOCK:
         for l in _LINES:
             if l["t"] < cutoff:
@@ -105,6 +108,8 @@ def counts(window_s: int = 3600) -> dict:
             out[l["cat"]] = out.get(l["cat"], 0) + 1
             if l["level"] in ("WARNING", "ERROR", "CRITICAL"):
                 out["problems"] += 1
+            if l["level"] in ("ERROR", "CRITICAL"):
+                out["errors"] += 1
     return out
 
 

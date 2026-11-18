@@ -5,7 +5,9 @@ WORKDIR /app
 # pyIEM pulls in a scientific-Python stack (numpy, pandas, shapely, pyproj,
 # matplotlib, metpy, etc.). Most have wheels on PyPI for x86_64/arm64, but
 # pygrib needs libeccodes at build time if no wheel is available on the host
-# architecture. Install the system libs to be safe.
+# architecture. Install the system libs to be safe. (psycopg, which pyIEM
+# imports, now comes as psycopg[binary] with its own libpq; libpq5 stays as
+# a fallback for an architecture without that wheel.)
 RUN apt-get update && apt-get install -y --no-install-recommends \
     libeccodes0 \
     libpq5 \
@@ -28,4 +30,6 @@ USER mcw
 
 VOLUME ["/app/data"]
 
+# `docker compose run --rm meshcore-weather --check` checks the configuration
+# and exits (never transmits).
 ENTRYPOINT ["meshcore-weather"]

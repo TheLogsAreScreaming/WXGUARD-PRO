@@ -3,7 +3,7 @@
 goesproc writes radar GIFs next to the text products, under
 `<dir>/YYYY-MM-DD/`, named `Z_<wmo>_C_KWIN_<received>_<seq>-3-<PRODUCT>.GIF`.
 Nothing is decoded until a request needs it. Decoded pictures are kept, the
-most recently used first, so a loop (spec 7D.4) asked for twice does not decode
+most recently used first, so a loop (spec 13.5) asked for twice does not decode
 its hour twice.
 """
 
@@ -34,8 +34,12 @@ RECEIVE_SLACK_MIN = 45
 
 
 class RadarSource:
-    def __init__(self, root: "str | Path"):
+    """`root` is the dish's directory; `extra_roots` are read the same way (the
+    internet fill's folder, whose pictures carry the web's time as their stamp)."""
+
+    def __init__(self, root: "str | Path", extra_roots: "list[str | Path] | None" = None):
         self.root = Path(root).expanduser()
+        self.roots = [self.root] + [Path(r).expanduser() for r in extra_roots or []]
         self._listing: "dict[str, list[tuple[datetime, Path]]]" = {}
         self._listed_at = 0.0
         self._decoded: "OrderedDict[Path, RadarPicture]" = OrderedDict()
@@ -50,8 +54,8 @@ class RadarSource:
             return
         found: "dict[str, list[tuple[datetime, Path]]]" = {}
         settle = time.time() - 2          # goesproc may still be writing the newest
-        for day in (now, now - timedelta(days=1)):
-            folder = self.root / day.strftime("%Y-%m-%d")
+        for root, day in ((r, d) for r in self.roots for d in (now, now - timedelta(days=1))):
+            folder = root / day.strftime("%Y-%m-%d")
             try:
                 entries = os.scandir(folder)
             except OSError:

@@ -110,8 +110,10 @@ function reading({ kilometres, icao, minutesAgo }) {
     lastBatchMinutes: null,
     source: 0,
   }
-  // `isStale` is two hours (`MeshWXPresentation.observationStaleAfterMinutes`).
+  // `isStale` is two hours (`MeshWXPresentation.observationStaleAfterMinutes`), `isTooOld` twelve
+  // (`observationShownForMinutes`).
   const isStale = now / 60000 - minutes > 120
+  const isTooOld = now / 60000 - minutes > 720
   return WeatherStationReading.make({
     index: tables.stationIndex({ forICAO: icao }),
     station,
@@ -120,6 +122,7 @@ function reading({ kilometres, icao, minutesAgo }) {
     distanceKilometres: kilometres,
     direction: null,
     isStale,
+    isTooOld,
     isInFootprint: true,
     isInLatestBatch: true,
   })
@@ -189,10 +192,22 @@ test('an attributed reading carries a nearer station worth asking about', () => 
   )
 })
 
-test('a stale reading between 25 and 40 km asks about its own station', () => {
+test('a stale reading between 25 and 40 km is shown under its station, with its age', () => {
+  // Owner decision 2026-10-16: up to twelve hours old a reading is the weather as last seen, not
+  // "No current conditions".
   const stale = reading({ kilometres: 30, icao: 'KATT', minutesAgo: 8 * 60 })
+  assert.ok(stale.isStale && !stale.isTooOld)
   assert.deepEqual(
     WeatherConditions.make({ primary: WeatherPrimaryStation.reading(stale), nearbyStation: null }),
+    WeatherConditions.nearby(stale, { nearer: null }),
+  )
+})
+
+test('a reading between 25 and 40 km over twelve hours old asks about its own station', () => {
+  const old = reading({ kilometres: 30, icao: 'KATT', minutesAgo: 13 * 60 })
+  assert.ok(old.isTooOld)
+  assert.deepEqual(
+    WeatherConditions.make({ primary: WeatherPrimaryStation.reading(old), nearbyStation: null }),
     WeatherConditions.ask({ icao: 'KATT', kilometres: 30 }),
   )
 })
@@ -206,13 +221,39 @@ test('with nothing held and every station past 40 km there is nothing to ask', (
   )
 })
 
-test('a stale reading near the place asks about its own station', () => {
-  const stale = reading({ kilometres: 6, icao: 'KATT', minutesAgo: 8 * 60 })
-  assert.ok(stale.isStale)
+test('a stale reading near the place is still the weather here, up to twelve hours', () => {
+  // 2026-10-16: the page said "No current conditions for Austin, TX" while the phone held Camp
+  // Mabry from five hours before. It now shows that reading, and its foot line says how old it is.
+  const stale = reading({ kilometres: 6, icao: 'KATT', minutesAgo: 5 * 60 })
+  assert.ok(stale.isStale && !stale.isTooOld)
   assert.deepEqual(
     WeatherConditions.make({ primary: WeatherPrimaryStation.reading(stale), nearbyStation: nearby }),
-    WeatherConditions.ask({ icao: stale.station.icao, kilometres: 6 }),
+    WeatherConditions.reading(stale),
   )
+  // The edge is inside.
+  const edge = reading({ kilometres: 6, icao: 'KATT', minutesAgo: 12 * 60 })
+  assert.ok(!edge.isTooOld)
+  assert.equal(WeatherConditions.make({ primary: WeatherPrimaryStation.reading(edge), nearbyStation: nearby }).kind, 'reading')
+})
+
+test('a reading near the place over twelve hours old asks about its own station', () => {
+  const old = reading({ kilometres: 6, icao: 'KATT', minutesAgo: 13 * 60 })
+  assert.ok(old.isTooOld)
+  assert.deepEqual(
+    WeatherConditions.make({ primary: WeatherPrimaryStation.reading(old), nearbyStation: nearby }),
+    WeatherConditions.ask({ icao: old.station.icao, kilometres: 6 }),
+  )
+})
+
+test('a nearer station silent for a day does not hide one that reported five hours ago', () => {
+  const silent = reading({ kilometres: 4, icao: 'KATT', minutesAgo: 25 * 60 })
+  const stale = reading({ kilometres: 11, icao: 'KAUS', minutesAgo: 5 * 60 })
+  const place = P.place(P.austin)
+  const primary = WeatherPrimaryStation.pick({ readings: [silent, stale], place })
+  assert.deepEqual(primary, WeatherPrimaryStation.reading(stale))
+  // Fresh still beats stale, wherever it is in reach.
+  const fresh = reading({ kilometres: 20, icao: 'KEDC', minutesAgo: 20 })
+  assert.deepEqual(WeatherPrimaryStation.pick({ readings: [silent, stale, fresh], place }), WeatherPrimaryStation.reading(fresh))
 })
 
 test('nothing in reach asks about the nearest bundled station, and nothing at all waits for the batch', () => {
@@ -355,10 +396,18 @@ test('a places row holds the nearest reading, its condition and whether it is st
   assert.notEqual(row.observedAt, null)
 })
 
-test('a stale reading is no good for the row, exactly as it is no good for the page', () => {
-  // **One rule for the row and the page** (docs/MESHWX_UI.md §3.1 U-2). Places read "86° Partly
-  // cloudy · 3 h old" beside a page that said "No current conditions", one tap apart.
+test('a stale reading is shown in the row with its age, exactly as the page shows it', () => {
+  // **One rule for the row and the page** (docs/MESHWX_UI.md §3.1 U-2). Places once read "86°
+  // Partly cloudy · 3 h old" beside a page that said "No current conditions", one tap apart; now
+  // both show a reading up to twelve hours old, and both say how old it is.
   const row = WeatherPlaceRowReading.make({ readings: fixtureReadings({ observationsAgo: 8 * 3600 }), at: P.austin, now })
+  assert.equal(WeatherPlaceRowReading.isEmpty(row), false)
+  assert.notEqual(row.tempF, null)
+  assert.equal(row.isStale, true)
+})
+
+test('a reading over twelve hours old is no good for the row, exactly as it is no good for the page', () => {
+  const row = WeatherPlaceRowReading.make({ readings: fixtureReadings({ observationsAgo: 13 * 3600 }), at: P.austin, now })
   assert.ok(WeatherPlaceRowReading.isEmpty(row))
   assert.equal(row.tempF, null)
 })

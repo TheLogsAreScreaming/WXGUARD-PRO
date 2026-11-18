@@ -88,8 +88,8 @@ export function WeatherPlacePageView({ app, page, onUseMyLocation }) {
       ? WeatherForecastSection({ app, screen })
       : null,
 
-    // Under the forecast (revision 11 §3), and absent altogether for a place with no coordinate:
-    // a radar tile is decided by a coordinate and by nothing else.
+    // Under the forecast (docs/MESHWX_UI.md §18.1), and absent altogether for a place with no
+    // coordinate: a radar tile is decided by a coordinate and by nothing else.
     WeatherRadarSection({ app, screen, onOpen: push.radar }),
 
     reports({ push }),
@@ -158,7 +158,7 @@ export function WeatherWarningBannerSection({ app, screen, banner, onOpen, onOpe
   const name = eventName(event, { tables }) ?? ''
 
   // "until 9:41 PM · 40 min left" for a live warning, "from Wed 7:00 PM until Fri 7:00 PM" for a
-  // watch not yet in effect (spec §10.2, revision 12); for one that just ended, or an upgrade
+  // watch not yet in effect (spec §18.2, revision 12); for one that just ended, or an upgrade
   // whose replacement never came, what became of it instead.
   const now = nowOf(screen, app)
   const qualifier = alertQualifier(item, { placeName: placeNameOf(screen), now })

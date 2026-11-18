@@ -152,7 +152,7 @@ test("of two bots' copies the active one wins, then the later expiry", () => {
 
 // Spec §3, revision 12: an alert carries its start from the stored copy, and a copy from a bot
 // that said nothing about the start does not make a watch read as begun. The start changes
-// nothing about where it sorts or whether it covers the place (docs/MESHWX_REV12.md §3).
+// nothing about where it sorts or whether it covers the place (docs/MESHWX_UI.md §3.1 U-49).
 test("an alert carries its start, from another bot's copy when the shown one has none", () => {
   const begins = P.now + 10 * 3600 * 1000
   const upcoming = { ...stored({ event: 3, etn: 42, minutes: 58 * 60 }), beginsAt: begins }

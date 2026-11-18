@@ -839,7 +839,7 @@ def test_not_available_strips_the_request_prefix():
 
 
 # ---------------------------------------------------------------------------
-# Request (type 9, spec 7B) — the one message that travels app -> bot
+# Request (type 9, spec 11) — the one message that travels app -> bot
 # ---------------------------------------------------------------------------
 
 SENDER = bytes.fromhex("010203040506")
@@ -864,7 +864,7 @@ def test_request_roundtrip():
 
 
 def test_request_layout_is_header_sender_ts_text():
-    """Byte for byte, spec 7B: 4 header, 6 sender, 4 ts LE, then the text."""
+    """Byte for byte, spec 11: 4 header, 6 sender, 4 ts LE, then the text."""
     data = v5.encode_request(7, 0x4C7A, SENDER, REQ_TS, ">o KAUS")
     assert data[:4] == v5.encode_header(7, 0x4C7A, v5.TYPE_REQUEST)
     assert data[3] == 0x90                                   # type 9, flags 0
@@ -935,7 +935,7 @@ def test_request_flags_nibble_is_reserved_and_ignored():
 
 
 def test_the_spec_vector_is_these_exact_bytes():
-    """docs/MeshWX_v5_Spec.md 7B quotes these sixteen bytes; an app checks
+    """docs/MeshWX_v5_Spec.md §11 quotes these sixteen bytes; an app checks
     itself against them, so they may never move."""
     assert v5.encode_request(1, 0x041D, SENDER, 1789660000, ">d") == bytes.fromhex(
         "011d0490010203040506600bac6a3e64"
@@ -1203,11 +1203,10 @@ def test_protocol_json_v5_block():
     with open(PROTOCOL_PATH, encoding="utf-8") as fh:
         proto = json.load(fh)
     assert proto["version"] == 17
-    assert "Revision 13" in proto["v5"]["notes"]
-    # Revision 12: a warning's start, two bytes after the issue time.
+    assert "docs/MeshWX_v5_Spec.md" in proto["v5"]["notes"]
+    # A warning's start, two bytes after the issue time.
     assert proto["v5"]["record_sizes"]["warning_begins"] == 2
     assert proto["v5"]["sentinels"]["warning_begins_saturated"] == v5.MAX_BEGINS_BEFORE_EXPIRY
-    assert "revision 12" in proto["v5"]["notes"]
     assert proto["index_file"] == "index.json"
     # Legacy keys other code still reads are untouched.
     for key in ("messages", "events", "event_names", "sky_codes", "data_types"):
@@ -1252,7 +1251,7 @@ def test_protocol_json_v5_block():
     assert block["limits"]["coverage_offices"] == [0, v5.MAX_COVERAGE_OFFICES]
     assert block["limits"]["coverage_runs"] == [0, v5.MAX_COVERAGE_RUNS]
     assert block["record_sizes"]["coverage_fixed"] == 14
-    # Revision 6: the app's Request datagram (spec 7B).
+    # Revision 6: the app's Request datagram (spec 11).
     assert block["record_sizes"]["request_fixed"] == v5.MIN_REQUEST_SIZE - 1 == 14
     assert block["record_sizes"]["request_sender"] == v5.REQUEST_SENDER_BYTES
     assert block["limits"]["request_text_bytes"] == [1, v5.MAX_REQUEST_TEXT]

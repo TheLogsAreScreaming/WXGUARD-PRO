@@ -273,7 +273,7 @@ describe('MeshWX codec', () => {
   });
 
   test('expansionWithoutTheStateYieldsNothing', () => {
-    // The run is still decodable, it just cannot be named (spec §9, append-only tables).
+    // The run is still decodable, it just cannot be named (spec §16, append-only tables).
     const run = { state: 99, county: true, start: 453, run: 1 };
     assert.deepStrictEqual(MeshWXAreaRun.ugcCodes(run, { states }), []);
     assert.deepStrictEqual(MeshWXAreaRun.numbers(run), [453]);
@@ -364,7 +364,7 @@ describe('MeshWX codec', () => {
     }), encodeError('emptyRequest'));
   });
 
-  // MARK: - Request (type 9, spec §7B)
+  // MARK: - Request (type 9, spec §11)
 
   test('aRequestRefusesWhatTheBotCouldNotRead', () => {
     const sender = Uint8Array.from([0x01, 0x02, 0x03, 0x04, 0x05, 0x06]);
@@ -384,7 +384,7 @@ describe('MeshWX codec', () => {
     assert.throws(() => MeshWXEncoder.request({
       seq: 0, bot: 1, senderPrefix: sender, timestamp: 1, text: '>',
     }), encodeError('emptyRequest'));
-    // 41 bytes of text: one past what §7B allows.
+    // 41 bytes of text: one past what §11 allows.
     const long = `>f ${'x'.repeat(38)}`;
     assert.throws(() => MeshWXEncoder.request({
       seq: 0, bot: 1, senderPrefix: sender, timestamp: 1, text: long,
@@ -399,7 +399,7 @@ describe('MeshWX codec', () => {
   });
 
   test('aRequestRoundTripsItsTextAndTimeWhoeverSentIt', () => {
-    // Another phone's request, as it arrives on the channel: the whole grammar of §8.2 at its
+    // Another phone's request, as it arrives on the channel: the whole grammar of §14 at its
     // longest, to a bot named `0xFFFF` — every bot on the channel.
     const request = MeshWXRequest.make({
       seq: 200,
@@ -813,7 +813,7 @@ describe('MeshWX codec', () => {
     assert.equal(MeshWXWarning.beginsBeforeMinutes(unflagged), null);
   });
 
-  // MARK: - Coverage (type 8, spec §7A)
+  // MARK: - Coverage (type 8, spec §10)
 
   /** The two flags are separate bits and each one alone is enough to stop a denial. */
   test('eachCutFlagIsItsOwnBitAndEitherWithholdsCompleteness', () => {
@@ -967,7 +967,7 @@ describe('MeshWX codec', () => {
     }), encodeError('badCount'));
   });
 
-  /** Spec §7A: the two caps are chosen so a full list never costs the other one. */
+  /** Spec §10: the two caps are chosen so a full list never costs the other one. */
   test('theFullestCoverageStillFitsOnePacket', () => {
     const offices = Array.from({ length: MeshWXWire.maxCoverageOffices }, (_, index) => index);
     const runs = Array.from({ length: MeshWXWire.maxAreaRuns }, (_, index) => ({
@@ -1142,7 +1142,7 @@ describe('MeshWX codec', () => {
     }
   });
 
-  // MARK: - Text cut for the air (spec §8.1, revision 7)
+  // MARK: - Text cut for the air (spec §8, revision 7)
 
   /**
    * Bit 0 of a Text's nibble: the product was longer than eight packets and the bot dropped the
@@ -1199,7 +1199,7 @@ describe('MeshWX codec', () => {
     }
   });
 
-  // MARK: - Area sweep (type 10, spec §7C)
+  // MARK: - Area sweep (type 10, spec §12)
 
   /** Texas zones 192 through 197 under a Severe Thunderstorm Warning, as one entry. */
   const texasZones = { event: 3, state: 42, county: false, start: 192, run: 6 };
@@ -1464,7 +1464,7 @@ describe('MeshWX codec', () => {
     assert.deepStrictEqual(sweep.entries, [texasZones]);
   });
 
-  // MARK: - Scoped sweeps (spec §7C, revision 10)
+  // MARK: - Scoped sweeps (spec §12, revision 10)
 
   /**
    * Bit 7 of the `total` byte, on every packet: "so a phone that lost packet 0 still knows it is
@@ -1561,7 +1561,7 @@ describe('MeshWX codec', () => {
     }), (error) => error.kind === 'badCount');
   });
 
-  // MARK: - Revision 10's request texts (spec §8.2)
+  // MARK: - Revision 10's request texts (spec §14)
 
   /**
    * The three new `>` lines through the Request encoder that already carried `>d`. The budget is

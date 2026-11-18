@@ -319,7 +319,7 @@ export const WeatherCopy = Object.freeze({
       case 'notAvailable':
         // Radar says which of the four refusals it is in its own words: "no recent picture for
         // this area" and "this bot has no dish at all" ask the reader to do entirely different
-        // things, and one "not available" would leave them tapping for ever (design §3).
+        // things, and one "not available" would leave them tapping for ever (docs/MESHWX_UI.md §18.3).
         if (request?.kind === 'radar' || request?.kind === 'radarLoop') {
           return WeatherCopy.radarRefusal(
             WeatherRadarRefusal.make({ reason: outcome.value }), { source: sourceStart },
@@ -363,7 +363,7 @@ export const WeatherCopy = Object.freeze({
     )
   },
 
-  // MARK: - Radar (revision 11 §3)
+  // MARK: - Radar (docs/MESHWX_UI.md §18)
 
   /**
    * The three widths the radar screen offers, by zoom. Never kilometres: a tile is two degrees,
@@ -406,7 +406,7 @@ export const WeatherCopy = Object.freeze({
 
   /**
    * What the picture says about the place, as the sentences the card and the screen print in
-   * order (design §3).
+   * order (docs/MESHWX_UI.md §18.3).
    *
    * Three shapes and no fourth:
    *
@@ -447,7 +447,7 @@ export const WeatherCopy = Object.freeze({
    *
    * The tool's own distance formatter and the wire's own compass abbreviation, so a radar
    * sentence reads in the same units and the same letters as every other distance in the app
-   * (design §3.1: no second copy of either).
+   * (docs/MESHWX_UI.md §18.3: no second copy of either).
    */
   radarReach(reach) {
     return [
@@ -494,7 +494,7 @@ export const WeatherCopy = Object.freeze({
     return t('weather.radar.loop.cost', packets)
   },
 
-  /** Why the bot would not send a tile, in the ask's own status line (design §3). */
+  /** Why the bot would not send a tile, in the ask's own status line (docs/MESHWX_UI.md §18.3). */
   radarRefusal(refusal, { source }) {
     switch (refusal.kind) {
       case 'noPicture': return t('weather.radar.refused.noPicture', source)
@@ -601,7 +601,7 @@ export const WeatherCopy = Object.freeze({
    *
    * The cut is worth its own sentence rather than a marker in the body: a hole in the text is a
    * chunk the air ate and asking again may fill it, while this is the whole reply that bot will
-   * ever send for that request (spec §8.1, revision 7).
+   * ever send for that request (spec §8, revision 7).
    */
   reportFootnote({ source, wasCut }) {
     const parts = [WeatherCopy.dataSource(source), wasCut ? t('weather.reports.cut') : null].filter(
@@ -689,7 +689,7 @@ export const WeatherCopy = Object.freeze({
 
   /**
    * Nothing to ask for because the channel just delivered it — which is not the same as
-   * everything being current (spec §13).
+   * everything being current (spec §19).
    */
   updateJustReceived({ source }) {
     return t('weather.update.justReceived', WeatherFormatting.sentenceStart(source))
@@ -722,12 +722,18 @@ export const WeatherCopy = Object.freeze({
    *
    * With no station name — a reading the block already attributes above its number (§3.1 U-2a)
    * — it is the time alone: "As of 6:56 AM".
+   *
+   * A stale reading — over two hours old, shown until twelve rather than replaced by "No current
+   * conditions" (owner decision 2026-10-16) — ends with its age: "Camp Mabry · 6 km · as of
+   * 2:24 PM · 5 h old". The clock time alone reads as recent at a glance; the age cannot.
    */
-  conditionsSource({ stationName = null, kilometres = null, observedAt, now, timeZone, locale }) {
+  conditionsSource({ stationName = null, kilometres = null, observedAt, now, timeZone, locale, isStale = false }) {
     const asOf = t('weather.stations.asOf', WeatherFormatting.clockTime(observedAt, { now, timeZone, locale }))
-    if (stationName == null) return WeatherFormatting.sentenceStart(asOf)
-    if (kilometres == null) return `${stationName} · ${asOf}`
-    return `${stationName} · ${WeatherFormatting.kilometres(kilometres)} · ${asOf}`
+    const parts = [asOf]
+    if (isStale) parts.push(WeatherFormatting.age(observedAt, { now }))
+    if (stationName == null) return WeatherFormatting.sentenceStart(parts.join(' · '))
+    if (kilometres != null) parts.unshift(WeatherFormatting.kilometres(kilometres))
+    return [stationName, ...parts].join(' · ')
   },
 
   /**
@@ -964,14 +970,14 @@ export const WeatherCopy = Object.freeze({
 
   /**
    * What a `>part` is a piece of, for the log's wording. The kind never reaches the wire — the
-   * bot's cache is keyed by the group byte alone (spec §7C) — so this is the only place the app
+   * bot's cache is keyed by the group byte alone (spec §12) — so this is the only place the app
    * remembers what it asked about.
    */
   partsKindName(kind, { tables = MeshWXTables.shared } = {}) {
     void tables
     if (kind == null) return null
     // The map's own name, not the log's name for a request for one: "Missing parts of National
-    // alert map" claims a country the `>part` says nothing about (revision 10, §1.1).
+    // alert map" claims a country the `>part` says nothing about (docs/MESHWX_UI.md §12).
     if (kind.kind === 'areaSweep') return t('weather.areaMap.title')
     // A subject code this build does not know has no name to put in the sentence, and "Missing
     // parts of Weather Service text" claims one. The bare noun is the honest row.

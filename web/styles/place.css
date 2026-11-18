@@ -252,7 +252,7 @@
   }
 }
 
-/* ---------- The radar card (revision 11 §3) ---------- */
+/* ---------- The radar card (docs/MESHWX_UI.md §18.1) ---------- */
 
 /* A square of the earth in a square on the page: the tile is 2° by 2°, and a letterbox would
    either crop it or leave the cells floating in the middle of a wide strip. */

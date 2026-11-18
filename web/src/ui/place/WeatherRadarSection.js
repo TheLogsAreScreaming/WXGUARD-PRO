@@ -1,4 +1,4 @@
-// The Radar section of a place page (revision 11 §3), under the forecast.
+// The Radar section of a place page (docs/MESHWX_UI.md §18.1), under the forecast.
 //
 // Three states and no fourth, which is `WeatherRadarCard`'s own shape:
 //
@@ -12,8 +12,8 @@
 // false`, and the tile is framed rather than freely pannable.
 //
 // **This is the one ask on a place page.** Everything else there is Update's (§11.1), and radar
-// is not Update's: a picture is one packet, it is never asked for on a schedule (revision 11 §4),
-// and a tile nobody asked for is a tile the channel never carried.
+// is not Update's: a picture is one packet, it is never asked for on a schedule
+// (docs/MESHWX_UI.md §18), and a tile nobody asked for is a tile the channel never carried.
 import { h } from '../kit/dom.js'
 import { icon } from '../kit/icons.js'
 import { Card } from '../kit/components.js'
@@ -65,7 +65,7 @@ export function WeatherRadarSection({ app, screen, onOpen }) {
     : h('p', { class: 'card__note' }, t('weather.radar.empty')),
   h('div', { class: 'ask-block' },
     // Always one packet, whatever is held and whatever the width: a radar answer is one packet
-    // or a coarser packet, never two (spec §7D). Said before the tap and not after it.
+    // or a coarser packet, never two (spec §13). Said before the tap and not after it.
     isAskable(screen, request) ? h('p', { class: 'footnote' }, t('weather.areaMap.packetsOne')) : null,
     WeatherAskButton({
       app,

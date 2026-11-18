@@ -4,7 +4,7 @@ answers to `>` requests.
 A request is a DM (or a channel line) that starts with `>` and uses the
 same words a person would: `>w`, `>w SV.W.EWX.42`, `>o KAUS`, `>f 102`,
 `>afd EWX`. The answer is never a DM: it goes out on the data channel as
-v5 messages so every app in range gets it (docs/MeshWX_v5_Spec.md 8.2).
+v5 messages so every app in range gets it (docs/MeshWX_v5_Spec.md §14).
 """
 
 from __future__ import annotations
@@ -37,21 +37,21 @@ BUSY_REPLY_PER_SENDER_S = 60.0
 MAX_WARNINGS_PER_REQUEST = 6
 # `>wmap` is the one answer that can take eight packets at once, so it gets a
 # limit of its own on top of everything else: one sweep of the same ground
-# every 5 minutes across ALL senders (spec 7C). Since revision 10 "the same
+# every 5 minutes across ALL senders (spec 12). Since revision 10 "the same
 # ground" is per state, so the window is kept per state as well as nationally.
 # It is never scheduled; it only ever answers. The name is the portal's: its
 # limits panel reads this constant, `_last_sweep` and `_last_sweep_state` to
 # show when the next sweep may go out.
 SWEEP_COOLDOWN_S = 300.0            # settings.sweep_window_s; one sweep per state per 5 min, whoever asks (owner, 2026-09-20)
 
-# `>radar` (spec 7D, revision 11): one packet, so the hourly budget is limit
+# `>radar` (spec 13, revision 11): one packet, so the hourly budget is limit
 # enough, with one exception. The same tile cut from the same picture is the
 # same bytes, and everyone in range already got them: inside this window the
 # answer is the 6-byte Not available instead. It is keyed on the picture's own
 # time as well as the tile, so a newer picture is never held back by an older.
 RADAR_COOLDOWN_S = 300.0            # settings.radar_window_s
 
-# `>part` (spec 7C/8.1, revision 10): the packets of the last few multi-packet
+# `>part` (spec 12/8.1, revision 10): the packets of the last few multi-packet
 # answers, kept so a phone that heard 4 of 7 can ask for the other 3 instead of
 # the whole map again. Eight answers is more than a busy minute produces, and
 # ten minutes is longer than a phone waits before it gives up on an assembly.
@@ -169,7 +169,7 @@ class AppResponder:
         # are answered Not available and the scheduler broadcasts nothing.
         self._ready = ready
         # The scheduler fills the cache as it stamps packets and hands them to
-        # the radio, which is the only place a group is known (spec 7C).
+        # the radio, which is the only place a group is known (spec 12).
         self._parts = PartsCache()
         self._scheduler = Scheduler(store=store, radio=radio, ready=ready, parts=self._parts)
         self._render_text = render_text          # the text bot's renderer, for narrative products
@@ -187,8 +187,10 @@ class AppResponder:
         # state code -> (when a sweep last covered it, with advisories or not).
         # A national sweep covers every state; a scoped one covers its own.
         self._last_sweep_state: dict[str, tuple[float, bool]] = {}
-        # (south, west, zoom, taken_min) -> when that radar tile last went on air.
-        self._last_radar: dict[tuple[int, int, int, int], float] = {}
+        # (south, west, zoom, taken_min) -> when that radar tile last went on
+        # air, as an answer or as the scheduled radar broadcast: one dict, the
+        # scheduler's.
+        self._last_radar: dict[tuple[int, int, int, int], float] = self._scheduler.radar_on_air
         # packet bytes -> (tile, picture, frame), from the thread that cut the
         # tile to the coroutine that sends it, for the audit line (radar/audit.py).
         self._radar_cut: dict[bytes, tuple] = {}
@@ -232,7 +234,7 @@ class AppResponder:
         arg = parts[1].strip() if len(parts) > 1 else ""
         # A bot that has just restarted holds no products yet. Every answer
         # would be an empty one, and an app files "nothing active here" as the
-        # truth, so it is told "no data yet" instead (reason 0, spec 8.3).
+        # truth, so it is told "no data yet" instead (reason 0, spec 9).
         # One 6-byte packet, off the hourly budget: the app's own retry a
         # minute later then still gets a real answer.
         if self._ready is not None and not self._ready.is_set():
@@ -303,7 +305,7 @@ class AppResponder:
     async def _resend_parts(self, arg: str, seq: b.SeqCounter, bot: int,
                             now: float, ev: dict | None, not_before: float = 0.0) -> str:
         """`>part <group> <idx>[,<idx>…]`: the named packets of a multi-packet
-        answer again, identical but for a fresh `seq` (spec 7C, revision 10).
+        answer again, identical but for a fresh `seq` (spec 12, revision 10).
 
         Three outcomes. Nothing held under that group, or none of the indexes
         in it: Not available, letter `p`, reason 0 — the phone should ask for
@@ -346,7 +348,7 @@ class AppResponder:
         self._sent.extend([now] * n)
         return f"{n} packet(s), {nbytes} B"
 
-    # -- radar (spec 7D) --
+    # -- radar (spec 13) --
 
     @staticmethod
     def _radar_key(radar: dict) -> tuple[int, int, int, int]:
@@ -369,7 +371,7 @@ class AppResponder:
 
     def _radar_answer(self, arg: str, seq: b.SeqCounter, bot: int) -> list[bytes]:
         """`>radar [place] [z<n>] [loop [HHMM ...]]`: one tile of the newest
-        radar picture, or the last hour of it (spec 7D, 7D.4)."""
+        radar picture, or the last hour of it (spec 13, 13.5)."""
         from meshcore_weather.radar import service as radar_service
         radar = radar_service.shared()
         if not radar.available:
@@ -461,7 +463,7 @@ class AppResponder:
         ctx = self._scheduler.context()
         # Every message aggregated from many products states the store-wide
         # source; the ones built from a single product take that product's
-        # own (spec 2.2.1).
+        # own (spec 2.3).
         store_source = self.store.products_source()
         if cmd == "d":
             active = extract_active_warnings(self.store, coverage=self.coverage)
@@ -470,7 +472,7 @@ class AppResponder:
                                      source=store_source)]
 
         # `>cov` describes the bot itself, not a place, so coverage never
-        # filters it and the answer is always one packet (spec 7A).
+        # filters it and the answer is always one packet (spec 10).
         if cmd == "cov":
             msg = b.coverage_message(seq.next(), bot, self.coverage, ctx.home, ctx.radius_km)
             return [msg] if msg else []
@@ -478,6 +480,9 @@ class AppResponder:
         if cmd == "w":
             active = extract_active_warnings(self.store, coverage=None if arg else self.coverage)
             active = [w for w in active if b.warning_identity(w) is not None]
+            # A watch can name more counties than one packet carries: the
+            # ones asked about, or else the bot's own, are kept first.
+            keep = self.coverage.zones | self.coverage.counties
             if arg:
                 ident = b.parse_identity(arg)
                 if ident is not None:
@@ -487,18 +492,19 @@ class AppResponder:
                     if len(ugc) != 6:
                         return [b.not_available(seq.next(), bot, "w", v5.REASON_UNKNOWN_LOCATION)]
                     active = [w for w in active if ugc in (w.get("ugcs") or [])]
+                    keep = {ugc}
                 if not active:
                     return [b.not_available(seq.next(), bot, "w", v5.REASON_NO_DATA)]
             active.sort(key=lambda w: w.get("onset_unix_min") or 0, reverse=True)
             out = [m for w in active[:MAX_WARNINGS_PER_REQUEST]
-                   if (m := b.warning_message(seq.next(), bot, w, update=True))]
+                   if (m := b.warning_message(seq.next(), bot, w, update=True, keep=keep))]
             if not arg:
                 out.append(b.digest_message(seq.next(), bot, active,
                                             b.feed_health(self.store, ctx.home_offices),
                                             source=store_source))
             return out
 
-        # `>wmap [all] [states]`: the picture as an Area sweep (spec 7C). Up to
+        # `>wmap [all] [states]`: the picture as an Area sweep (spec 12). Up to
         # eight packets in one answer, so it carries limits nothing else needs:
         # never scheduled, one sweep per state every 5 minutes across all
         # senders, and only started when the whole sweep still fits in the
@@ -560,7 +566,7 @@ class AppResponder:
                 lat, lon = ctx.home
             # `>f 35.687,-105.938`: a coordinate, answered through the same
             # path a resolved place takes, so a phone that knows of no bundled
-            # point near it can still ask (spec 8.2, revision 10). `point`
+            # point near it can still ask (spec 14, revision 10). `point`
             # stays None: the answer carries the bundle index of the point the
             # bot actually used, or 0xFFFF when it is not in the bundle.
             elif (coord := b.parse_latlon(arg)) is not None:
@@ -619,7 +625,7 @@ class AppResponder:
                        "rain": v5.SUBJECT_RAINFALL, "sat": v5.SUBJECT_GENERAL}[cmd]
             text = self._render_text(cmd, arg) if self._render_text else None
             # `>sat` describes the bot's own receiver, not a weather product,
-            # so it states no source (spec 2.2.1).
+            # so it states no source (spec 2.3).
             source = v5.SOURCE_UNSTATED if cmd == "sat" else store_source
             return b.text_messages(seq, bot, subject, text, source=source) if text else []
 
@@ -637,7 +643,7 @@ class AppResponder:
         `source` is the store-wide one: a METAR line is pulled out of a
         collective by text and the record does not carry its product back
         here, so the honest statement is the one about the bot's feed
-        (spec 2.2.1)."""
+        (spec 2.3)."""
         from meshcore_weather.core import render_text, services
         icao = arg.upper()
         resolver.load()

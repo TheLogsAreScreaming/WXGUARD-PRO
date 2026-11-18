@@ -152,7 +152,7 @@ export function WeatherAreaPickerScreen({ app, page }) {
 
         // Past fifteen codes the request does not fit and the tap asks for the country instead.
         // Said here as well as on the map, because this is the screen where the sixteenth is
-        // picked (spec §8.2, revision 10).
+        // picked (spec §14, revision 10).
         count > WeatherAreaSelection.maxStates
           ? Note(t('weather.areaMap.tooManyStates', WeatherAreaSelection.maxStates))
           : null,

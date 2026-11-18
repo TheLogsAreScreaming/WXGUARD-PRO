@@ -1,8 +1,8 @@
 // Port of MC1Services/Sources/MC1Services/Services/Weather/Screen/WeatherRadar.swift
 //
-// What a radar picture says (spec §7D, revision 11, and the screen decisions in the revision 11
-// design §3): which tile to draw, how old it is, what it says about one place, what the card
-// shows, and the rectangles a map draws. Revision 13 (docs/MESHWX_REV13.md in the app) adds the
+// What a radar picture says (spec §13, revision 11, and the screen decisions in docs/MESHWX_UI.md
+// §18): which tile to draw, how old it is, what it says about one place, what the card
+// shows, and the rectangles a map draws. Revision 13 (docs/MESHWX_UI.md §18.5) adds the
 // last hour of a square as a loop (`WeatherRadarLoop`).
 //
 // Pure, as everything in this layer is: no clock of its own, no words, no colours. `now` is
@@ -22,7 +22,7 @@ import { WeatherRequest } from '../weather/index.js'
 // MARK: - Picking a tile
 
 /**
- * Which held tile a place is drawn from (design §2).
+ * Which held tile a place is drawn from (docs/MESHWX_UI.md §18).
  *
  * The channel is shared, so a phone can hold several pictures of the same ground: the zoom 0
  * tile it asked for, a zoom 2 tile somebody across town asked for, and the coarse half of one of
@@ -36,7 +36,7 @@ import { WeatherRequest } from '../weather/index.js'
  * newer would beat the local one every time, and the map would flip between widths on its own.
  */
 export const WeatherRadarPick = Object.freeze({
-  /** Past this a picture is not drawn at all (design §2). Minutes. */
+  /** Past this a picture is not drawn at all (spec §18.4). Minutes. */
   maximumAgeMinutes: 120,
   /** The cadence pictures are made at, and the step `taken` is compared in. Minutes. */
   takenBucketMinutes: 15,
@@ -68,7 +68,7 @@ export const WeatherRadarPick = Object.freeze({
   /**
    * The picture held for one **exact** square, whether or not it reaches the place.
    *
-   * This is the radar screen's width control (design §3): each width shows the tile held for it,
+   * This is the radar screen's width control (docs/MESHWX_UI.md §18.2): each width shows the tile held for it,
    * and a partial tile whose bounds stop short of the place is still the tile held for that
    * width — the screen says "This picture does not reach Austin", which is an answer, and a very
    * different one from "Not asked for yet". `best` is for the other question.
@@ -301,7 +301,7 @@ export const WeatherRadarPicture = Object.freeze({
 })
 
 /**
- * The Radar section of a place page (design §3): `.noCoordinate`, `.missing` or `.held`.
+ * The Radar section of a place page (docs/MESHWX_UI.md §18.1): `.noCoordinate`, `.missing` or `.held`.
  *
  * - `noCoordinate`: the place has no coordinate, so there is no tile to ask for and the section
  *   is absent — not empty, absent.
@@ -342,7 +342,7 @@ export const WeatherRadarCard = Object.freeze({
   },
 
   /**
-   * One width of the radar screen's control (design §3): the tile held for the square this
+   * One width of the radar screen's control (docs/MESHWX_UI.md §18.2): the tile held for the square this
    * place's ask at that width would name, or `missing` — "Not asked for yet".
    *
    * Not `make` with a zoom, because the two answer different questions. The card asks *which
@@ -376,7 +376,7 @@ export const WeatherRadarCard = Object.freeze({
    *
    * The coordinate, never the place's name: the lattice turns the coordinate into a tile this
    * phone can name before the answer arrives, and a place the bot resolves for itself would come
-   * back as a square nobody here chose (spec §7D).
+   * back as a square nobody here chose (spec §13).
    */
   ask({ place, zoom = WeatherRadarCard.pageZoom }) {
     if (place?.coordinate == null) return null
@@ -407,7 +407,7 @@ export const WeatherRadarCard = Object.freeze({
 
 /**
  * The last hour of one square, as the radar screen plays it: `{ frames, hasGap, held }`
- * (spec revision 13, §7D.4, §3).
+ * (spec §13.5; docs/MESHWX_UI.md §18.5).
  *
  * - `frames`: the pictures of **that exact tile**, **oldest first** (the order they play in),
  *   whose `taken` is within 60 minutes before the newest held for it and at most 120 minutes old
@@ -480,7 +480,7 @@ export const WeatherRadarLoop = Object.freeze({
 
   /**
    * The ask for the rest of the hour at one width, listing what this loop already holds so the
-   * bot leaves those pictures out (spec revision 13, §7D.4), at the place's coordinate.
+   * bot leaves those pictures out (spec revision 13, §13.5), at the place's coordinate.
    */
   ask(loop, { latitude, longitude, zoom }) {
     return WeatherRequest.radarLoop({ latitude, longitude, zoom, held: loop?.held ?? [] })
@@ -490,7 +490,7 @@ export const WeatherRadarLoop = Object.freeze({
 // MARK: - Refusals
 
 /**
- * Why the bot would not send a radar tile (design §3).
+ * Why the bot would not send a radar tile (docs/MESHWX_UI.md §18.3).
  *
  * The wire's reasons, split into the four the screen says different things for. Radar is the one
  * request where the refusal carries most of the information: "no recent picture for this area"

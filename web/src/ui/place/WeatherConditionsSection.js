@@ -12,7 +12,8 @@
 //     Everything is current · WX-AUS 4:25 PM   ← what Update would ask for (§11.1)
 //
 // A temperature here is a claim about the weather *here*, so it is shown bare only for a reading
-// good enough to make it. A fresh one from 25 to 40 km off is shown under the station it came
+// good enough to make it. One over two hours old (up to twelve) is shown with its age on the foot
+// line: "Camp Mabry · 6 km · as of 2:24 PM · 5 h old". A fresh one from 25 to 40 km off is shown under the station it came
 // from, named above the number, and the foot line then says only when (§3.1 U-2a). Otherwise the
 // block is the sentence that says what to do about it, set as the page's statement rather than as
 // a footnote: an 80 pt "--°" placeholder was tried and rejected (V-1).
@@ -202,9 +203,11 @@ function details({ observation, locale }) {
 
 /**
  * The one honesty line, and the way to the station behind it (docs/MESHWX_UI.md §3.2 Q5). With
- * `attributed` the station and distance already lead the block, so this says when only.
+ * `attributed` the station and distance already lead the block, so this says when only. A stale
+ * reading's line ends with its age, in the stale colour the stations list uses for the same thing.
  */
 function sourceLine({ app, screen, reading, attributed, observedAt, onOpenStation }) {
+  const isStale = reading?.isStale === true
   const text = conditionsSource({
     stationName: attributed ? null : attempt(() => WeatherNames.stationName(reading.station?.name)),
     kilometres: attributed ? null : reading.distanceKilometres ?? null,
@@ -212,10 +215,11 @@ function sourceLine({ app, screen, reading, attributed, observedAt, onOpenStatio
     now: nowOf(screen, app),
     timeZone: app?.timeZone,
     locale: app?.locale,
+    isStale,
   })
   if (!text) return null
   return h('button', {
-    class: 'hero__station',
+    class: isStale ? 'hero__station hero__station--stale' : 'hero__station',
     type: 'button',
     dataset: { test: 'weather.honestyLine' },
     onclick: () => onOpenStation?.(reading.index),

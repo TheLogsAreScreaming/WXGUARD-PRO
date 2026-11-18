@@ -344,7 +344,7 @@ test('the tile held for a square is the newest and finest of that square', () =>
 
 /**
  * The ask is the coordinate and never the place's name: the lattice turns the coordinate into a
- * tile this phone can name before the answer arrives (spec §7D).
+ * tile this phone can name before the answer arrives (spec §13).
  */
 test('the ask names the coordinate and the width', () => {
   assert.equal(WeatherRadarCard.ask({ place: null }), null)

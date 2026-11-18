@@ -95,7 +95,7 @@ export const WeatherAlertRequests = Object.freeze({
   },
 
   /**
-   * `SV.W.EWX.42`: an identity as the bot's `>w` and `>wt` requests spell it (spec §8.2), or null
+   * `SV.W.EWX.42`: an identity as the bot's `>w` and `>wt` requests spell it (spec §14), or null
    * when the bundle cannot name the event or the office.
    */
   identityString(identity, { tables }) {

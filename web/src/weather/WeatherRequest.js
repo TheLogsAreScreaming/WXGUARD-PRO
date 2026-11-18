@@ -3,12 +3,12 @@
 import { MeshWXRadarTile, MeshWXWire } from '../meshwx/index.js'
 
 /**
- * The MeshWX v5 request grammar (spec §8.2), one case per line of the table, with the text
+ * The MeshWX v5 request grammar (spec §14), one case per line of the table, with the text
  * the bot parses and the answer the app should wait for.
  *
  * Requests are plain text starting with `>`. The bot takes them as a DM or as text on
  * `#meshwx`; the app sends a DM, which only the addressed bot can read, so exactly one bot
- * answers (spec §8.2, §12, revision 2). The same words without the prefix are what people type
+ * answers (spec §14, §20, revision 2). The same words without the prefix are what people type
  * in the bot's chat and get a text reply for; the prefix is what turns the answer into v5
  * messages on `#meshwx` for every listening app. Identities and codes are carried as the
  * strings the bot expects (`SV.W.EWX.42`, `TXC453`, `KAUS`, `EWX`); the caller renders them
@@ -31,7 +31,7 @@ export const WeatherRequest = Object.freeze({
   /**
    * `>w TXC453` / `>w TXZ192` — every active warning whose area list names that county or zone
    * exactly (at most 6). No digest follows. Storm-based warnings carry county codes, most other
-   * products zone codes, so a county finds no watch or advisory (spec §8.2).
+   * products zone codes, so a county finds no watch or advisory (spec §14).
    */
   warningsTouching({ ugc }) { return { kind: 'warningsTouching', ugc } },
   /** `>wt SV.W.EWX.42` — a warning's narrative as text, subject 0. */
@@ -69,7 +69,7 @@ export const WeatherRequest = Object.freeze({
   /** `>hwo` — the hazardous weather outlook, text subject 6. */
   hazardousOutlook: Object.freeze({ kind: 'hazardousOutlook' }),
   /**
-   * `>cov` — what the bot carries, stated by the bot (spec §7A, §8.2). The statement otherwise
+   * `>cov` — what the bot carries, stated by the bot (spec §10, §14). The statement otherwise
    * arrives only on the three-hourly broadcast, so a phone that has just opened the tool cannot
    * tell "outside the area" from "nothing said yet" until one does — and withholds both the
    * check and the out-of-area requests meanwhile (docs/MESHWX_UI.md §6, §11.1).
@@ -77,7 +77,7 @@ export const WeatherRequest = Object.freeze({
   coverage: Object.freeze({ kind: 'coverage' }),
   /**
    * `>wmap` / `>wmap all` / `>wmap TXOK` / `>wmap all TXOK` — every area under an alert in the
-   * states asked for, as an Area sweep of at most eight packets (spec §7C).
+   * states asked for, as an Area sweep of at most eight packets (spec §12).
    *
    * The most expensive request in the grammar, and the only one whose cost is stated on the
    * button before it is spent (docs/MESHWX_UI.md §17). `includesAdvisories` sends `>wmap all`,
@@ -95,7 +95,7 @@ export const WeatherRequest = Object.freeze({
     return { kind: 'areaSweep', includesAdvisories, states: WeatherRequest.sweepStates(states) }
   },
   /**
-   * `>part 212 1,4,6` — the packets of a multi-packet answer that never arrived (spec §7C,
+   * `>part 212 1,4,6` — the packets of a multi-packet answer that never arrived (spec §12,
    * revision 10). `group` is the `group` byte of an Area sweep or of a Text reply, and the bot
    * keeps the transmitted bytes of its last eight multi-packet answers for ten minutes under it,
    * so what comes back is the same bytes with a new `seq`.
@@ -123,7 +123,7 @@ export const WeatherRequest = Object.freeze({
   forecastAt({ latitude, longitude }) { return { kind: 'forecastAt', latitude, longitude } },
   /**
    * `>radar 30.270,-97.740` / `>radar 30.270,-97.740 z2` — one tile of a radar picture around a
-   * coordinate (spec §7D, revision 11). One packet, always.
+   * coordinate (spec §13, revision 11). One packet, always.
    *
    * The coordinate is written the way `>f <lat>,<lon>` writes one, and the zoom is left off at 0
    * because that is the form the bot's own grammar table leads with: `z0` would be the same
@@ -136,7 +136,7 @@ export const WeatherRequest = Object.freeze({
   radar({ latitude, longitude, zoom = 0 }) { return { kind: 'radar', latitude, longitude, zoom } },
   /**
    * `>radar 30.270,-97.740 loop` / `>radar 30.270,-97.740 z1 loop 2353 2338` — the pictures of
-   * the last hour for one tile, oldest first, one packet each (spec §7D.4, revision 13).
+   * the last hour for one tile, oldest first, one packet each (spec §13.5, revision 13).
    *
    * `held` is the `taken` minutes of the frames this phone already holds for that tile
    * (`WeatherRadarLoop.held`), so the bot leaves them out. They go on the wire as UTC `HHMM`,
@@ -222,7 +222,7 @@ export const WeatherRequest = Object.freeze({
       case 'coverage': return '>cov'
       case 'areaSweep': {
         // `>wmap`, `>wmap all`, `>wmap TXOK`, `>wmap all TXOK`. Compact and upper case: fifteen
-        // codes are 30 bytes, and `>wmap all ` is the other 10 of the 40-byte budget (spec §8.2).
+        // codes are 30 bytes, and `>wmap all ` is the other 10 of the 40-byte budget (spec §14).
         const states = WeatherRequest.areaSweepStates(request).join('')
         const level = request.includesAdvisories ? '>wmap all' : '>wmap'
         return states.length === 0 ? level : `${level} ${states}`
@@ -241,8 +241,8 @@ export const WeatherRequest = Object.freeze({
   /**
    * `>radar <lat>,<lon>` at zoom 0, `… z2` otherwise. Zoom 0 sends nothing after the place: it is
    * the default, and "anything else after the place is part of the place" (spec revision 11,
-   * §7D). The longest this can be is `>radar -30.270,-197.740 z3`, 26 bytes of the 40-byte
-   * request budget (spec §7B).
+   * §13). The longest this can be is `>radar -30.270,-197.740 z3`, 26 bytes of the 40-byte
+   * request budget (spec §11).
    */
   radarText({ latitude, longitude, zoom = 0 }) {
     const base = `>radar ${WeatherRequest.coordinateKey({ latitude, longitude })}`
@@ -250,7 +250,7 @@ export const WeatherRequest = Object.freeze({
   },
 
   /**
-   * `>radar 30.270,-97.740 [z<n>] loop [HHMM …]` (spec revision 13, §7D.4): the held pictures'
+   * `>radar 30.270,-97.740 [z<n>] loop [HHMM …]` (spec revision 13, §13.5): the held pictures'
    * UTC hour and minute, **newest first**, as many as fit the 40-byte request and never more than
    * `MeshWXWire.radarLoopHeldMax`. `>radar 30.270,-97.740 loop` is 26 bytes, so two always fit
    * there; a southern, western coordinate at a wider zoom leaves room for one. The newest go
@@ -280,10 +280,10 @@ export const WeatherRequest = Object.freeze({
   },
 
   /**
-   * The letter a Not-available reply echoes back (spec §8.3): the ASCII code of the
+   * The letter a Not-available reply echoes back (spec §9): the ASCII code of the
    * request's first letter after `>`.
    *
-   * `>radar` is the one exception, and it is `x` (spec §7D, revision 11). `r` is already
+   * `>radar` is the one exception, and it is `x` (spec §13, revision 11). `r` is already
    * `>rain`, and a refusal names no argument: with both sharing a letter, a phone waiting for a
    * radar tile and a phone waiting for rainfall totals would each take the other's refusal.
    */
@@ -336,7 +336,7 @@ export const WeatherRequest = Object.freeze({
   /**
    * Whether another bot's message carrying exactly what was asked for settles it.
    *
-   * Only the addressed bot answers a DM (spec §12, revision 2), so this is not about who
+   * Only the addressed bot answers a DM (spec §20, revision 2), so this is not about who
    * answers: another bot's broadcast, or its answer to somebody else, can carry the very thing
    * asked for — the forecast for point 102, the reading for KAUS, warning SV.W.EWX.42, the
    * discussion for EWX — and then there is nothing left to wait for. What describes one bot's
@@ -391,7 +391,7 @@ export const WeatherRequest = Object.freeze({
         return `${request.kind}:${request.includesAdvisories ? 'all' : 'narrow'}:${WeatherRequest.areaSweepStates(request).join('')}`
       case 'parts':
         // Not the kind: the bot's parts cache is keyed by the group byte alone, across sweeps and
-        // texts alike (spec §7C), so two `>part 212 1` are one request whatever they are called.
+        // texts alike (spec §12), so two `>part 212 1` are one request whatever they are called.
         return `${request.kind}:${request.group}:${WeatherRequest.partIndexes(request.indexes).join(',')}`
       case 'forecastAt': return `${request.kind}:${WeatherRequest.coordinateKey(request)}`
       // The coordinate, not the tile: two coordinates on one tile are one *answer*, which is
@@ -416,7 +416,7 @@ export const WeatherReplyKind = Object.freeze({
   digest: Object.freeze({ kind: 'digest' }),
   /** `>w`: warning messages followed by a digest; either settles. */
   warnings: Object.freeze({ kind: 'warnings' }),
-  /** `>w SV.W.EWX.42`: that warning. No digest follows (spec §8.2). */
+  /** `>w SV.W.EWX.42`: that warning. No digest follows (spec §14). */
   warning({ identity }) { return { kind: 'warning', identity } },
   /** `>w TXC453`: a warning whose area list names that county or zone. No digest follows. */
   warningsTouching({ ugc }) { return { kind: 'warningsTouching', ugc } },
@@ -437,11 +437,11 @@ export const WeatherReplyKind = Object.freeze({
   /**
    * `>part <group> <idx>…`: a resent packet of the answer stamped with that group byte, sweep or
    * text alike. The indexes are not here — the group is what identifies the answer, and the
-   * service checks the index against the request it is settling (spec §7C, revision 10).
+   * service checks the index against the request it is settling (spec §12, revision 10).
    */
   parts({ group }) { return { kind: 'parts', group } },
   /**
-   * `>radar <lat>,<lon>`: a Radar message for that `MeshWXRadarTile` (spec §7D, revision 11).
+   * `>radar <lat>,<lon>`: a Radar message for that `MeshWXRadarTile` (spec §13, revision 11).
    *
    * Checked against the tile and against nothing else. Not the picture's time — "a Radar message
    * for that tile from the bot asked settles the request whatever its `taken`", because a bot
@@ -452,7 +452,7 @@ export const WeatherReplyKind = Object.freeze({
 })
 
 /**
- * What a `>part` request is asking for a piece of (spec §7C, revision 10).
+ * What a `>part` request is asking for a piece of (spec §12, revision 10).
  *
  * Nothing on the wire carries it: the bot's cache is keyed by the group byte alone. It is here
  * so the request log and the pending bar can say "the alert map" or "the forecast discussion"
@@ -460,12 +460,12 @@ export const WeatherReplyKind = Object.freeze({
  */
 export const WeatherPartsKind = Object.freeze({
   areaSweep: Object.freeze({ kind: 'areaSweep' }),
-  /** A Text reply, by its subject (spec §8.1), so the log can name the product. */
+  /** A Text reply, by its subject (spec §8), so the log can name the product. */
   text({ subject }) { return { kind: 'text', subject } }
 })
 
 /**
- * Text subjects on the wire (spec §8.1), kept as raw codes here so this file needs no
+ * Text subjects on the wire (spec §8), kept as raw codes here so this file needs no
  * table; the decoded message's `subject` is the same number (PORTING.md §5).
  */
 export const WeatherTextSubjectCode = Object.freeze({

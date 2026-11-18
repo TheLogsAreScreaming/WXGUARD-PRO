@@ -1,4 +1,4 @@
-"""Cutting the tile a phone asked for out of a radar picture (spec 7D).
+"""Cutting the tile a phone asked for out of a radar picture (spec 13).
 
 A tile is 32 x 32 cells over a square of the earth on a fixed lattice
 (`v5.radar_tile`).  A cell's level is the strongest echo in it, not the

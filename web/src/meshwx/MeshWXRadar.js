@@ -1,6 +1,6 @@
 // Port of MC1Services/Sources/MeshWX/MeshWXRadar.swift
 //
-// Radar (type 11, spec §7D, revision 11): one tile of a radar picture, and the lattice the
+// Radar (type 11, spec §13, revision 11): one tile of a radar picture, and the lattice the
 // tiles sit on.
 //
 // The picture itself is the decoded wire object (PORTING §5) — `taken_min`, `south`, `west`,
@@ -22,7 +22,7 @@
 import { MeshWXWire, MeshWXMessageType } from './MeshWXWire.js';
 
 /**
- * A cell's level (spec §7D): the **strongest** echo in the cell, never the average — a
+ * A cell's level (spec §13): the **strongest** echo in the cell, never the average — a
  * thunderstorm core is smaller than a cell, and averaging it away is the one thing a radar
  * picture on a phone must not do.
  *
@@ -50,7 +50,7 @@ export const MeshWXRadarLevel = Object.freeze({
 });
 
 /**
- * The part of a tile a partial picture covers (spec §7D): `{ row0, row1, col0, col1 }`,
+ * The part of a tile a partial picture covers (spec §13): `{ row0, row1, col0, col1 }`,
  * inclusive, in that packet's own grid — 0-31, or 0-15 when coarse.
  *
  * On the wire and in a decoded message this is the four-element array `bounds`, or null when
@@ -85,7 +85,7 @@ export const MeshWXRadarBounds = Object.freeze({
 });
 
 /**
- * One square of the lattice: `{ south, west, zoom }`, all whole degrees and 0-3 (spec §7D).
+ * One square of the lattice: `{ south, west, zoom }`, all whole degrees and 0-3 (spec §13).
  *
  * Hashable and Codable in Swift, so here it is plain data with `key` for a dictionary and
  * `isEqual` for the comparisons that Swift gets from `==` (PORTING §3).
@@ -155,7 +155,7 @@ export const MeshWXRadarTile = Object.freeze({
   /**
    * The square of the earth one cell covers: `{ south, west, north, east }`.
    *
-   * Row 0 is the **northern** row and column 0 the western one (spec §7D), which is the picture's
+   * Row 0 is the **northern** row and column 0 the western one (spec §13), which is the picture's
    * own order and the opposite of latitude's, so the row arithmetic counts down from the top.
    */
   cellBox(tile, { row, col, size }) {
@@ -200,7 +200,7 @@ export const MeshWXRadarTile = Object.freeze({
 });
 
 /**
- * One tile of a radar picture (type 11, spec §7D), as the decoded wire object.
+ * One tile of a radar picture (type 11, spec §13), as the decoded wire object.
  *
  * `taken` is the time printed on the radar picture — not when the bot received it and not when
  * it sent it. It is the only clock a radar message carries, and everything on screen that says

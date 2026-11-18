@@ -53,3 +53,11 @@ def _warning_state_in_tmp(tmp_path, monkeypatch):
     except ImportError:          # a dev venv without pyIEM: those tests skip themselves
         return
     monkeypatch.setattr(sched_mod, "_STATE_PATH", tmp_path / "warning_state.json")
+
+
+@pytest.fixture(autouse=True)
+def _no_internet_fill(monkeypatch):
+    """The internet fill (emwin/fill.py) would call api.weather.gov and NWS's
+    feeds from every source a test polls: never from a test. The fill's own
+    tests switch it on with a mock transport."""
+    monkeypatch.setattr(settings, "fill_enabled", False)

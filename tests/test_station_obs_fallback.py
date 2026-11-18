@@ -1,4 +1,4 @@
-"""`>o ICAO` answers with the nearest station that reports (spec 8.2, rev 8).
+"""`>o ICAO` answers with the nearest station that reports (spec 14, rev 8).
 
 Field report 2026-09-18: Dayton's nearest station in the app's bundled list
 is Wright-Patterson AFB (KFFO), which sends nothing on the feed, so every
@@ -69,3 +69,71 @@ def test_an_unknown_station_is_still_an_unknown_location():
     msgs = _app(">o KZZZ", WeatherStore())
     assert [m["name"] for m in msgs] == ["not_available"]
     assert msgs[0]["reason"] == v5.REASON_UNKNOWN_LOCATION
+
+
+# 2026-10-16: nothing near Woodcreek had reported in two hours, so the app
+# showed "No current conditions". The owner's choice: the newest report up to
+# twelve hours old, with its age, rather than nothing.
+
+
+def _aged(pairs):
+    from tests.test_v5_builders import _aged_metar_store
+    return _aged_metar_store(pairs)
+
+
+def _own_time(store, icao):
+    return int(store._find_metar_raw(icao)[1].timestamp() // 60)
+
+
+def test_a_station_with_only_a_stale_report_answers_with_it_dated_exactly():
+    store = _aged([(5 * 60, "KAUS 151153Z 18005KT 10SM CLR 20/10 A3001")])
+    d = v5.decode(b.station_obs_message(1, 1, store, "KAUS"))
+    assert [s["station"] for s in d["stations"]] == [_index("KAUS")]
+    # A batch of one: `ts` is the report's own time and its age is 0, so the
+    # phone works out "as of" to the minute instead of a saturated nibble.
+    assert d["ts_min"] == _own_time(store, "KAUS") and d["stations"][0]["age_min"] == 0
+
+
+def test_a_fresh_neighbour_beats_the_stations_own_stale_report():
+    # Camp Mabry is 12 km from Bergstrom: current there wins, as it does in chat.
+    store = _aged([(5 * 60, "KAUS 151153Z 18005KT 10SM CLR 20/10 A3001"),
+                   (10, "KATT 151153Z 18005KT 10SM CLR 22/10 A3001")])
+    d = v5.decode(b.station_obs_message(1, 1, store, "KAUS"))
+    assert [s["station"] for s in d["stations"]] == [_index("KATT")]
+
+
+def test_a_stale_neighbour_stands_in_for_a_silent_station():
+    store = _aged([(5 * 60, "KATT 151153Z 18005KT 10SM CLR 22/10 A3001")])
+    d = v5.decode(b.station_obs_message(1, 1, store, "KAUS"))
+    assert [s["station"] for s in d["stations"]] == [_index("KATT")]
+
+
+def test_over_twelve_hours_is_still_nothing():
+    store = _aged([(13 * 60, "KAUS 151153Z 18005KT 10SM CLR 20/10 A3001")])
+    assert b.station_obs_message(1, 1, store, "KAUS") is None
+    msgs = _app(">o KAUS", store)
+    assert [m["name"] for m in msgs] == ["not_available"] and msgs[0]["reason"] == v5.REASON_NO_DATA
+
+
+def test_the_app_request_gets_the_stale_report():
+    store = _aged([(5 * 60, "KAUS 151153Z 18005KT 10SM CLR 20/10 A3001")])
+    msgs = _app(">o KAUS", store)
+    assert [m["name"] for m in msgs] == ["observations"]
+    assert msgs[0]["stations"][0]["temp_f"] == 68
+
+
+def test_the_hourly_batch_still_admits_only_current_reports():
+    # A stale station cannot ride in a batch beside a fresh one: its age
+    # would not fit the nibble, and the phone would date it fresher than it is.
+    store = _aged([(5 * 60, "KAUS 151153Z 18005KT 10SM CLR 20/10 A3001"),
+                   (10, "KATT 151153Z 18005KT 10SM CLR 22/10 A3001")])
+    d = v5.decode(b.obs_message(1, 1, store, ["KATT", "KAUS"]))
+    assert [s["station"] for s in d["stations"]] == [_index("KATT")]
+    assert b.obs_message(1, 1, store, ["KAUS"]) is None
+    # Admitting stale reports keeps only what the ages can place honestly.
+    d = v5.decode(b.obs_message(1, 1, store, ["KATT", "KAUS"], max_age_min=b.OBS_STALE_MAX_AGE_MIN))
+    assert [s["station"] for s in d["stations"]] == [_index("KATT")]
+    both = _aged([(5 * 60, "KAUS 151153Z 18005KT 10SM CLR 20/10 A3001"),
+                  (5 * 60 + 40, "KATT 151153Z 18005KT 10SM CLR 22/10 A3001")])
+    d = v5.decode(b.obs_message(1, 1, both, ["KATT", "KAUS"], max_age_min=b.OBS_STALE_MAX_AGE_MIN))
+    assert [(s["station"], s["age_min"]) for s in d["stations"]] == [(_index("KATT"), 40), (_index("KAUS"), 0)]

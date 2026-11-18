@@ -7,10 +7,21 @@ services:
       - weather-data:/app/data
       - ./.env:/app/.env
     ports:
-      - "8080:8080"
+      # The admin portal has no login: published on the host's loopback only.
+      # Reach it from another machine over SSH (ssh -N -L 8080:127.0.0.1:8080
+      # you@this-host), never by publishing it on the LAN.
+      - "127.0.0.1:8080:8080"
     env_file:
       - .env
     environment:
+      # Inside the container the portal must listen on every interface:
+      # Docker forwards the published port to the container's own address,
+      # not to its 127.0.0.1, and MCW_PORTAL_HOST now defaults to 127.0.0.1.
+      # The exposure is set by the `ports:` line above (host loopback only),
+      # and the portal still answers only Host localhost/127.0.0.1/[::1] (plus
+      # MCW_PORTAL_ALLOWED_HOSTS). These override .env, so the mapping holds.
+      - MCW_PORTAL_HOST=0.0.0.0
+      - MCW_PORTAL_PORT=8080
       # Connect to radio via TCP (socat on host bridges serial)
       - MCW_SERIAL_PORT=tcp://host.docker.internal:4403
       # Use host Ollama (has GPU access, much faster than Docker Ollama)

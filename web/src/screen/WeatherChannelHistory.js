@@ -51,10 +51,10 @@ export const WeatherChannelSubject = Object.freeze({
   text({ subject, request }) {
     return { kind: 'text', subject, request }
   },
-  /** The bot's statement of what it carries (spec §7A). */
+  /** The bot's statement of what it carries (spec §10). */
   coverage: Object.freeze({ kind: 'coverage' }),
   /**
-   * One radar tile (spec §7D, revision 11). **The tile is the subject**: a picture of a square of
+   * One radar tile (spec §13, revision 11). **The tile is the subject**: a picture of a square of
    * earth, named by its width and its centre rather than by anybody's question — nothing on the
    * wire says who asked for it, and the lattice means several people may have.
    *
@@ -200,7 +200,7 @@ export const WeatherCacheGroup = Object.freeze({
   warningNarratives: 'warningNarratives',
   /** Warnings the phone holds for somewhere other than the place on screen. */
   warningsElsewhere: 'warningsElsewhere',
-  /** The radar tiles the phone is holding (spec §7D, revision 11), one row per square of earth. */
+  /** The radar tiles the phone is holding (spec §13, revision 11), one row per square of earth. */
   radarPictures: 'radarPictures',
 
   allCases: Object.freeze([
@@ -320,7 +320,7 @@ export const WeatherCache = Object.freeze({
           destination: WeatherCache.destination({ of: assembly.request ?? null, tables }),
         })
       }
-      // One row per square of earth held, whatever its width (design §3), with its newest
+      // One row per square of earth held, whatever its width (docs/MESHWX_UI.md §18.4), with its newest
       // picture's time and, since revision 13, how many pictures of it are held. No destination:
       // the radar screen is reached from the place page's card, which knows which place it is
       // about; a cached row knows only a tile.

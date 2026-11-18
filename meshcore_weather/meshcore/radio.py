@@ -17,7 +17,7 @@ from typing import Any
 from meshcore import MeshCore, EventType
 
 from meshcore_weather.bridge import datagram_feed
-from meshcore_weather.config import settings
+from meshcore_weather.config import frequency_problem, iata_from_name, node_name_problem, settings
 from meshcore_weather.meshcore import profile
 from meshcore_weather.meshcore.delivery import (
     PAYLOAD_GRP_DATA,
@@ -189,6 +189,7 @@ class MeshcoreRadio:
         self._running = False
         self._channel_idx: int | None = None
         self._data_channel_idx: int | None = None
+        self._status_channel_idx: int | None = None   # status lines (status_channel.py), never requests
         self._channel_handler: Callable | None = None
         self._channel_request_handler: Callable | None = None
         # The node's message queue (see _drain_queue): one drain at a time, a
@@ -204,6 +205,13 @@ class MeshcoreRadio:
         self._contacts_task: asyncio.Task | None = None
         self._mqtt: MqttPublisher | None = None
         self.last_advert_at: float = 0.0
+        # The last advert before this radio object existed, {"at", "key"}: the
+        # scheduler's state file after a restart (main.py), the old radio
+        # after a reconnect. Recent and from the same key, it stands in for
+        # the advert a connect would otherwise send.
+        self.restored_advert: dict | None = None
+        self.region_problem: str | None = None   # the node's frequency is outside MCW_RADIO_REGION's band
+        self.name_problem: str | None = None     # the node's name is off the WX-<IATA> convention
         self.device: dict = {}                 # DEVICE_INFO: firmware build, model, capacity
         self.max_contacts: int = settings.contact_slots
         self.port: str | None = None           # the port the node actually answered on
@@ -230,7 +238,7 @@ class MeshcoreRadio:
 
     def on_channel_request(self, handler: Callable) -> None:
         """Register handler: async def handler(request, hops, snr), where
-        `request` is a decoded `v5.Request` (spec 7B) that arrived as a
+        `request` is a decoded `v5.Request` (spec 11) that arrived as a
         datagram on our own channel."""
         self._channel_request_handler = handler
 
@@ -303,7 +311,7 @@ class MeshcoreRadio:
             self._port_real = os.path.realpath(p)
             if p != port:
                 logger.warning("Radio answered on %s, not on the configured %s; update MCW_SERIAL_PORT "
-                               "under System > Settings (or install the udev rule for /dev/meshcore)", p, port)
+                               "under Settings › Radio link (or install the udev rule for /dev/meshcore)", p, port)
             return mc
         raise ConnectionError(
             f"no companion response on {port} (is the firmware 'Companion Radio USB'?)"
@@ -481,8 +489,54 @@ class MeshcoreRadio:
                 "result": d.get("result") or "pending", "echo_ms": d.get("echo_ms"), "via": d.get("via"),
                 "snr": d.get("snr"), "attempts": d.get("attempts"), "skipped": d.get("skipped")}
 
+    def band_problem(self) -> str | None:
+        """Why this node may not transmit where MCW_RADIO_REGION says the bot
+        is, or None: its frequency (and bandwidth) outside the region's band,
+        or a region the bot does not know."""
+        si = (self._mc.self_info if self._mc else None) or {}
+        freq = si.get("radio_freq")
+        return frequency_problem(freq if isinstance(freq, (int, float)) else None, si.get("radio_bw"))
+
+    def _check_identity_and_band(self) -> None:
+        """At connect, before anything is sent: a node on a frequency outside
+        the region's band (a board flashed with another country's preset)
+        gets its transmit switched off, loudly; a name off the WX-<IATA>
+        convention is a warning."""
+        si = (self._mc.self_info if self._mc else None) or {}
+        self.name_problem = node_name_problem(si.get("name"))
+        if self.name_problem:
+            logger.warning("Node name: %s. Set it under Radio > Node (WX- and your nearest airport's "
+                           "IATA code; check nobody nearby uses it)", self.name_problem)
+        self.region_problem = self.band_problem()
+        if self.region_problem:
+            if settings.tx_enabled:
+                settings.tx_enabled = False
+                logger.error("Radio: %s. Transmit is OFF until the node is on a %s frequency "
+                             "(Radio > LoRa parameters, then switch transmit on)",
+                             self.region_problem, settings.radio_region)
+            else:
+                logger.error("Radio: %s", self.region_problem)
+
+    def _restored_advert_fresh(self) -> bool:
+        """Did this node advert recently enough, before the restart, that a
+        connect needs no advert of its own? Same key only: a node with a new
+        identity must tell the mesh."""
+        rec = self.restored_advert or {}
+        at = rec.get("at")
+        key = ((self._mc.self_info if self._mc else None) or {}).get("public_key") or ""
+        if not isinstance(at, (int, float)) or not key or rec.get("key") != key:
+            return False
+        age = time.time() - at
+        if not 0 <= age < max(1, settings.advert_interval_hours) * 3600:
+            return False
+        self.last_advert_at = max(self.last_advert_at, float(at))
+        logger.info("Advert not repeated: this node adverted %d min ago, before the restart; next one in %d min",
+                    age // 60, (max(1, settings.advert_interval_hours) * 3600 - age) // 60)
+        return True
+
     async def _configure_node(self) -> None:
         """Resolve (or create) the bot's channels, subscribe, advertise."""
+        self._check_identity_and_band()
         # Text channel: create it if the node does not have it yet (a fresh
         # flash has only slot 0). Never slot 0: that is the public channel.
         try:
@@ -517,10 +571,27 @@ class MeshcoreRadio:
                         logger.warning("Could not create data channel '%s' — no free slots",
                                        settings.meshwx_channel)
 
+        # The status channel: operational lines only, joined by name like the
+        # others so anyone can add it on their own node. A slot of its own,
+        # never the one requests come in on.
+        if settings.status_channel:
+            if settings.status_channel in (settings.meshcore_channel, settings.meshwx_channel):
+                logger.warning("MCW_STATUS_CHANNEL %s is the request channel; no status lines will be posted",
+                               settings.status_channel)
+            else:
+                try:
+                    self._status_channel_idx = await self._resolve_channel(settings.status_channel)
+                except ValueError:
+                    self._status_channel_idx = await self._create_channel(settings.status_channel)
+                if self._status_channel_idx is None:
+                    logger.warning("Could not create status channel '%s' — no free slots", settings.status_channel)
+                else:
+                    logger.info("Status channel %d (%s)", self._status_channel_idx, settings.status_channel)
+
         # Subscribe to channel messages, DMs, and new adverts
         self._mc.subscribe(EventType.CHANNEL_MSG_RECV, self._on_channel_msg)
         # GRP_DATA on a channel (RESP_CODE_CHANNEL_DATA_RECV, 0x1B): an app's
-        # Request datagram arrives here (spec 7B).
+        # Request datagram arrives here (spec 11).
         self._mc.subscribe(EventType.CHANNEL_DATA_RECV, self._on_channel_data)
         self._mc.subscribe(EventType.CONTACT_MSG_RECV, self._on_dm)
         self._mc.subscribe(EventType.ADVERTISEMENT, self._on_advert)       # a node we know adverted again
@@ -581,7 +652,7 @@ class MeshcoreRadio:
         await self.housekeep_contacts()
         if self.pending_adoption:
             logger.warning("Advert held: this radio is not the node in the profile (adopt it under Radio > Hardware)")
-        else:
+        elif not self._restored_advert_fresh():
             await self._send_advert()
 
         # Periodic tasks: re-advert, refresh contacts, watch the link
@@ -598,12 +669,17 @@ class MeshcoreRadio:
         if settings.mqtt_enabled:
             try:
                 pubkey = self._mc.self_info.get("public_key", "") or ""
-                if pubkey:
+                # The topic's region: MCW_MQTT_IATA, else the IATA code of the
+                # node's own WX-<IATA> name. Never someone else's city.
+                iata = settings.mqtt_iata.strip() or iata_from_name(self._mc.self_info.get("name"))
+                if not iata:
+                    logger.error("MQTT not started: set MCW_MQTT_IATA (or name the node WX-<IATA>)")
+                elif pubkey:
                     self._mqtt = MqttPublisher(
                         host=settings.mqtt_host,
                         port=settings.mqtt_port,
                         topic_prefix=settings.mqtt_topic_prefix,
-                        iata=settings.mqtt_iata,
+                        iata=iata,
                         pubkey=pubkey,
                         username=settings.mqtt_username,
                         password=settings.mqtt_password,
@@ -714,8 +790,8 @@ class MeshcoreRadio:
         if not self._mc:
             logger.error("Cannot send - not connected")
             return False
-        if channel == 0 or channel != self._channel_idx:
-            logger.warning("Blocked send on ch %d (our ch is %d)", channel, self._channel_idx)
+        if channel == 0 or channel not in (self._channel_idx, self._status_channel_idx):
+            logger.warning("Blocked send on ch %d (our ch is %s)", channel, self._channel_idx)
             return False
         budget = self.channel_text_budget()
         if len(text.encode()) > budget:
@@ -950,7 +1026,7 @@ class MeshcoreRadio:
                 logger.exception("Error in channel message handler")
 
     async def _on_channel_data(self, event) -> None:
-        """A GRP_DATA datagram on a channel (spec 2.1, 7B).
+        """A GRP_DATA datagram on a channel (spec 2.1, 11).
 
         Only one kind of datagram is addressed to the bot: an app's Request
         (type 9) on our own channel. Everything else — the link-test type
@@ -1256,8 +1332,14 @@ class MeshcoreRadio:
         return True
 
     async def _advert_loop(self) -> None:
+        first = True
         while self._running:
-            await asyncio.sleep(max(1, settings.advert_interval_hours) * 3600)
+            interval = max(1, settings.advert_interval_hours) * 3600
+            # The first wait counts from the last advert, which a restart may
+            # have restored (_restored_advert_fresh) rather than sent.
+            wait = interval - (time.time() - self.last_advert_at) if first and self.last_advert_at else interval
+            first = False
+            await asyncio.sleep(max(1.0, wait))
             await self._send_advert()
             # Refresh contacts right after advert to pick up new peers
             try:
@@ -1350,7 +1432,8 @@ class MeshcoreRadio:
             "manual_add_contacts": si.get("manual_add_contacts"),
             "path_hash_size": self.path_hash_size(),
             "battery_mv": None,
-            "channels": {"text": self._channel_idx, "data": self._data_channel_idx},
+            "channels": {"text": self._channel_idx, "data": self._data_channel_idx,
+                         "status": self._status_channel_idx},
         }
         try:
             bat = await mc.commands.get_bat()
@@ -1388,6 +1471,8 @@ class MeshcoreRadio:
             return "text"
         if idx == self._data_channel_idx:
             return "data"
+        if idx == self._status_channel_idx:
+            return "status"
         return None
 
     # Role -> (index attribute, settings attribute). The bot listens/sends on
@@ -1395,6 +1480,7 @@ class MeshcoreRadio:
     _ROLES = {
         "text": ("_channel_idx", "meshcore_channel"),
         "data": ("_data_channel_idx", "meshwx_channel"),
+        "status": ("_status_channel_idx", "status_channel"),
     }
 
     async def _slots(self) -> dict[int, str]:
@@ -1434,7 +1520,7 @@ class MeshcoreRadio:
             raise ValueError("channel 0 (public) cannot be cleared")
         role = self._role_for(idx)
         if role:
-            raise ValueError(f"slot {idx} is the bot's {role} channel; change it under Text Bot instead of clearing it")
+            raise ValueError(f"slot {idx} is the bot's {role} channel; change it under Radio › Channels instead of clearing it")
         await self.set_channel_name(idx, "", "00" * 16)
 
     async def assign_role(self, role: str, name: str) -> int | None:
@@ -1455,6 +1541,8 @@ class MeshcoreRadio:
             return None
         if not name.startswith("#") and not name.isdigit():
             raise ValueError("channel names start with '#'")
+        if role == "status" and name in (settings.meshcore_channel, settings.meshwx_channel):
+            raise ValueError("the status channel cannot be the request channel")
         # v5: one channel carries text and data. Nothing to create or rename.
         if role == "data" and self._channel_idx is not None and name == settings.meshcore_channel:
             self._data_channel_idx = self._channel_idx
@@ -1489,6 +1577,9 @@ class MeshcoreRadio:
         if res.type != EventType.OK:
             raise RuntimeError(f"radio refused set_name: {res.payload}")
         mc.self_info["name"] = name
+        self.name_problem = node_name_problem(name)
+        if self.name_problem:
+            logger.warning("Node name: %s", self.name_problem)
 
     async def set_radio_params(self, freq_mhz: float, bw_khz: float, sf: int, cr: int) -> None:
         mc = self._require()
@@ -1496,12 +1587,17 @@ class MeshcoreRadio:
             raise ValueError("frequency must be 400-1000 MHz")
         if bw_khz not in (7.8, 10.4, 15.6, 20.8, 31.25, 41.7, 62.5, 125, 250, 500):
             raise ValueError("bandwidth must be a LoRa bandwidth in kHz (62.5, 125, 250, 500 ...)")
+        # Never onto a frequency the operator's region does not allow.
+        problem = frequency_problem(freq_mhz, bw_khz)
+        if problem:
+            raise ValueError(problem)
         if not (5 <= sf <= 12) or not (5 <= cr <= 8):
             raise ValueError("sf must be 5-12 and cr 5-8")
         res = await mc.commands.set_radio(freq_mhz, bw_khz, sf, cr)
         if res.type != EventType.OK:
             raise RuntimeError(f"radio refused set_radio: {res.payload}")
         mc.self_info.update({"radio_freq": freq_mhz, "radio_bw": bw_khz, "radio_sf": sf, "radio_cr": cr})
+        self.region_problem = None             # in band now; transmit is the operator's to switch on
 
     def path_hash_size(self) -> int | None:
         """Bytes per repeater hash on the paths of packets this node
@@ -1648,4 +1744,8 @@ class MeshcoreRadio:
     @property
     def data_channel_idx(self) -> int | None:
         return self._data_channel_idx
+
+    @property
+    def status_channel_idx(self) -> int | None:
+        return self._status_channel_idx
 

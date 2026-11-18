@@ -46,37 +46,49 @@ _LABEL_END = 14
 
 # Rows we care about. Keys are canonical labels; values are regexes that
 # match the *start* of the label (case-insensitive, anchored to column 0).
+# A label ends where no lower-case letter follows, not at a word boundary:
+# NWS sometimes drops the spaces between a label and its first value
+# ("Temp52 49 43 ...", BOX 2026-10-17; "Max/Min70", EWX; "Avg cloudsFW",
+# LUB), and such a row is still that row (see _unglue_row).
+_END = r"(?-i:(?![a-z]))"
 _ROW_PATTERNS = {
-    "temp": re.compile(r"^\s*Temp\b", re.IGNORECASE),
-    "dewpt": re.compile(r"^\s*Dewpt\b", re.IGNORECASE),
-    "rh": re.compile(r"^\s*RH\b", re.IGNORECASE),
-    "wind_dir": re.compile(r"^\s*Wind\s*dir\b", re.IGNORECASE),
-    "wind_spd": re.compile(r"^\s*Wind\s*spd\b", re.IGNORECASE),
-    "wind_gust": re.compile(r"^\s*Wind\s*gust\b", re.IGNORECASE),
-    "wind_char": re.compile(r"^\s*Wind\s*char\b", re.IGNORECASE),  # 6hrly table
-    "pwind_dir": re.compile(r"^\s*PWind\s*dir\b", re.IGNORECASE),  # 6hrly table
-    "clouds": re.compile(r"^\s*(Avg\s+)?Clouds\b", re.IGNORECASE),
-    "pop12": re.compile(r"^\s*PoP\s*12hr\b", re.IGNORECASE),
-    "qpf12": re.compile(r"^\s*QPF\s*12hr\b", re.IGNORECASE),
-    "snow12": re.compile(r"^\s*Snow\s*12hr\b", re.IGNORECASE),
-    "rain": re.compile(r"^\s*Rain(\s+shwrs?)?\b", re.IGNORECASE),
-    "tstm": re.compile(r"^\s*Tstms?\b", re.IGNORECASE),
-    "obvis": re.compile(r"^\s*Obvis\b", re.IGNORECASE),
-    "min_max": re.compile(r"^\s*(Min/Max|Max/Min)\b", re.IGNORECASE),
-    "max_min": re.compile(r"^\s*(Min/Max|Max/Min)\b", re.IGNORECASE),  # 6hrly same row
+    "temp": re.compile(r"^\s*Temp" + _END, re.IGNORECASE),
+    "dewpt": re.compile(r"^\s*Dewpt" + _END, re.IGNORECASE),
+    "rh": re.compile(r"^\s*RH" + _END, re.IGNORECASE),
+    "wind_dir": re.compile(r"^\s*Wind\s*dir" + _END, re.IGNORECASE),
+    "wind_spd": re.compile(r"^\s*Wind\s*spd" + _END, re.IGNORECASE),
+    "wind_gust": re.compile(r"^\s*Wind\s*gust" + _END, re.IGNORECASE),
+    "wind_char": re.compile(r"^\s*Wind\s*char" + _END, re.IGNORECASE),  # 6hrly table
+    "pwind_dir": re.compile(r"^\s*PWind\s*dir" + _END, re.IGNORECASE),  # 6hrly table
+    "clouds": re.compile(r"^\s*(Avg\s+)?Clouds" + _END, re.IGNORECASE),
+    "pop12": re.compile(r"^\s*PoP\s*12hr" + _END, re.IGNORECASE),
+    "qpf12": re.compile(r"^\s*QPF\s*12hr" + _END, re.IGNORECASE),
+    "snow12": re.compile(r"^\s*Snow\s*12hr" + _END, re.IGNORECASE),
+    "rain": re.compile(r"^\s*Rain(\s+shwrs?)?" + _END, re.IGNORECASE),
+    "tstm": re.compile(r"^\s*Tstms?" + _END, re.IGNORECASE),
+    "obvis": re.compile(r"^\s*Obvis" + _END, re.IGNORECASE),
+    "min_max": re.compile(r"^\s*(Min/Max|Max/Min)" + _END, re.IGNORECASE),
+    "max_min": re.compile(r"^\s*(Min/Max|Max/Min)" + _END, re.IGNORECASE),  # 6hrly same row
 }
+# Rows whose values sit only at 00Z and 12Z columns (12-hourly periods).
+_TWELVE_HOURLY = {"pop12", "qpf12", "min_max", "max_min"}
 
 # Detect the hour header rows (local TZ and UTC)
 # Local header: "CDT 3hrly", but Alaska/Guam/Hawaii write "AKDT3hrly" and
-# "ChST3hrly" (4-letter zone, no space), so the gap is optional.
+# "ChST3hrly" (4-letter zone, no space), so the gap is optional. So is the
+# gap after "hrly": "MDT 6hrly00   06 12 18" (TFX and CYS, whose 6-hourly
+# tables were dropped and their rows read into the 3-hourly table, giving
+# Lewistown MT a low of 3), "UTC 3hrly21 00 03", "UTC 6hrly06 12 18".
 _HRLY_LOCAL_RE = re.compile(
-    r"^(?P<label>\s*[A-Za-z]{3,4}\s*(?P<interval>3hrly|6hrly))\s+(?P<hours>.+)$",   # ChST (Guam) is mixed case
+    r"^(?P<label>\s*[A-Za-z]{3,4}\s*(?P<interval>3hrly|6hrly))\s*(?P<hours>\d.*)$",   # ChST (Guam) is mixed case
     re.IGNORECASE,
 )
 _HRLY_UTC_RE = re.compile(
-    r"^\s*UTC\s+(?P<interval>3hrly|6hrly)\s+(?P<hours>.+)$",
+    r"^\s*UTC\s*(?P<interval>3hrly|6hrly)\s*(?P<hours>\d.*)$",
     re.IGNORECASE,
 )
+# Any hour header, parsed or not: where one table's rows stop.
+_ANY_HRLY_RE = re.compile(r"^\s*[A-Za-z]{3,4}\s*[36]hrly", re.IGNORECASE)
 
 # Point header: UGC line, then a non-blank name, then a coord line.
 _UGC_RE = re.compile(r"^([A-Z]{2}[ZC]\d{3})(?:[->]\d{3})*-\d{6}-\s*$")
@@ -241,19 +253,22 @@ def _parse_issue_time(line: str) -> datetime | None:
 # US timezone offsets (hours ahead of UTC). Negative = west of UTC.
 # Sign convention here: local_utc = local + (-offset) so positive means
 # LOCAL is ahead of UTC. For CDT (UTC-5), offset = -5.
-_TZ_OFFSET = {
+# Every abbreviation an NWS product header (MND line) carries: the storm
+# report and warning code read the same table (core/services, protocol/warnings).
+TZ_ABBR_OFFSET = {
     "EST": -5, "EDT": -4,
     "CST": -6, "CDT": -5,
     "MST": -7, "MDT": -6,
     "PST": -8, "PDT": -7,
     "AKST": -9, "AKDT": -8,
-    "HST": -10,
-    "AST": -4,   # Atlantic (Puerto Rico — no DST)
-    "ChST": 10,  # Chamorro (Guam)
+    "HST": -10,  # Hawaii, and the Aleutians in winter
+    "HDT": -9,   # the Aleutians in summer (America/Adak)
+    "AST": -4,   # Atlantic (Puerto Rico, Virgin Islands; no DST)
+    "ChST": 10,  # Chamorro (Guam, Northern Marianas)
     "CHST": 10,
     "SST": -11,  # Samoa
-    "HDT": -9,
 }
+_TZ_OFFSET = TZ_ABBR_OFFSET
 
 
 def _build_slot_times(
@@ -330,9 +345,15 @@ def _split_glued_headers(lines: list[str]) -> list[str]:
             out.append(line[:m.start()].rstrip())
             line = line[m.start():]
         else:
-            # Generic: a row label glued after data ("...  Y  YTstms   S")
+            # Generic: a row label glued after data ("...  Y  YTstms   S").
+            # The row before the label may be an hour header rather than a
+            # data row: "UTC 6hrly  06 12 18 00 ... 18 00Min/Max  34  67"
+            # (JKL 2026-10-17, and 2.6% of PFMs over three days) read as a
+            # UTC hour of 34 and lost the point.
             for gm in _GLUED_ROW_RE.finditer(line):
-                if gm.start() >= 14 and line[:gm.start()].strip() and _classify_row(line) is not None:
+                if gm.start() >= 14 and line[:gm.start()].strip() and (
+                        _classify_row(line) is not None
+                        or _HRLY_UTC_RE.match(line) or _HRLY_LOCAL_RE.match(line)):
                     out.append(line[:gm.start()].rstrip())
                     line = line[gm.end():] if gm.end() > gm.start() else line[gm.start():]
                     break
@@ -482,9 +503,13 @@ _DATE_LABEL_RE = re.compile(r"(?:[A-Za-z]{3}\s+)?(\d{2})/(\d{2})(?:/(\d{2}))?")
 
 
 def _slot_times_from_local(
-    local_line: str, date_row: str | None, tz_offset: int, issue_time: datetime,
+    hours: list[int], positions: list[int], date_row: str | None, tz_offset: int, issue_time: datetime,
 ) -> list[datetime] | None:
     """Exact slot timestamps from the LOCAL hour header and the Date row.
+
+    `hours` are the local header's hours and `positions` their columns (the
+    table's data columns when the counts agree: a header glued to its label,
+    "MDT 6hrly00   06 12", sits left of them).
 
     Columns are grouped into local days wherever the local hour wraps
     (e.g. 22 -> 01). The Date row's labels are CENTRED over each day's
@@ -496,8 +521,6 @@ def _slot_times_from_local(
     """
     if date_row is None:
         return None
-    hours = _parse_hour_tokens(local_line[_LABEL_END:])
-    positions = _find_column_positions(local_line, _LABEL_END)
     if not hours or len(positions) != len(hours):
         return None
     # Day groups: list of (first_col_pos, last_col_pos, [col indexes])
@@ -624,11 +647,15 @@ def _parse_point_tables(lines: list[str], issue_time: datetime) -> list[PFMSlot]
             continue
         utc_hours = _parse_hour_tokens(m_utc.group("hours"))
 
-        # Column positions come from the UTC header (it has the same alignment)
-        positions = _find_column_positions(lines[j], _LABEL_END)
-        if len(positions) != len(utc_hours):
-            # Misaligned — fall back to the local hrly line
-            positions = _find_column_positions(lines[i], _LABEL_END)
+        # The table's rows run to the next table: its Date row or any hour
+        # header, read or not. Stopping only at a header that parsed let the
+        # rows of a 6-hourly table whose header did not ("MDT 6hrly00") land
+        # in the 3-hourly table's columns (Lewistown MT: a low of 3).
+        end = next((k for k in range(j + 1, len(lines))
+                    if (_ANY_HRLY_RE.match(lines[k]) and "UTC" not in lines[k].upper()[:6])
+                    or lines[k].lstrip().lower().startswith("date")), len(lines))
+        rows = lines[j + 1:end]
+        positions = _table_columns(lines[i], m_local, lines[j], m_utc, len(utc_hours), rows)
 
         # Anchor the table on its own "Date" row (the line above the local
         # hrly header, e.g. "Date           09/16  Thu 09/17/26 ..."). Without
@@ -646,15 +673,17 @@ def _parse_point_tables(lines: list[str], issue_time: datetime) -> list[PFMSlot]
         if tz_off is None and tz_label:
             tz_off = _TZ_OFFSET.get(tz_label.group(1))
         times = None
+        local_hours = _parse_hour_tokens(m_local.group("hours"))
         if tz_off is not None:
-            times = _slot_times_from_local(lines[i], date_row, tz_off, issue_time)
+            local_cols = positions if len(positions) == len(local_hours) else \
+                _find_column_positions(lines[i], m_local.start("hours"))
+            times = _slot_times_from_local(local_hours, local_cols, date_row, tz_off, issue_time)
         if (times is None or len(times) != len(utc_hours)) and interval == 6 and slots and tz_off is not None:
             # The 6-hourly table always begins the local day after the
             # 3-hourly table ends; rebuild its times from that fact when the
             # Date row did not survive the link.
             last_local = (slots[-1].dt + timedelta(hours=tz_off)).date()
             start_local = last_local + timedelta(days=1)
-            local_hours = _parse_hour_tokens(m_local.group("hours"))
             built, day, prev = [], start_local, -1
             for h in local_hours:
                 if h <= prev:
@@ -673,17 +702,20 @@ def _parse_point_tables(lines: list[str], issue_time: datetime) -> list[PFMSlot]
                 start_date=start_date, first_local_hour=first_local_hour,
             )
 
-        # Scan data rows until we hit another hrly header or run out
         table_slots = [PFMSlot(dt=t, interval_hours=interval) for t in times]
-        next_header: int | None = None
-        for k in range(j + 1, len(lines)):
-            row = lines[k]
-            if _HRLY_LOCAL_RE.match(row) and "UTC" not in row.upper():
-                next_header = k
-                break  # Next table (typically the 6-hourly one)
-            row_kind = _classify_row(row)
-            if row_kind is None:
+        twelve_cols = _twelve_hourly_columns(rows, positions, utc_hours)
+        for row in rows:
+            found = _classify_row_span(row)
+            if found is None:
                 continue
+            row_kind, label_end = found
+            if label_end < len(row) and not row[label_end].isspace():
+                # "Temp52 49 43 ...": the spaces between label and first value
+                # were dropped. Put the values back on the columns.
+                row = _unglue_row(row, label_end, positions,
+                                  twelve_cols if row_kind in _TWELVE_HOURLY else None)
+                if row is None:
+                    continue   # cannot be placed: leave the row out rather than misread it
             _apply_row(row_kind, row, positions, table_slots)
 
         slots.extend(table_slots)
@@ -691,19 +723,126 @@ def _parse_point_tables(lines: list[str], issue_time: datetime) -> list[PFMSlot]
         # Advance to the next table's header so it gets parsed too. (Skipping
         # past it left every point with only its 3-hourly table, i.e. ~3 days
         # of forecast instead of 7.)
-        i = next_header if next_header is not None else len(lines)
+        i = end
 
     return slots
 
 
 def _classify_row(row: str) -> str | None:
     """Return the canonical row kind ('temp', 'wind_dir', etc.) or None."""
+    found = _classify_row_span(row)
+    return found[0] if found else None
+
+
+def _classify_row_span(row: str) -> tuple[str, int] | None:
+    """(row kind, column where its label ends), or None."""
     # Only the label portion (first _LABEL_END chars) matters for classification
     label = row[:_LABEL_END + 5]  # +5 for multi-word labels like "Wind gust"
     for kind, pattern in _ROW_PATTERNS.items():
-        if pattern.match(label):
-            return kind
+        m = pattern.match(label)
+        if m:
+            return kind, m.end()
     return None
+
+
+def _table_columns(local_line: str, m_local, utc_line: str, m_utc, n: int,
+                   rows: list[str]) -> list[int]:
+    """The data columns of a table with `n` UTC hours.
+
+    Either hour header can sit off the data: one glued to its label
+    ("UTC 6hrly06 12 18", "MDT 6hrly00   06 12") starts left of it, and
+    "UTC3hrly     09 12" (MHX) one column left. So each header's columns, read
+    from where its hours start and from column 14, are tried, and the set on
+    which most of the table's values end wins (values are right-aligned on a
+    column). Ties go to the UTC row, then to reading from column 14, as
+    before; with no candidate of `n` columns, the old reading."""
+    candidates: list[list[int]] = []
+    for line, m in ((utc_line, m_utc), (local_line, m_local)):
+        for start in (_LABEL_END, m.start("hours")):
+            cols = _find_column_positions(line, start)
+            if len(cols) == n and cols not in candidates:
+                candidates.append(cols)
+    if not candidates:
+        cols = _find_column_positions(utc_line, _LABEL_END)
+        if len(cols) != n:
+            # Misaligned — fall back to the local hrly line
+            cols = _find_column_positions(local_line, _LABEL_END)
+        return cols
+    if len(candidates) == 1:
+        return candidates[0]
+    ends: list[int] = []
+    for row in rows:
+        found = _classify_row_span(row)
+        if found is None or (found[1] < len(row) and not row[found[1]].isspace()):
+            continue
+        ends += [m.end() - 1 for m in re.finditer(r"\S+", row) if m.start() >= found[1]]
+
+    def score(cols: list[int]) -> int:
+        at = {p + 1 for p in cols}
+        return sum(e in at for e in ends)
+
+    return max(candidates, key=score)   # max keeps the first of equals
+
+
+_VALUE_TOKEN_RE = re.compile(r"^(?:-?\d+(?:\.\d+)?|[A-Z][A-Z0-9]{0,2})$")
+
+
+def _twelve_hourly_columns(rows: list[str], positions: list[int], utc_hours: list[int]) -> set[int]:
+    """Columns (indexes) holding a table's 12-hourly values (PoP, QPF,
+    Min/Max): where its rows of those that are not glued have them, else the
+    00Z and 12Z columns (Hawaii's sit at 06Z and 18Z, so the rows decide)."""
+    col_at_end = {p + 1: k for k, p in enumerate(positions)}
+    cols: set[int] = set()
+    for row in rows:
+        found = _classify_row_span(row)
+        if found is None or found[0] not in _TWELVE_HOURLY:
+            continue
+        if found[1] < len(row) and not row[found[1]].isspace():
+            continue
+        for m in re.finditer(r"\S+", row[found[1]:]):
+            k = col_at_end.get(found[1] + m.end() - 1)
+            if k is not None:
+                cols.add(k)
+    return cols or {k for k, h in enumerate(utc_hours) if h in (0, 12)}
+
+
+def _unglue_row(row: str, label_end: int, positions: list[int],
+                anchor_cols: set[int] | None = None) -> str | None:
+    """Rebuild a row whose first value is glued to its label ("Temp52 49 43",
+    "PoP 12hr0           0", "Max/Min70          47") with its values on the
+    table's columns. Only the spaces before the first value are lost; the
+    values keep their spacing among themselves. They are placed as far right
+    as they go with every value ending on a column (a Temp row runs to the
+    table's last column), and a 12-hourly row's values (PoP, QPF, Min/Max)
+    on `anchor_cols` when they fit there. None when they cannot be placed."""
+    rest = row[label_end:]
+    toks = [(m.start(), m.end() - 1, m.group()) for m in re.finditer(r"\S+", rest)]
+    if not toks or not all(_VALUE_TOKEN_RE.match(t) for _, _, t in toks):
+        return None
+    col_at_end = {p + 1: k for k, p in enumerate(positions)}
+
+    def place(anchors: set[int] | None) -> int | None:
+        for p in reversed(positions):
+            base = p + 1 - toks[-1][1]          # column of rest[0] once re-spaced
+            if base <= label_end:
+                return None
+            ks = [col_at_end.get(base + end) for _, end, _ in toks]
+            if any(k is None for k in ks):
+                continue
+            if anchors is not None and not all(k in anchors for k in ks):
+                continue
+            return base
+        return None
+
+    base = place(anchor_cols) if anchor_cols else None
+    if base is None:
+        base = place(None)
+    if base is None:
+        return None
+    out = list(row[:label_end].ljust(base + toks[-1][1] + 1))
+    for start, _end, tok in toks:
+        out[base + start:base + start + len(tok)] = tok
+    return "".join(out)
 
 
 def _apply_row(kind: str, row: str, positions: list[int], slots: list[PFMSlot]) -> None:
@@ -961,14 +1100,27 @@ def downsample_to_daily(
     # from the first day with enough data, so we don't have gaps in the
     # middle of the series.
     sorted_dates = sorted(by_local_date.keys())
+
+    def row_max(d: date) -> list[int]:
+        """The Min/Max row's daytime value(s) for day d (the evening column)."""
+        return [s.minmax_f for s in by_local_date.get(d, [])
+                if s.minmax_f is not None and point.local_hour(s.dt) >= 12]
+
+    def row_min_after(d: date) -> list[int]:
+        """The Min/Max row's overnight value after day d (next morning)."""
+        return [s.minmax_f for s in by_local_date.get(d + timedelta(days=1), [])
+                if s.minmax_f is not None and point.local_hour(s.dt) < 12]
+
     valid_dates: list[date] = []
     for d in sorted_dates:
         temps = [s.temp_f for s in by_local_date[d] if s.temp_f is not None]
         # A day counts when it has enough samples, or when NWS gave its
         # max in the Min/Max row (issued late in the day, "today" has only
-        # evening samples but the row still says what the high was/is).
-        has_row_max = any(s.minmax_f is not None and point.local_hour(s.dt) >= 12 for s in by_local_date[d])
-        if len(temps) >= min_slots_per_day or (has_row_max and temps):
+        # evening samples but the row still says what the high was/is). A
+        # day whose Temp row could not be read still counts when the Min/Max
+        # row gives both its high and the night's low.
+        has_row_max = bool(row_max(d))
+        if len(temps) >= min_slots_per_day or (has_row_max and (temps or row_min_after(d))):
             valid_dates.append(d)
         elif valid_dates:
             # We've hit a partial day AFTER finding valid ones — stop here
@@ -990,17 +1142,18 @@ def downsample_to_daily(
         night_temps = [s.temp_f for s in nighttime if s.temp_f is not None]
         all_temps = [s.temp_f for s in day_slots if s.temp_f is not None]
 
-        high_f = max(daytime_temps) if daytime_temps else max(all_temps)
-        low_f = min(night_temps) if night_temps else min(all_temps)
-        # Prefer the forecast's own Min/Max row.
-        row_max = [s.minmax_f for s in day_slots if s.minmax_f is not None and point.local_hour(s.dt) >= 12]
-        if row_max:
-            high_f = max(row_max)
-        next_day = d + timedelta(days=1)
-        row_min = [s.minmax_f for s in by_local_date.get(next_day, [])
-                   if s.minmax_f is not None and point.local_hour(s.dt) < 12]
-        if row_min:
-            low_f = min(row_min)
+        high_f = (max(daytime_temps) if daytime_temps else max(all_temps)) if all_temps else None
+        low_f = (min(night_temps) if night_temps else min(all_temps)) if all_temps else None
+        # Prefer the forecast's own Min/Max row (and it is all there is when
+        # the Temp row was unusable).
+        day_max = row_max(d)
+        if day_max:
+            high_f = max(day_max)
+        night_min = row_min_after(d)
+        if night_min:
+            low_f = min(night_min)
+        if high_f is None or low_f is None:
+            break
         if low_f > high_f:
             low_f, high_f = high_f, low_f
 

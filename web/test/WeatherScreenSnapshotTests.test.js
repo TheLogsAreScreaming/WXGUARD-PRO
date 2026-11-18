@@ -88,7 +88,7 @@ test("the owner's phone at 23:20 reads as it should", () => {
   assert.deepEqual(screen.otherPlaces.map((one) => one.point.index), [304, 1010])
   assert.equal(screen.readings.length, 14)
   // Nobody has asked for a radar picture, so the section is an ask and names the square a tap
-  // would ask about (spec §7D, revision 11).
+  // would ask about (spec §13, revision 11).
   assert.equal(screen.radar.kind, 'missing')
   assert.deepEqual(screen.radar.tile, { south: 29, west: -99, zoom: 0 })
 })
@@ -182,7 +182,7 @@ test('with no link of its own the radio still decides', () => {
 })
 
 // Until 2026-09-21 this read "can be read but not asked". A Request datagram names the bot by the
-// two bytes its own packets carry (spec §7B), so the advert was only ever needed for the DM. The
+// two bytes its own packets carry (spec §11), so the advert was only ever needed for the DM. The
 // owner found the hole from the other side: a web client on a radio that was itself named WX-AUS,
 // which can never hear itself announce, with every ask blocked for a night.
 test('a bot with no advert can be read, and asked by datagram', () => {

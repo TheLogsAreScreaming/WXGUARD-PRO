@@ -80,7 +80,7 @@ export const WeatherTrafficSummary = Object.freeze({
         return {
           title: t('weather.traffic.title.forecast'),
           // `0xFFFF` is not a point, it is "the bot picked one this bundle cannot name" (spec §7,
-          // revision 10 §1.3), so the row says *that* rather than naming a sentinel. Anything
+          // §14.3), so the row says *that* rather than naming a sentinel. Anything
           // else is named through `pointLabel`, the one function a bundle name is shown through
           // (docs/MESHWX_UI.md §3.1 U-25) — never the raw table name.
           detail: message.point === MeshWXWire.unbundledPoint
@@ -99,7 +99,7 @@ export const WeatherTrafficSummary = Object.freeze({
       case 'not_available':
         return {
           title: t('weather.traffic.title.notAvailable'),
-          // The letter is the grammar's own echo of what was asked (spec §8.3), and it is the
+          // The letter is the grammar's own echo of what was asked (spec §9), and it is the
           // only thing that says *which* request was refused: a refusal names no argument.
           detail: join(message.request, reasonName(message.reason)),
         }
@@ -131,7 +131,7 @@ export const WeatherTrafficSummary = Object.freeze({
           ),
         }
       case 'radar':
-        // "Radar picture · Local · 214 cells with precipitation" (revision 11 design §3). The
+        // "Radar picture · Local · 214 cells with precipitation" (docs/MESHWX_UI.md §18.4). The
         // width rather than the tile's corner: a tile is two degrees, which is 222 km tall
         // everywhere and a different width at every latitude, so the corner would be a number
         // nobody can picture and the width is the thing that was asked for. An older frame of a
@@ -184,7 +184,7 @@ function areaCount(count) {
 }
 
 /**
- * How wide the tile is, in the three words the radar screen's own control uses (design §3):
+ * How wide the tile is, in the three words the radar screen's own control uses (docs/MESHWX_UI.md §18.2):
  * Local, Regional, Wide for zooms 0, 1 and 2. Zoom 3 exists on the wire and is not offered, so a
  * tile at that width is left unnamed rather than given a fourth word nothing else says.
  */
@@ -235,7 +235,7 @@ function pointName(point, tables) {
  * or — for a scoped packet that is not the one the scope rides on — that these bytes do not say.
  *
  * "No states" must not read as "nothing". The entries in packets 1… of a scoped sweep are real
- * and are drawn; which states were asked for is simply not in them (spec §7C).
+ * and are drawn; which states were asked for is simply not in them (spec §12).
  *
  * In the packet's own order, unsorted: this row is a reading of the bytes, not of a selection.
  */

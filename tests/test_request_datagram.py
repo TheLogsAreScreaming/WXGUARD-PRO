@@ -1,5 +1,5 @@
 """Request datagrams: an app's `>` request flooded on #meshwx as GRP_DATA
-(docs/MeshWX_v5_Spec.md 7B, revision 6).
+(docs/MeshWX_v5_Spec.md §11).
 
 What is checked here is the whole road: the companion frame the node hands
 up, the radio hook that decodes it, the bot-id filter that decides whether
@@ -186,7 +186,7 @@ async def test_start_registers_the_hook_on_the_radio(monkeypatch, tmp_path):
     await b.stop()
 
 
-# -- Which bot answers (spec 7B, 12) ------------------------------------------
+# -- Which bot answers (spec 11, 20) ------------------------------------------
 
 
 def test_a_request_naming_this_bot_is_answered(bot):
@@ -235,7 +235,7 @@ def test_the_sender_name_is_the_contact_we_know_or_the_key(bot):
     assert traffic_log.recent(5, kinds=("data_request",))[-1]["sender"] == "Tommy"
 
 
-# -- Copies (spec 7B "Copies", 13) --------------------------------------------
+# -- Copies (spec 11 "Copies", 13) --------------------------------------------
 
 
 def test_a_resend_with_the_same_timestamp_waits_out_the_twelve_seconds(bot):
@@ -272,11 +272,11 @@ def test_a_copy_is_logged_as_a_datagram_copy_never_as_a_dm(bot):
     assert bot.radio.dms == []                      # never an answer by DM
 
 
-# -- Limits (spec 7B "Limits", 8.2) -------------------------------------------
+# -- Limits (spec 11 "Limits", 8.2) -------------------------------------------
 
 
 def test_a_datagram_never_meets_the_limiter_for_people(bot):
-    """Spec 7B: the app limits inside the broadcaster, and not the text-command
+    """Spec 11: the app limits inside the broadcaster, and not the text-command
     limiter — exactly like a `>` line arriving as channel text."""
     seen = []
     bot._rate_check = lambda *a, **k: seen.append(a) or True
@@ -336,7 +336,7 @@ def test_the_answer_is_logged_as_a_reply_row_of_its_own(bot):
     assert traffic_log.recent(5, public=True, kinds=("reply_data",))[-1]["text"] == reply["text"]
 
 
-# -- While the products are still loading (spec 8.3) --------------------------
+# -- While the products are still loading (spec 9) --------------------------
 
 
 @pytest.mark.asyncio

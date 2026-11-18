@@ -1,7 +1,7 @@
 // Port of MC1Services/Services/Weather/WeatherBot.swift (docs/PORTING.md).
 
 /**
- * A MeshWX weather bot as the app knows it from its advert (docs/MESHWX.md, spec §12): a
+ * A MeshWX weather bot as the app knows it from its advert (docs/MESHWX.md, spec §20): a
  * chat node named `WX-<city>` whose position rides in the advert.
  *
  * There is no discovery channel in v5. Every MeshCore app already collects adverts into
@@ -44,7 +44,7 @@ export const WeatherBot = {
   /**
    * A bot known only from its own packets: every v5 message carries the first two bytes of the
    * bot's public key (spec §2.2), and a Request datagram names the bot asked by those same two
-   * bytes (§7B). So a bot that has been heard can be asked without ever having been seen to
+   * bytes (§11). So a bot that has been heard can be asked without ever having been seen to
    * advertise. It has no name, no position and no full key, which is why the DM fallback, the
    * one path that needs the key, stays closed to it (`isAnnounced`).
    *
@@ -97,7 +97,7 @@ export const WeatherBot = {
   },
 
   /**
-   * The bots among `from`, nearest to `near` first (spec §12: "show the nearest; let the user
+   * The bots among `from`, nearest to `near` first (spec §20: "show the nearest; let the user
    * pick"). Bots without a position sort after every located one, alphabetically; with no
    * reference location the whole list is alphabetical so the order is at least stable.
    */

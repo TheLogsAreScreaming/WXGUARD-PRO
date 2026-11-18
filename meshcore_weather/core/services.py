@@ -19,7 +19,7 @@ from dataclasses import dataclass, field
 from datetime import datetime, timedelta, timezone
 
 from meshcore_weather.geodata.names import place_name
-from meshcore_weather.parser.pfm import PFMPoint, downsample_to_daily, parse_pfm
+from meshcore_weather.parser.pfm import TZ_ABBR_OFFSET, PFMPoint, downsample_to_daily, parse_pfm
 from meshcore_weather.parser.weather import EMWINProduct, WeatherStore
 from meshcore_weather.protocol.encoders import parse_metar, metar_observed_at
 from meshcore_weather.protocol.meshwx import (
@@ -33,6 +33,11 @@ logger = logging.getLogger(__name__)
 
 # An observation older than this is not "current".
 OBS_MAX_AGE_MIN = 120
+# ...but it is still the weather as last seen: when nothing nearby is current
+# the newest report up to this old is served with its age rather than nothing
+# (owner, 2026-10-16: "Woodcreek: 70/49 20%" read as complete with no
+# observation at all and a five-hour-old forecast).
+OBS_STALE_MAX_AGE_MIN = 720
 # A forecast point farther than this is not "your" forecast.
 FORECAST_MAX_KM = 80.0
 # A forecast is issued about every 12 hours. One older than this is a copy
@@ -71,6 +76,7 @@ class Observation:
     pressure_inhg: float | None
     sky_code: int | None
     raw: str
+    stale: bool = False            # older than OBS_MAX_AGE_MIN: shown with its age, never as current
 
     @property
     def age_min(self) -> int:
@@ -94,15 +100,22 @@ class Observation:
 
 def observation_for(
     store: WeatherStore, loc: dict, max_age_min: int = OBS_MAX_AGE_MIN,
+    stale_max_age_min: int = OBS_STALE_MAX_AGE_MIN,
 ) -> Observation | None:
     """Latest fresh METAR from the nearest station THAT ACTUALLY REPORTS.
 
     Walks the resolver's distance-ranked station list and returns the first
     one with a METAR newer than `max_age_min`. A silent AWOS next door never
     hides a reporting airport a few km further away.
+
+    When no station has a fresh report, the newest one up to
+    `stale_max_age_min` old is returned instead, flagged `stale`, so the
+    reply says "63F ... (KAUS 12km, 5h old)" rather than leaving the
+    observation out and reading as if the forecast were the whole story.
     """
     now = datetime.now(timezone.utc)
     candidates = loc.get("stations") or ([(loc["station"], loc.get("station_km") or 0.0)] if loc.get("station") else [])
+    newest_stale: tuple[datetime, str, float, str] | None = None
     for icao, km in candidates:
         if km > STATION_MAX_KM:
             break
@@ -114,6 +127,10 @@ def observation_for(
         # station in it; the report's own DDHHMMZ group is when it was taken.
         ts = metar_observed_at(text, ts) or ts
         if (now - ts) > timedelta(minutes=max_age_min):
+            # Not current; remembered as the stand-in if nothing nearer is.
+            if (now - ts) <= timedelta(minutes=stale_max_age_min) and (
+                    newest_stale is None or ts > newest_stale[0]):
+                newest_stale = (ts, icao, float(km), text)
             continue
         fields = parse_metar(text)
         if not fields:
@@ -125,6 +142,18 @@ def observation_for(
             raw=text,
             **fields,
         )
+    if newest_stale is not None:
+        ts, icao, km, text = newest_stale
+        fields = parse_metar(text)
+        if fields:
+            return Observation(
+                station=icao,
+                distance_km=km,
+                observed_at=ts,
+                raw=text,
+                stale=True,
+                **fields,
+            )
     return None
 
 
@@ -263,8 +292,13 @@ def forecast_point_near(lat: float, lon: float, max_km: float = FORECAST_MAX_KM)
 
 def warnings_for(store: WeatherStore, loc: dict, all_active: list[dict] | None = None) -> list[dict]:
     """Active warnings that apply to the location: any whose UGC list
-    includes the location's zone, or whose storm-based polygon contains the
-    point. Uses the pyIEM extractor (the same one the broadcasts use)."""
+    includes the location's zone, any without a polygon whose UGC list
+    includes the location's county (a tornado or severe thunderstorm watch
+    names counties only), and any whose storm-based polygon contains the
+    point. A storm-based warning's counties are only the ones its polygon
+    touches, so for one the polygon decides. Uses the pyIEM extractor (the
+    same one the broadcasts use)."""
+    from meshcore_weather.geodata import resolver
     from meshcore_weather.protocol.coverage import _point_in_polygon
     from meshcore_weather.protocol.warnings import extract_active_warnings
 
@@ -272,13 +306,21 @@ def warnings_for(store: WeatherStore, loc: dict, all_active: list[dict] | None =
         all_active = extract_active_warnings(store, coverage=None)
     zone = loc["zones"][0] if loc.get("zones") else ""
     lat, lon = loc.get("lat"), loc.get("lon")
+    county: str | None = None
     out = []
     for w in all_active:
         ugcs = set(w.get("ugcs") or w.get("zones") or [])
         if zone and zone in ugcs:
             out.append(w)
             continue
-        if lat is not None and w.get("vertices") and _point_in_polygon(lat, lon, w["vertices"]):
+        has_polygon = len(w.get("vertices") or []) >= 3
+        if not has_polygon:
+            if lat is not None and county is None and any(u[2:3] == "C" for u in ugcs):
+                county = resolver.county_for_point(lat, lon) or ""
+            if county and county in ugcs:
+                out.append(w)
+            continue
+        if lat is not None and _point_in_polygon(lat, lon, w["vertices"]):
             out.append(w)
     # Most urgent first: warnings, then watches, then advisories; sooner expiry first.
     sev_rank = {"W": 0, "A": 1, "Y": 2, "S": 3}
@@ -447,9 +489,12 @@ def product_state(prod: EMWINProduct) -> str:
     return prod.state
 
 
-_TZ_ABBR_OFFSET = {"EST": -5, "EDT": -4, "CST": -6, "CDT": -5, "MST": -7, "MDT": -6, "PST": -8, "PDT": -7,
-                   "AKST": -9, "AKDT": -8, "HST": -10, "AST": -4, "CHST": 10, "SST": -11, "HDT": -9}
-_LSR_HDR_RE = re.compile(r"^\d{3,4} [AP]M ([A-Z]{3,4}) \w{3} \w{3} \d{1,2} \d{4}", re.M)
+# Hours from UTC for each zone abbreviation a product header carries (one
+# table, parser/pfm.py). The header's abbreviation is mixed case on Guam
+# ("1015 PM ChST Sat Oct 17 2026"): the pattern read only capitals, so every
+# Guam storm report was taken as UTC and fell outside the six-hour window.
+_TZ_ABBR_OFFSET = {k.upper(): v for k, v in TZ_ABBR_OFFSET.items()}
+_LSR_HDR_RE = re.compile(r"^\d{3,4} [AP]M ([A-Za-z]{3,4}) \w{3} \w{3} \d{1,2} \d{4}", re.M)
 LSR_RECENT_HOURS = 6
 
 
@@ -463,7 +508,10 @@ def _lsr_entry_time(entry: dict, tz_abbr: str | None) -> datetime | None:
         local = datetime.strptime(f"{d} {tm}", "%m/%d/%Y %I%M %p")
     except ValueError:
         return None
-    off = _TZ_ABBR_OFFSET.get((tz_abbr or "").upper(), 0)
+    off = _TZ_ABBR_OFFSET.get((tz_abbr or "").upper())
+    if off is None:
+        logger.debug("Storm report header zone %r unknown; read as UTC", tz_abbr)
+        off = 0
     return (local - timedelta(hours=off)).replace(tzinfo=timezone.utc)
 
 
@@ -536,15 +584,37 @@ def nowcast_for(store: WeatherStore, loc: dict) -> Nowcast | None:
 # -- Raw METAR / TAF ------------------------------------------------------------------
 
 
-def raw_metar_for(store: WeatherStore, loc: dict, max_age_min: int = OBS_MAX_AGE_MIN) -> tuple[str, float, str] | None:
-    """(station, km, raw METAR line) from the nearest reporting station."""
+def raw_metar_for(store: WeatherStore, loc: dict, max_age_min: int = OBS_MAX_AGE_MIN,
+                  stale_max_age_min: int = OBS_STALE_MAX_AGE_MIN) -> tuple[str, float, str] | None:
+    """(station, km, raw METAR line) from the nearest reporting station.
+
+    With nothing current, the newest report up to `stale_max_age_min` old,
+    as `observation_for` does: the line carries its own DDHHMMZ time and
+    `render_text.raw_metar` says how old it is.
+
+    A station asked for by name (`metar KLAX`: it is the location, 0 km) is
+    answered with its own report while it has one up to `stale_max_age_min`
+    old, never a neighbour's newer one: a METAR is one airport's, and the
+    reply says how old it is. On 2026-10-19 "metar KLAX" got Hawthorne's."""
     now = datetime.now(timezone.utc)
+    newest_stale: tuple[datetime, str, float, str] | None = None
     for icao, km in loc.get("stations") or []:
         if km > STATION_MAX_KM:
             break
         raw = store._find_metar_raw(icao)
-        if raw and (now - raw[1]) <= timedelta(minutes=max_age_min):
+        if not raw:
+            continue
+        # The report's own time, not its collective's (`observation_for`).
+        ts = metar_observed_at(raw[0], raw[1]) or raw[1]
+        if (now - ts) <= timedelta(minutes=max_age_min):
             return icao, float(km), raw[0]
+        if (now - ts) <= timedelta(minutes=stale_max_age_min) and km == 0:
+            return icao, 0.0, raw[0]
+        if (now - ts) <= timedelta(minutes=stale_max_age_min) and (
+                newest_stale is None or ts > newest_stale[0]):
+            newest_stale = (ts, icao, float(km), raw[0])
+    if newest_stale is not None:
+        return newest_stale[1], newest_stale[2], newest_stale[3]
     return None
 
 
@@ -564,7 +634,10 @@ class Taf:
 
 def _taf_block(text: str, station: str) -> str | None:
     import re
-    lines = text.splitlines()
+    # The dish's "\r\r\n" line ends: splitlines() made a blank line of every
+    # "\r", and the blank line ended each TAF after its first line, so every
+    # reply lost its FM groups (found 2026-10-19).
+    lines = text.replace("\r", "").split("\n")
     for i, line in enumerate(lines):
         s = line.strip()
         if s.startswith(f"TAF {station}") or s.startswith(f"TAF AMD {station}") or (
@@ -573,7 +646,8 @@ def _taf_block(text: str, station: str) -> str | None:
             block = [s]
             for j in range(i + 1, min(i + 15, len(lines))):
                 nxt = lines[j].strip()
-                if not nxt or nxt.startswith("=") or nxt.startswith("TAF ") or re.match(r"^[A-Z]{4}\s+\d{6}Z", nxt):
+                if block[-1].endswith("=") or not nxt or nxt.startswith("=") or nxt.startswith("TAF ") \
+                        or re.match(r"^[A-Z]{4}\s+\d{6}Z", nxt):
                     break
                 block.append(nxt)
             return " ".join(block)

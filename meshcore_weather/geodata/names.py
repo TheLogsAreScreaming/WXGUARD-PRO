@@ -1,4 +1,4 @@
-"""Place names as people read them: the label rule of spec section 9.1.
+"""Place names as people read them: the label rule of spec section 16.2.
 
 Census and NWS tables name places in capitals with legal-form suffixes
 ("ADJUNTAS ZONA URBANA", "HELL'S KITCHEN"). Python's str.title() turns those

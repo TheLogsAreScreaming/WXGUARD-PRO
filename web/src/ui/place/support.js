@@ -90,7 +90,7 @@ export const ago = (date, { now } = {}) => format('ago', [date, { now }])
 
 export const age = (date, { now } = {}) => format('age', [date, { now }])
 
-/** When an alert applies (spec §10.2, revision 12). The fallback is the end's bare clock time. */
+/** When an alert applies (spec §18.2, revision 12). The fallback is the end's bare clock time. */
 export const alertWindow = ({ beginsAt = null, expiresAt, now, timeZone, locale, countdown = true }) =>
   format('alertWindow', [{ beginsAt, expiresAt, now, timeZone, locale, countdown }],
     () => plainTime(expiresAt, timeZone, locale))
@@ -138,8 +138,8 @@ export const updateJustReceived = ({ source }) => copy('updateJustReceived', [{ 
 export const everythingCurrent = ({ source, asOf, now, timeZone, locale }) =>
   copy('everythingCurrent', [{ source, asOf, now, timeZone, locale }], () => t('weather.update.currentUnknown'))
 
-export const conditionsSource = ({ stationName, kilometres: km, observedAt, now, timeZone, locale }) =>
-  copy('conditionsSource', [{ stationName, kilometres: km, observedAt, now, timeZone, locale }])
+export const conditionsSource = ({ stationName, kilometres: km, observedAt, now, timeZone, locale, isStale = false }) =>
+  copy('conditionsSource', [{ stationName, kilometres: km, observedAt, now, timeZone, locale, isStale }])
 
 export const nearbyReadingLead = ({ stationName, kilometres: km }) =>
   copy('nearbyReadingLead', [{ stationName, kilometres: km }])
@@ -210,8 +210,9 @@ export const ownedReply = ({ source, at, now, timeZone, locale }) =>
 export const quietCaption = ({ source, since, now, timeZone, locale }) =>
   copy('quietCaption', [{ source, since, now, timeZone, locale }])
 
-// Radar (revision 11 §3). A sentence the copy layer cannot word yet is left out, as everything
-// else here is: the card is a picture with a caption, and a caption it cannot write is no caption.
+// Radar (docs/MESHWX_UI.md §18). A sentence the copy layer cannot word yet is left out, as
+// everything else here is: the card is a picture with a caption, and a caption it cannot write is
+// no caption.
 
 export const radarSummary = (summary, { placeName: name }) =>
   copy('radarSummary', [summary, { placeName: name }], () => [])

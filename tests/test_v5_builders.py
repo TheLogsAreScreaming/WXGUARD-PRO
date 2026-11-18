@@ -125,7 +125,7 @@ def test_text_messages_chunk_and_share_a_group():
 
 def test_a_warning_states_the_source_of_the_product_it_came_out_of():
     """The extractor stamps each entry with its product's source; the builder
-    puts that on the wire without being told (spec 2.2.1)."""
+    puts that on the wire without being told (spec 2.3)."""
     assert v5.decode(b.warning_message(1, 9, _warning()))["source"] == v5.SOURCE_UNSTATED
     dish = v5.decode(b.warning_message(1, 9, {**_warning(), "source": "sdr"}))
     assert dish["source"] == v5.SOURCE_GOES
@@ -496,7 +496,7 @@ def test_f_request_by_index_carries_that_index(monkeypatch):
     assert d["name"] == "forecast" and d["point"] == 454
 
 
-# -- `>f <lat>,<lon>` (spec 8.2, revision 10) -------------------------------------------
+# -- `>f <lat>,<lon>` (spec 14, revision 10) -------------------------------------------
 
 
 def _ask(monkeypatch, text):

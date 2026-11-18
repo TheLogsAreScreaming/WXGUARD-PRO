@@ -1,7 +1,7 @@
 // Port of MC1Services/Sources/MeshWX/MeshWXTables.swift (and the ZIP extension in
 // MeshWXZips.swift, whose members hang off MeshWXTables in Swift too).
 //
-// The preload bundle of spec §9: everything the wire refers to by index.
+// The preload bundle of spec §16: everything the wire refers to by index.
 //
 // The protocol's first design rule is "the mesh carries identifiers and numbers, the phone
 // carries tables and words", so this type is not a convenience — without it a decoded warning is
@@ -148,7 +148,7 @@ function searchKey(query) {
 
 // MARK: - Tables
 
-/** The preload bundle of spec §9. */
+/** The preload bundle of spec §16. */
 export class MeshWXTables {
   /**
    * Build from already-parsed bundle files. Every key is optional; a missing one leaves that
@@ -217,9 +217,9 @@ export class MeshWXTables {
       productNames: Object.freeze([...(radarFile?.product_names ?? [])]),
       /** Level 1 starts at the first, level 2 at the second, level 3 at the third. */
       levelsDBZ: Object.freeze([...(radarFile?.levels_dbz ?? [])]),
-      /** Spec §7D: no picture older than this covers a tile, so the answer is a refusal. */
+      /** Spec §13: no picture older than this covers a tile, so the answer is a refusal. */
       maxAgeMinutes: radarFile?.max_age_minutes ?? null,
-      /** Spec §7D: the same tile of the same picture goes out at most this often. Seconds. */
+      /** Spec §13: the same tile of the same picture goes out at most this often. Seconds. */
       cooldownSeconds: radarFile?.cooldown_seconds ?? null,
       /** `"x"` — the Not-available letter of `>radar`, stated by the bundle as well. */
       requestLetter: radarFile?.request_letter ?? null,
@@ -440,7 +440,7 @@ export class MeshWXTables {
 
   /**
    * Nearest forecast point by great-circle distance — the "forecast for my location" lookup of
-   * spec §11. Send `>f <index>` for what comes back and label the answer with the point's name
+   * spec §21. Send `>f <index>` for what comes back and label the answer with the point's name
    * and its distance, because it is not the user's coordinate.
    */
   nearestPoint({ toLat, lon }) {
@@ -481,7 +481,7 @@ export class MeshWXTables {
     return best;
   }
 
-  // MARK: - Search (spec §11)
+  // MARK: - Search (spec §21)
 
   /**
    * The place to name a coordinate by ("Austin"), within `within` kilometres.
@@ -516,9 +516,9 @@ export class MeshWXTables {
 
   /**
    * Place search: prefix match on the name, then nearest to `nearLat`/`lon` if given, then the
-   * biggest (spec §11).
+   * biggest (spec §21).
    *
-   * Distance before population is deliberate. 207 names exist in more than one state — Round
+   * Distance before population is deliberate. 4,292 names exist in more than one state — Round
    * Rock is in TX and AZ — and the one the user means is almost always the one they can drive
    * to, not the one with more people in it.
    */
@@ -552,7 +552,7 @@ export class MeshWXTables {
   }
 
   /**
-   * Station search by ICAO prefix or name substring (spec §11), nearest first when a location is
+   * Station search by ICAO prefix or name substring (spec §21), nearest first when a location is
    * given.
    */
   searchStations({ query, nearLat = null, lon = null, limit = 25 }) {
@@ -585,7 +585,7 @@ export class MeshWXTables {
   // MARK: - Areas
 
   /**
-   * Resolve a warning's area runs to named places with pins (spec §9). Takes either the runs
+   * Resolve a warning's area runs to named places with pins (spec §16). Takes either the runs
    * themselves or a decoded warning, exactly as the two Swift overloads do.
    *
    * Runs whose state index is unknown are dropped — there is no UGC to build without the state
@@ -633,7 +633,7 @@ export class MeshWXTables {
   }
 
   /**
-   * The ZIP a query names, looked up exactly and never by prefix (spec §9, §11). Null for a
+   * The ZIP a query names, looked up exactly and never by prefix (spec §16, §21). Null for a
    * query that is not a ZIP, and for a ZIP the table does not have.
    */
   zip(query) {

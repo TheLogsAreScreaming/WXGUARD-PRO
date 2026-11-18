@@ -1,4 +1,4 @@
-"""Area sweep (type 10, spec 7C, revision 9): the national picture in runs.
+"""Area sweep (type 10, spec 12, revision 9): the national picture in runs.
 
 Three layers, in the order the bytes travel: the wire codec (protocol/v5.py),
 the builder that turns active warnings into ordered entries
@@ -37,12 +37,12 @@ def _warning(phen="SV", sig="W", ugcs=("TXC453",), onset=0):
 
 
 # ---------------------------------------------------------------------------
-# The wire (spec 7C)
+# The wire (spec 12)
 # ---------------------------------------------------------------------------
 
 
 def test_entry_packing_offset_by_offset():
-    """One packet, checked byte by byte against the table in section 7C."""
+    """One packet, checked byte by byte against the table in section 12."""
     data = v5.encode_area_sweep(
         32,
         BOT,
@@ -165,7 +165,7 @@ def test_sweep_packets_number_themselves_like_text():
 
 
 # ---------------------------------------------------------------------------
-# The scope (spec 7C.1, revision 10)
+# The scope (spec 12.3, revision 10)
 # ---------------------------------------------------------------------------
 
 
@@ -259,7 +259,7 @@ def test_sweep_packets_cut_beyond_eight_packets():
 
 
 # ---------------------------------------------------------------------------
-# Building the sweep (spec 7C, the bot side)
+# Building the sweep (spec 12, the bot side)
 # ---------------------------------------------------------------------------
 
 
@@ -353,7 +353,7 @@ def test_unknown_events_and_unusable_ugcs_are_dropped():
 
 
 # ---------------------------------------------------------------------------
-# `>wmap` (spec 7C and 8.2) and the airtime limits
+# `>wmap` (spec 12 and 14) and the airtime limits
 # ---------------------------------------------------------------------------
 
 
@@ -398,7 +398,7 @@ async def test_wmap_answers_a_sweep_stamped_with_one_group(monkeypatch):
     packets = _sweep_of(sent)
     # 1 Texas run + 60 single-county Oklahoma runs: two packets.
     assert len(packets) == len(sent) == 2 and "packet(s)" in out
-    # The group is the seq the first packet went out with (spec 7C), stamped
+    # The group is the seq the first packet went out with (spec 12), stamped
     # by the scheduler like a Text reply's, and idx runs 0..total-1.
     assert {p["group"] for p in packets} == {packets[0]["seq"]}
     assert [p["idx"] for p in packets] == list(range(len(packets)))
@@ -523,7 +523,7 @@ async def test_a_sweep_with_nothing_active_is_not_available(monkeypatch):
 
 
 # ---------------------------------------------------------------------------
-# `>wmap [all] [states]` (spec 7C.1 and 8.2, revision 10)
+# `>wmap [all] [states]` (spec 12.3 and 14, revision 10)
 # ---------------------------------------------------------------------------
 
 

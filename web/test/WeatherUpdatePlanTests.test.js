@@ -131,7 +131,7 @@ test('a list older than three hours and a quarter is asked for again', () => {
 })
 
 test('an old list the channel delivered a minute ago is held back, not called current', () => {
-  // Airtime etiquette (spec §13): the channel delivered it a minute ago, so the bot would only
+  // Airtime etiquette (spec §19): the channel delivered it a minute ago, so the bot would only
   // rebuild the same answer. Not current either, so nothing claims it is.
   const built = plan(withDigest(P.state(), { builtMinutesAgo: 200, receivedAt: P.now - 60 * 1000 }))
   assert.ok(WeatherUpdatePlan.isEmpty(built))
@@ -545,7 +545,7 @@ test('a complete statement that excludes the place asks by its zone and county',
 })
 
 test('a cut zone list is unknown and asks for nothing by area', () => {
-  // A zone list the bot had to cut says "not listed", never "not covered" (spec §7A). Unknown
+  // A zone list the bot had to cut says "not listed", never "not covered" (spec §10). Unknown
   // spends no airtime.
   const built = dallasPlan(P.stating({ ...P.statement, zones_cut: true }))
   assert.ok(!items(built).includes('areaAlerts'))

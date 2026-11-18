@@ -9,6 +9,7 @@ import {
   WeatherAlertPlacement,
   WeatherAlertPriority,
   WeatherAlertStatus,
+  WeatherConditions,
   WeatherCoverage,
   WeatherForecastCard,
   WeatherForecastRowLabel,
@@ -620,6 +621,20 @@ test('stale readings in reach are still offered, marked stale', () => {
   const primary = primaryOf(P.state({ observationsAgo: 3 * 3600 }), P.place(P.austin))
   assert.equal(primary.kind, 'reading')
   assert.ok(primary.value.isStale)
+})
+
+test('a reading five hours old is still the weather here, and over twelve it is not', () => {
+  // 2026-10-16: "No current conditions for Austin, TX" while the phone held Camp Mabry from five
+  // hours before. Up to twelve hours the page shows it, marked stale; past that it asks.
+  const stale = primaryOf(P.state({ observationsAgo: 5 * 3600 }), P.place(P.austin))
+  assert.equal(stale.kind, 'reading')
+  assert.ok(stale.value.isStale && !stale.value.isTooOld)
+  assert.equal(WeatherConditions.make({ primary: stale, nearbyStation: null }).kind, 'reading')
+
+  const old = primaryOf(P.state({ observationsAgo: 13 * 3600 }), P.place(P.austin))
+  assert.ok(old.value.isTooOld)
+  const conditions = WeatherConditions.make({ primary: old, nearbyStation: null })
+  assert.deepEqual(conditions, WeatherConditions.ask({ icao: old.value.station.icao, kilometres: old.value.distanceKilometres }))
 })
 
 test('Dallas gets the nearest station named, not a reading', () => {

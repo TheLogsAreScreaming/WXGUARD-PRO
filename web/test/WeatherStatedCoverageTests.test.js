@@ -1,6 +1,6 @@
 // Port of MC1Services/Tests/MC1ServicesTests/Weather/Screen/WeatherStatedCoverageTests.swift
 //
-// The bot's own coverage statement (spec §7A) deciding in, out and unknown, the station footprint
+// The bot's own coverage statement (spec §10) deciding in, out and unknown, the station footprint
 // still deciding for a bot that has not stated one, and the single office claim the statement
 // supports (docs/MESHWX_UI.md §3.1 I-B18, §7.4).
 

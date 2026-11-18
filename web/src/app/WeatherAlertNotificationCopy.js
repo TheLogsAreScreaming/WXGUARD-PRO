@@ -45,7 +45,7 @@ export const WeatherAlertNotificationCopyImpl = Object.freeze({
         } else {
           parts.push(place)
         }
-        // When it applies, without the countdown (spec §10.2, revision 12): "40 min left" in a
+        // When it applies, without the countdown (spec §18.2, revision 12): "40 min left" in a
         // notification centre is stale the moment it is read, and a watch not yet in effect says
         // "from Wed 7:00 PM until Fri 7:00 PM" rather than looking as if it were in force.
         parts.push(

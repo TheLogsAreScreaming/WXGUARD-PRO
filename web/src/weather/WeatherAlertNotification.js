@@ -159,7 +159,7 @@ export const WeatherAlertDefaultCopy = {
 
   /**
    * The one tag worth a line in a notification: what the warning is being called for, in the
-   * order spec §10.2 lists them.
+   * order spec §18.2 lists them.
    *
    * Computed from the decoded warning's own fields rather than through
    * `MeshWXPresentation.tags`, whose associated-value cases have no settled JS spelling yet; the

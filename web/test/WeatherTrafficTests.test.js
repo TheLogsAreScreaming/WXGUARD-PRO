@@ -146,7 +146,7 @@ describe('WeatherTrafficSummary', () => {
   it('names the kind and then what this one carries', () => {
     assert.deepStrictEqual(summary(observations()), { title: 'Observations', detail: '2 stations' })
 
-    // Packet numbers are zero-based on the wire (spec §7C, §8.1) and one-based for a reader:
+    // Packet numbers are zero-based on the wire (spec §12, §8) and one-based for a reader:
     // nobody counting packets on a screen starts at nought.
     assert.deepStrictEqual(
       summary(sweep()), { title: 'Alert map', detail: 'part 3 of 7 · 6 areas · the whole country' },
@@ -172,7 +172,7 @@ describe('WeatherTrafficSummary', () => {
   })
 
   /**
-   * Spec §7D, revision 11: "Radar picture · Local · 214 cells with precipitation". The width
+   * Spec §13, revision 11: "Radar picture · Local · 214 cells with precipitation". The width
    * rather than the tile's corner — a tile is two degrees, which is 222 km tall everywhere and a
    * different width at every latitude, so the corner is a number nobody can picture.
    */
@@ -327,7 +327,7 @@ describe('WeatherTrafficSummary', () => {
   /**
    * A scoped packet that is not the one the scope rides on cannot say what it covers, and "no
    * states" must not read as "nothing": its entries are real and are drawn, and which states were
-   * asked for is simply not in these bytes (spec §7C).
+   * asked for is simply not in these bytes (spec §12).
    */
   it('a scoped sweep names the states it covers, or says it cannot tell', () => {
     const scoped = (fields) => MeshWXEncoder.areaSweep({
@@ -492,7 +492,7 @@ describe('WeatherService channel traffic', () => {
       { title: 'Request sent', detail: '>part 212 1,4' },
     )
 
-    // Spec §7B: waited on for 10 s, then sent once more — the same bytes — and never a third time.
+    // Spec §11: waited on for 10 s, then sent once more — the same bytes — and never a third time.
     await h.clock.advance(10)
     rows = h.service.trafficLog.entries()
     assert.equal(rows.length, 2)

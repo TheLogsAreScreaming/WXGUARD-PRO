@@ -1,7 +1,7 @@
 // Port of MC1ServicesTests/Weather/WeatherRequestTests.swift (docs/PORTING.md).
 //
 // The request grammar is the one part of the protocol the app *sends*, so every line of the
-// spec §8.2 table is pinned here byte for byte.
+// spec §14 table is pinned here byte for byte.
 
 import assert from 'node:assert/strict'
 import { describe, it } from 'node:test'
@@ -49,7 +49,7 @@ describe('WeatherRequest', () => {
     }
   })
 
-  // Spec §8.3 lists the letters a Not-available reply can carry: w, o, f, a, s, r, m, t, h, d.
+  // Spec §9 lists the letters a Not-available reply can carry: w, o, f, a, s, r, m, t, h, d.
   it('request letters are the first letter after the prefix', () => {
     assert.equal(R.requestLetter(R.digest), 'd')
     assert.equal(R.requestLetter(R.activeWarnings), 'w')
@@ -65,25 +65,25 @@ describe('WeatherRequest', () => {
     assert.equal(R.requestLetter(R.hazardousOutlook), 'h')
     assert.equal(R.requestLetter(R.coverage), 'c')
     // The sweep rides on `w` like every other warning request, so a refusal for it comes back
-    // under the same letter (spec §8.3).
+    // under the same letter (spec §9).
     assert.equal(R.requestLetter(R.areaSweep({ includesAdvisories: false })), 'w')
     assert.equal(R.requestLetter(R.areaSweep({ includesAdvisories: true })), 'w')
     // Revision 11's exception, and the only one: `>radar` is refused under `x`, because `r` is
-    // already `>rain` and a refusal names no argument (spec §7D).
+    // already `>rain` and a refusal names no argument (spec §13).
     assert.equal(R.requestLetter(R.radar({ latitude: 30.27, longitude: -97.74 })), 'x')
     assert.equal(R.requestLetter(R.radar({ latitude: 30.27, longitude: -97.74, zoom: 3 })), 'x')
   })
 
-  // Spec §7A: a statement describes the bot that sent it, so another bot's — or another
+  // Spec §10: a statement describes the bot that sent it, so another bot's — or another
   // bot's answer to somebody else — says nothing about this one's area.
   it('only the bot asked can answer for its own area', () => {
     assert.equal(R.acceptsAnswerFromAnyBot(R.coverage), false)
     assert.equal(R.acceptsAnswerFromAnyBot(R.observations), false)
     assert.equal(R.acceptsAnswerFromAnyBot(R.observation({ station: 'KAUS' })), true)
-    // Spec §7C: a sweep is one bot's reading of the country, cut where its own feed runs out.
+    // Spec §12: a sweep is one bot's reading of the country, cut where its own feed runs out.
     assert.equal(R.acceptsAnswerFromAnyBot(R.areaSweep({ includesAdvisories: false })), false)
     assert.equal(R.acceptsAnswerFromAnyBot(R.areaSweep({ includesAdvisories: true })), false)
-    // Spec §7D: a tile is a named square of the earth cut from a national mosaic, so another
+    // Spec §13: a tile is a named square of the earth cut from a national mosaic, so another
     // bot's picture of it is this question's answer.
     assert.equal(R.acceptsAnswerFromAnyBot(R.radar({ latitude: 30.27, longitude: -97.74 })), true)
   })
@@ -232,9 +232,9 @@ describe('WeatherRequest', () => {
   // MARK: - Revision 11
 
   /**
-   * Spec §7D: the zoom is left off at 0, because that is the form the bot's grammar leads with
+   * Spec §13: the zoom is left off at 0, because that is the form the bot's grammar leads with
    * and `z0` would be the same request in bytes nobody else sends. The longest `>radar` there
-   * is, `>radar -30.270,-197.740 z3`, is 26 of the 40 bytes a Request datagram carries (§7B).
+   * is, `>radar -30.270,-197.740 z3`, is 26 of the 40 bytes a Request datagram carries (§11).
    */
   it('a radar request is a coordinate and, past zoom 0, a width', () => {
     const austin = R.radar({ latitude: 30.27, longitude: -97.74 })

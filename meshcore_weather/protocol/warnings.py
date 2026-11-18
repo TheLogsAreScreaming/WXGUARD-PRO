@@ -25,8 +25,10 @@ from pathlib import Path
 from pyiem.nws.products import parser as pyiem_parser
 from pyiem.nws.ugc import UGC, UGCProvider
 
-from meshcore_weather.core.vtec_names import event_code
+from meshcore_weather.core.vtec_names import event_code, long_name
+from meshcore_weather.parser.pfm import TZ_ABBR_OFFSET
 from meshcore_weather.parser.weather import (
+    EMWINProduct,
     WeatherStore,
     _expand_zone_ranges,
     extract_warning_polygon,
@@ -147,17 +149,48 @@ _WARNING_PRODUCT_TYPES = {
     "SMW", "SWO", "DSW", "EWW", "SQW", "CFW",
     # River products (VTEC-based)
     "RVA",  # River Watch/Warning — flood stage warnings with VTEC
-    # SPC watch products (VTEC-based). NOTE: "AWW" is the Airport Weather
-    # Warning (no VTEC, airport ops only) — not an SPC watch; do not add it.
-    "WCN",  # Watch County Notification — counties in a watch
-    "WOU",  # Watch Outline Update — zone/county list for an SPC watch
+    # Tornado and severe thunderstorm watches. NOTE: "AWW" is the Airport
+    # Weather Warning (no VTEC, airport ops only) — not an SPC watch; do not
+    # add it.
+    "WCN",  # Watch County Notification: each office's counties in a watch
+    # Not "WOU", SPC's Watch Outline Update. It carries the same watch under
+    # office WNS with every office's counties, so each watch would go out
+    # twice; it re-sends shrinking county lists as CON without clearing the
+    # counties it drops, and ends the watch with state-wide codes (DCZ000) a
+    # per-zone replay cannot apply, so a WNS event would outlive the watch.
+    # The WCNs are what NWS (api.weather.gov) lists, county by county; on 14
+    # and 16 Oct 2026 the dish's WCNs named every county the WOUs did.
     # Hurricane products (VTEC-based)
-    "HLS",  # Hurricane Local Statement
+    "HLS",  # Hurricane Local Statement (VTEC in the Pacific; Guam's typhoon warnings)
+    # Since 2015 the Atlantic and Gulf HLS carries no VTEC: the Tropical
+    # Cyclone VTEC product (TCV) is the one that names, zone by zone, the
+    # hurricane, tropical storm and storm surge watches and warnings. Where
+    # an office's HLS does carry VTEC it is the same event (same ETN), which
+    # the lifecycle replay merges, so nothing is counted twice.
+    "TCV",
+    # Flash Flood Statement: the CON / CAN / EXP updates to a Flash Flood
+    # Warning (same office, same ETN). Without it an FFS that cancelled a
+    # warning, or cut it to part of its area, was never applied, and the
+    # warning stayed active to its original end (LUB and MAF, 2026-10-14).
+    "FFS",
+    "TSU",  # Tsunami warnings, advisories and watches (NTWC / PTWC, VTEC)
+    "AQA",  # Air Quality Alert: no VTEC, ends at its UGC expiry
 }
 
-# SPS products don't carry VTEC; they get the WARN_SPECIAL type and
+# SPS and AQA products don't carry VTEC; they get the WARN_SPECIAL type and
 # advisory-level severity by default.
-_NON_VTEC_TYPES = {"SPS"}
+_NON_VTEC_TYPES = {"SPS", "AQA"}
+
+# The name a reply uses for a product without VTEC (SPS keeps the generic
+# "Special Wx Stmt"). The wire has no event code for these and sends the SPS
+# one (vtec_names: the event table is append-only and shared with every app).
+_NON_VTEC_NAMES = {"AQA": "AIR QUALITY ALERT"}
+
+# Non-VTEC products whose newer issuance replaces the older one for the
+# same area: an Air Quality Alert reissued for the same zones is the same
+# alert, not a second one.
+_SUPERSEDING_NON_VTEC = {"AQA"}
+_ENDED_RE = re.compile(r"\b(CANCEL|EXPIRED|HAS ENDED|NO LONGER IN EFFECT)", re.IGNORECASE)
 
 
 # -- Cancellation actions (VTEC significance) --------------------------------
@@ -205,15 +238,52 @@ def _extract_headline_from_body(text: str) -> str:
 
     Looks for lines wrapped in triple-dots like:
       ...RED FLAG WARNING REMAINS IN EFFECT FROM NOON TO 8 PM CDT...
+    A headline that wraps is read to its closing dots ("...FLASH FLOOD
+    WARNING REMAINS IN EFFECT UNTIL 715 PM CDT THIS" / "EVENING FOR ...
+    COUNTIES...", LUB's FFS of 2026-10-14, which pyIEM did not read), not
+    cut at the end of its first line.
     """
-    for line in text.splitlines():
+    lines = text.splitlines()
+    for i, line in enumerate(lines):
         s = line.strip()
         if s.startswith("...") and len(s) > 10:
-            # Strip the dots and return
-            clean = s.strip(".")
+            parts = [s]
+            for nxt in lines[i + 1:i + 5]:
+                if parts[-1].endswith("...") or not nxt.strip():
+                    break
+                parts.append(nxt.strip())
+            clean = " ".join(parts).strip(".").strip()
             if clean and not any(x in clean.lower() for x in ("www.", "http")):
                 return clean
     return ""
+
+
+def _vtec_headline(vtec, parsed, end: datetime | None, until_further_notice: bool) -> str:
+    """'Tornado Watch 600 until 6:59 PM CDT', from the VTEC line and the event
+    name, for a product with no headline of its own. The time is in the
+    product's own zone (its header's abbreviation), with the day when that is
+    not the day of issue; the number only for an SPC watch, which people know
+    by it. Empty for an event the name table does not know."""
+    name = long_name(vtec.phenomena, vtec.significance)
+    if not name or "." in name:
+        return ""
+    if vtec.significance == "A" and vtec.phenomena in ("TO", "SV") and vtec.etn:
+        name = f"{name} {int(vtec.etn)}"
+    if until_further_notice:
+        return f"{name} until further notice"
+    if end is None:
+        return name
+    abbr = str(getattr(parsed, "z", "") or "").upper()
+    offset = TZ_ABBR_OFFSET.get(abbr)
+    if offset is None:
+        abbr, offset = "UTC", 0
+    local = end + timedelta(hours=offset)
+    clock = f"{local.hour % 12 or 12}:{local.minute:02d} {'AM' if local.hour < 12 else 'PM'}"
+    out = f"{name} until {clock} {'ChST' if abbr == 'CHST' else abbr}"
+    issued = getattr(parsed, "valid", None)
+    if isinstance(issued, datetime) and (issued + timedelta(hours=offset)).date() != local.date():
+        out += f" {local:%a}"
+    return out
 
 
 def _extract_warning_description(text: str) -> str:
@@ -231,7 +301,7 @@ def _extract_warning_description(text: str) -> str:
     Watch's text stopped at "WHEN: From" on the phone. The one reader is the
     `>wt` reply, and `text_messages` fits that to the eight packets a reply
     may take, at a sentence, and flags the cut when it has to make one
-    (spec 8.1). Two limits, the tighter one silent, is how a phone came to
+    (spec 8). Two limits, the tighter one silent, is how a phone came to
     show a truncated warning as if it were whole.
     """
     lines: list[str] = []
@@ -314,6 +384,7 @@ def _extract_warnings_pyiem(store: WeatherStore, now: datetime | None = None) ->
         del _parsed_cache[stale]
 
     parsed_items: list[tuple] = []
+    failed: list[EMWINProduct] = []
     for prod in products:
         if prod.product_type not in _WARNING_PRODUCT_TYPES:
             continue
@@ -322,14 +393,33 @@ def _extract_warnings_pyiem(store: WeatherStore, now: datetime | None = None) ->
             try:
                 parsed = pyiem_parser(prod.raw_text, ugc_provider=provider)
             except Exception as exc:  # pyIEM can raise on malformed input
-                logger.debug("pyIEM parse failed for %s: %s", prod.filename, exc)
+                # Once per product (the cache remembers the failure), at a
+                # level that is read: a dropped warning used to leave no trace
+                # above DEBUG.
+                logger.warning("pyIEM parse failed for %s: %s", prod.filename, exc)
                 parsed = _PARSE_FAILED
             _parsed_cache[prod.filename] = parsed
         if parsed is _PARSE_FAILED:
+            failed.append(prod)
             continue
         parsed_items.append((parsed, prod))
 
     results: list[dict] = []
+
+    # -- Products pyIEM rejected: the regex extractor, one product at a time --
+    # At least the headline, zones and VTEC expiry survive, so the warning is
+    # broadcast rather than silently missing. The fallback knows nothing of
+    # the lifecycle, so a later CAN for the same event is only honoured when
+    # it, too, is in a product pyIEM rejected (`_is_cancelled` reads the
+    # product's own VTEC action).
+    for prod in failed:
+        try:
+            entry = _fallback_entry(store, prod, now)
+        except Exception as exc:  # noqa: BLE001 - one unreadable product must not cost the rest
+            logger.warning("Fallback extraction failed for %s too: %s", prod.filename, exc)
+            continue
+        if entry is not None:
+            results.append(entry)
 
     # -- VTEC events: replay the lifecycle -----------------------------------
     tracker = VtecTracker()
@@ -343,15 +433,28 @@ def _extract_warnings_pyiem(store: WeatherStore, now: datetime | None = None) ->
         del entry["_dedup_key"]
         results.append(entry)
 
-    # -- Non-VTEC (SPS): newest product per (office, type, valid) -------------
+    # -- Non-VTEC (SPS, AQA): newest product per (office, type, valid) --------
+    # An AQA reissued for an area replaces the older one there (and one that
+    # says the alert has ended clears it), so a place never hears of two.
     seen: set[tuple] = set()
-    for parsed, prod in sorted(parsed_items, key=lambda x: x[1].timestamp, reverse=True):
+    claimed: dict[tuple, set[str]] = {}
+    newest_first = sorted(parsed_items, reverse=True,
+                          key=lambda x: (getattr(x[0], "valid", None) or x[1].timestamp, x[1].timestamp))
+    for parsed, prod in newest_first:
         if prod.product_type not in _NON_VTEC_TYPES:
             continue
         for seg in parsed.segments:
             if seg.vtec:
                 continue
-            entry = _segment_to_entry(seg, parsed, prod, now)
+            only: set[str] | None = None
+            if prod.product_type in _SUPERSEDING_NON_VTEC:
+                ugcs = {str(u) for u in seg.ugcs}
+                done = claimed.setdefault((prod.office, prod.product_type), set())
+                only = ugcs - done
+                done |= ugcs
+                if not only or _ENDED_RE.search(" ".join(seg.headlines or [])):
+                    continue
+            entry = _segment_to_entry(seg, parsed, prod, now, only_ugcs=only)
             if entry is None or entry["_dedup_key"] in seen:
                 continue
             seen.add(entry["_dedup_key"])
@@ -362,35 +465,51 @@ def _extract_warnings_pyiem(store: WeatherStore, now: datetime | None = None) ->
 
 def _segment_to_entry(
     seg, parsed, prod, now: datetime, vtec=None, vtec_index: int = 0, tracker_state=None,
+    only_ugcs: set[str] | None = None,
 ) -> dict | None:
     """Convert one VTEC event of a pyIEM product segment to a warning dict.
 
     `vtec` selects which of the segment's VTEC lines this entry describes
     (segments can carry more than one); None means "the first one", or the
     non-VTEC path for products like SPS. `vtec_index` picks the matching
-    headline when the segment has one headline per event.
+    headline when the segment has one headline per event. `only_ugcs` keeps
+    a non-VTEC segment to the part of its area no newer issuance covers.
 
     Returns None if the event should be skipped (cancelled, expired, no
     extractable data, etc.).
     """
     ugcs = [str(u) for u in seg.ugcs]
+    if only_ugcs is not None:
+        ugcs = [u for u in ugcs if u in only_ugcs]
     if tracker_state is not None:
         # The event's current zones and times come from the lifecycle replay,
         # not from this one segment.
         ugcs = sorted(tracker_state.active_zones(now))
+    # The area is the UGC list, zones (TXZ192) and counties (TXC453) alike.
+    # A watch (WCN) names counties only and has no polygon; requiring a
+    # polygon or a zone here dropped every tornado and severe thunderstorm
+    # watch before anything downstream saw it.
     if not ugcs:
         return None
 
     # -- VTEC path (most warnings: TOR, SVR, SVS, FFW, WSW, etc.) --
     expires_estimated = False
+    until_further_notice = False
+    event_name = None
     if seg.vtec:
         if vtec is None:
             vtec = seg.vtec[0]
         if tracker_state is not None:
             expires_at = tracker_state.expires_at(now)
             if expires_at is None:
-                # Until further notice: give the client something finite.
-                expires_at = now + timedelta(hours=12)
+                # Until further notice (VTEC end 000000T0000Z). Replies say
+                # so; the wire needs a finite time and gets the one the bot
+                # keeps the event to without a new statement (its UGC expiry
+                # plus vtec_events.UFN_GRACE), flagged as invented. It moves
+                # only when a statement arrives; "now + 12 h" moved with the
+                # clock, and so re-sent the warning every 30 minutes (spec 3).
+                until_further_notice = tracker_state.until_further_notice(now)
+                expires_at = tracker_state.kept_until(now) or now + timedelta(hours=12)
                 expires_estimated = True
             onset_at = tracker_state.onset_at(now)
         else:
@@ -434,17 +553,14 @@ def _segment_to_entry(
             "vtec_office": prod.office,
             "vtec_etn": None,
         }
-        event = event_code(None, None)   # SPS
+        event = event_code(None, None)   # SPS (the wire's one non-VTEC event)
+        event_name = _NON_VTEC_NAMES.get(prod.product_type)
     else:
         return None
 
-    # Polygon and zone splitting
+    # Polygon, and the zones among the UGCs (`ugcs` keeps the counties too)
     vertices = _polygon_from_sbw(seg.sbw)
     zones = [u for u in ugcs if len(u) == 6 and u[2] == "Z"]
-
-    # Need something renderable
-    if len(vertices) < 3 and not zones:
-        return None
 
     # Headline: prefer pyIEM's canonical ...HEADLINE... block.
     # Fall back to extracting ...TEXT... from the raw product if empty.
@@ -454,7 +570,16 @@ def _segment_to_entry(
     else:
         headline_raw = headlines[0] if headlines else ""
     if not headline_raw:
-        headline_raw = _extract_headline_from_body(prod.raw_text)
+        # This segment's own headline first: in a product of several
+        # segments the first one in the text may be another area's.
+        headline_raw = (_extract_headline_from_body(getattr(seg, "unixtext", "") or "")
+                        or _extract_headline_from_body(prod.raw_text))
+    if not headline_raw and seg.vtec:
+        # A watch county notification (WCN) or a TCV has no ...HEADLINE...:
+        # say what it is from the VTEC line rather than "Active warning",
+        # which was all `>wt` returned for a tornado watch.
+        headline_raw = _vtec_headline(vtec, parsed, None if expires_estimated else expires_at,
+                                      until_further_notice)
     headline = _shorten_headline(headline_raw)
 
     # Description: structured detail lines (Wind, Humidity, Timing, Impacts)
@@ -486,7 +611,9 @@ def _segment_to_entry(
         "onset_unix_min": onset_unix_min,
         "issued_at": issued_at,        # the product's own issuance (spec 3, revision 5)
         "expires_at": expires_at,      # canonical absolute expiry (NWS-authoritative)
-        "expires_estimated": expires_estimated,  # invented (until further notice): moves with the clock
+        "expires_estimated": expires_estimated,  # invented (until further notice): not NWS's time
+        "until_further_notice": until_further_notice,  # VTEC end 000000T0000Z: replies say so, not a time
+        "event_name": event_name,      # a reply's name for a non-VTEC product (AQA); None = from the VTEC
         "expiry_minutes": expiry_minutes,  # convenience — minutes from "now"
         "vertices": vertices,
         "headline": headline,
@@ -497,7 +624,7 @@ def _segment_to_entry(
         "product_type": prod.product_type,
         "filename": prod.filename,
         # How the bot got the product this warning was read out of, for the
-        # wire's source field (spec 2.2.1, revision 7).
+        # wire's source field (spec 2.3, revision 7).
         "source": getattr(prod, "source", ""),
         "_dedup_key": dedup_key,
         **vtec_meta,
@@ -531,8 +658,6 @@ def _parse_vtec_end_datetime(end_str: str) -> datetime | None:
 
 def _extract_warnings_fallback(store: WeatherStore) -> list[dict]:
     """Legacy hand-rolled extraction. Only used if pyIEM parsing crashes globally."""
-    from meshcore_weather.parser.weather import parse_vtec  # local import to avoid cycles
-
     now = datetime.now(timezone.utc)
     results: list[dict] = []
     seen: set[str] = set()
@@ -544,65 +669,80 @@ def _extract_warnings_fallback(store: WeatherStore) -> list[dict]:
         if key in seen:
             continue
         seen.add(key)
-        if store._is_cancelled(prod.raw_text):
-            continue
-
-        vertices = extract_warning_polygon(prod.raw_text)
-        zones = _expand_zone_ranges(prod.raw_text)
-        if len(vertices) < 3 and not zones:
-            continue
-
-        wtype = PRODUCT_TYPE_MAP.get(prod.product_type, WARN_OTHER)
-        vtec = parse_vtec(prod.raw_text)
-        expires_at: datetime | None = None
-        if vtec:
-            severity = VTEC_SEVERITY_MAP.get(vtec["significance"], SEV_WARNING)
-            expires_at = _parse_vtec_end_datetime(vtec["end"])
-        else:
-            severity = SEV_WARNING
-
-        expires_estimated = expires_at is None
-        if expires_at is None:
-            # Last-resort default: 2 hours from now. Only applied in the
-            # fallback path for products with no VTEC.
-            expires_at = now.replace(second=0, microsecond=0)
-            expires_at = expires_at.replace(hour=(expires_at.hour + 2) % 24)
-
-        if expires_at <= now:
-            continue  # expired
-
-        expiry_minutes = max(0, int((expires_at - now).total_seconds() / 60))
-
-        # Fallback path has no VTEC onset; assume effective immediately
-        onset_at = now
-
-        results.append({
-            "warning_type": wtype,
-            "severity": severity,
-            "onset_at": onset_at,
-            "onset_unix_min": int(onset_at.timestamp() / 60),
-            # No parsed product header on this path, and the filename's time is
-            # when the bot received the file, not when NWS issued it: say
-            # nothing rather than something wrong (spec 3, revision 5).
-            "issued_at": None,
-            "expires_at": expires_at,
-            "expires_estimated": expires_estimated,
-            "expiry_minutes": expiry_minutes,
-            "vertices": vertices,
-            "headline": _shorten_headline(store._short_headline(prod.raw_text)),
-            "description": _extract_warning_description(prod.raw_text),
-            "zones": sorted(zones),
-            "ugcs": sorted(zones),
-            "product_type": prod.product_type,
-            "filename": prod.filename,
-            "source": getattr(prod, "source", ""),
-            "vtec_action": (vtec or {}).get("action"),
-            "vtec_phenomenon": (vtec or {}).get("phenomenon"),
-            "vtec_significance": (vtec or {}).get("significance"),
-            "vtec_office": None,
-            "vtec_etn": None,
-        })
+        entry = _fallback_entry(store, prod, now)
+        if entry is not None:
+            results.append(entry)
     return results
+
+
+def _fallback_entry(store: WeatherStore, prod: EMWINProduct, now: datetime) -> dict | None:
+    """One product's warning by regex alone: the first VTEC line, the UGC
+    zones and counties, the polygon and the headline. None when the product
+    is cancelled, expired, or names no area. Used for every product when
+    pyIEM crashes outright, and for the one product pyIEM refuses to parse."""
+    from meshcore_weather.parser.weather import parse_vtec  # local import to avoid cycles
+
+    if store._is_cancelled(prod.raw_text):
+        return None
+
+    vertices = extract_warning_polygon(prod.raw_text)
+    ugcs = _expand_zone_ranges(prod.raw_text)      # zones and counties
+    zones = {u for u in ugcs if u[2] == "Z"}
+    if len(vertices) < 3 and not ugcs:
+        return None
+
+    wtype = PRODUCT_TYPE_MAP.get(prod.product_type, WARN_OTHER)
+    vtec = parse_vtec(prod.raw_text)
+    expires_at: datetime | None = None
+    if vtec:
+        severity = VTEC_SEVERITY_MAP.get(vtec["significance"], SEV_WARNING)
+        expires_at = _parse_vtec_end_datetime(vtec["end"])
+    else:
+        severity = SEV_WARNING
+
+    expires_estimated = expires_at is None
+    if expires_at is None:
+        # Last-resort default: 2 hours from now. Only applied in the
+        # fallback path for products with no VTEC.
+        expires_at = now.replace(second=0, microsecond=0)
+        expires_at = expires_at.replace(hour=(expires_at.hour + 2) % 24)
+
+    if expires_at <= now:
+        return None  # expired
+
+    expiry_minutes = max(0, int((expires_at - now).total_seconds() / 60))
+
+    # Fallback path has no VTEC onset; assume effective immediately
+    onset_at = now
+
+    return {
+        "warning_type": wtype,
+        "severity": severity,
+        "onset_at": onset_at,
+        "onset_unix_min": int(onset_at.timestamp() / 60),
+        # No parsed product header on this path, and the filename's time is
+        # when the bot received the file, not when NWS issued it: say
+        # nothing rather than something wrong (spec 3, revision 5).
+        "issued_at": None,
+        "expires_at": expires_at,
+        "expires_estimated": expires_estimated,
+        "expiry_minutes": expiry_minutes,
+        "vertices": vertices,
+        # (`store._short_headline` was called here, and never existed: the
+        # global fallback had been crashing on its first product.)
+        "headline": _shorten_headline(_extract_headline_from_body(prod.raw_text)),
+        "description": _extract_warning_description(prod.raw_text),
+        "zones": sorted(zones),
+        "ugcs": sorted(ugcs),
+        "product_type": prod.product_type,
+        "filename": prod.filename,
+        "source": getattr(prod, "source", ""),
+        "vtec_action": (vtec or {}).get("action"),
+        "vtec_phenomenon": (vtec or {}).get("phenomenon"),
+        "vtec_significance": (vtec or {}).get("significance"),
+        "vtec_office": None,
+        "vtec_etn": None,
+    }
 
 
 # -- Public API ---------------------------------------------------------------
@@ -666,17 +806,24 @@ def extract_active_warnings(
     filter_active = coverage is not None and not coverage.is_empty()
     results: list[dict] = []
     for w in raw:
-        if filter_active:
-            ugcs = w.get("ugcs") or w.get("zones", [])
-            if ugcs and coverage.covers_any(ugcs):
-                pass
-            elif w.get("vertices") and coverage.covers_polygon(w["vertices"]):
-                pass
-            else:
-                continue
+        if filter_active and not _in_coverage(w, coverage):
+            continue
         results.append(w)
 
     return results
+
+
+def _in_coverage(w: dict, coverage: Coverage) -> bool:
+    """A warning is in coverage when its area touches it. A storm-based
+    warning's area is its polygon: the counties on its UGC line are only the
+    ones the polygon touches, so they do not count on their own (its zones
+    still do). A product without a polygon is its zones and counties: a
+    tornado watch for Travis County is in an Austin bot's coverage."""
+    ugcs = w.get("ugcs") or w.get("zones", [])
+    has_polygon = len(w.get("vertices") or []) >= 3
+    if ugcs and coverage.covers_any(ugcs, by_county=not has_polygon):
+        return True
+    return has_polygon and coverage.covers_polygon(w["vertices"])
 
 
 def warnings_to_binary(warnings: list[dict], prefer_zones: bool = True) -> list[bytes]:

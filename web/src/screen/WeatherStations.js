@@ -5,10 +5,12 @@ import { WeatherGeo } from './WeatherGeo.js'
 
 /**
  * One station's newest reading across every bot, placed against the place:
- * `{ index, station, stored, botID, distanceKilometres, direction, isStale, isInFootprint,
- * isInLatestBatch }`.
+ * `{ index, station, stored, botID, distanceKilometres, direction, isStale, isTooOld,
+ * isInFootprint, isInLatestBatch }`.
  *
  * - `direction` is from the place towards the station.
+ * - `isStale`: over two hours old, shown with its age. `isTooOld`: over twelve, not shown at all
+ *   (`MeshWXPresentation.observationShownForMinutes`).
  * - `isInFootprint`: the station has been in one of a bot's scheduled batches in the last day, so
  *   it is in that bot's area, whoever's request delivered the reading held now.
  * - `isInLatestBatch`: the station is in the newest scheduled batch its bot has sent, so a bare
@@ -24,10 +26,13 @@ export const WeatherStationReading = Object.freeze({
     distanceKilometres = null,
     direction = null,
     isStale,
+    isTooOld = false,
     isInFootprint,
     isInLatestBatch,
   }) {
-    return { index, station, stored, botID, distanceKilometres, direction, isStale, isInFootprint, isInLatestBatch }
+    return {
+      index, station, stored, botID, distanceKilometres, direction, isStale, isTooOld, isInFootprint, isInLatestBatch,
+    }
   },
 
   id(reading) {
@@ -75,6 +80,7 @@ export const WeatherStations = Object.freeze({
           distanceKilometres: place == null ? null : WeatherGeo.kilometres(place.coordinate, coordinate),
           direction: place == null ? null : WeatherGeo.direction({ from: place.coordinate, to: coordinate }),
           isStale: WeatherStoredObservation.isStale(entry.stored, { at: now }),
+          isTooOld: WeatherStoredObservation.isTooOld(entry.stored, { at: now }),
           isInFootprint: footprint.has(index),
           isInLatestBatch:
             entry.stored.lastBatchMinutes != null && entry.stored.lastBatchMinutes === latestBatch.get(entry.botID),
@@ -161,8 +167,10 @@ export const WeatherPrimaryStation = Object.freeze({
   },
 
   /**
-   * Fresh with a temperature, then fresh, then stale with a temperature, then stale — each the
-   * nearest within 80 km. All fields come from the one station chosen.
+   * Fresh with a temperature, then fresh, then stale but young enough to show with its age (with a
+   * temperature, then without), then anything — each the nearest within 80 km. All fields come
+   * from the one station chosen. A nearby station silent for a day must not hide one a little
+   * further off that reported five hours ago: the page would ask instead of showing it.
    */
   pick({ readings, place }) {
     if (readings.length === 0) return WeatherPrimaryStation.noObservations
@@ -173,6 +181,8 @@ export const WeatherPrimaryStation = Object.freeze({
     const choice =
       inReach.find((reading) => !reading.isStale && reading.stored.observation.temp_f != null) ??
       inReach.find((reading) => !reading.isStale) ??
+      inReach.find((reading) => !reading.isTooOld && reading.stored.observation.temp_f != null) ??
+      inReach.find((reading) => !reading.isTooOld) ??
       inReach.find((reading) => reading.stored.observation.temp_f != null) ??
       inReach[0]
     if (choice != null) return WeatherPrimaryStation.reading(choice)

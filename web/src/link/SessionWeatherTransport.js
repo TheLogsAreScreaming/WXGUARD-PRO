@@ -24,20 +24,20 @@ export { WeatherChannel, WeatherTransportError, hashSecret }
  */
 export const CHANNEL_SLOTS = 40
 
-// MARK: - The v5 Request datagram (type 9, spec §7B)
+// MARK: - The v5 Request datagram (type 9, spec §11)
 
 /** MeshCore `data_type` carrying a v5 message (development range, spec §2.1). */
 export const MESHWX_DATA_TYPE = 0xff10
 /**
  * Bytes of the sender's public key a Request carries: the same six-byte prefix a DM
- * identifies the phone by, so one phone's DM and its datagram are one sender (spec §7B).
+ * identifies the phone by, so one phone's DM and its datagram are one sender (spec §11).
  */
 export const REQUEST_SENDER_PREFIX_SIZE = 6
-/** UTF-8 bytes a Request's text may take (spec §7B). */
+/** UTF-8 bytes a Request's text may take (spec §11). */
 export const MAX_REQUEST_TEXT_BYTES = 40
 
 /**
- * The Request datagram's bytes, header and all (spec §7B):
+ * The Request datagram's bytes, header and all (spec §11):
  *
  *   `[seq:1][bot u16 LE:2][(type << 4) | flags = 0x90 :1][sender:6][ts u32 LE:4][text ≤ 40]`
  *
@@ -48,7 +48,7 @@ export const MAX_REQUEST_TEXT_BYTES = 40
  * @param {number} args.botID the bot asked; `0xFFFF` asks them all
  * @param {Uint8Array} args.senderPrefix the first six bytes of this radio's public key
  * @param {number} args.timestamp Unix **seconds** (not milliseconds); a resend repeats it
- * @param {string} args.text the §8.2 request, starting with `>`
+ * @param {string} args.text the §14 request, starting with `>`
  */
 export function encodeRequestDatagram({ seq, botID, senderPrefix, timestamp, text }) {
   if (senderPrefix.length !== REQUEST_SENDER_PREFIX_SIZE) {
@@ -141,7 +141,7 @@ export class SessionWeatherTransport {
   }
 
   /**
-   * The request as a datagram on the `#meshwx` slot, flooded (spec §7B): every repeater in
+   * The request as a datagram on the `#meshwx` slot, flooded (spec §11): every repeater in
    * reach forwards it once, and no stored route can lose it — which is the whole reason the
    * datagram replaced the DM.
    *
@@ -160,7 +160,7 @@ export class SessionWeatherTransport {
    * instead — so the shape stays optional for the bridge and the replay transports.
    *
    * @param {object} args
-   * @param {string} args.text the `>` request (spec §8.2)
+   * @param {string} args.text the `>` request (spec §14)
    * @param {number} args.botID the bot asked, the first two bytes of its public key
    * @param {number} args.timestamp milliseconds; the request's own time, repeated byte for
    *   byte on the one resend

@@ -9,13 +9,19 @@ the same parse.
 from __future__ import annotations
 
 import re
-from datetime import datetime, timezone
+from datetime import UTC, datetime, timezone
 from zoneinfo import ZoneInfo
 
 from meshcore_weather.config import settings
-from meshcore_weather.core.services import Forecast, Observation, forecast_point_near
+from meshcore_weather.core.services import (
+    OBS_MAX_AGE_MIN,
+    Forecast,
+    Observation,
+    forecast_point_near,
+)
 from meshcore_weather.core.vtec_names import short_name
 from meshcore_weather.geodata.names import place_name
+from meshcore_weather.protocol.encoders import metar_observed_at
 
 # One MeshCore text message. The firmware clips a channel message at 160
 # bytes of "name: text" (plus 5 bytes of header), so with a name like
@@ -157,13 +163,32 @@ def _conditions(ob: Observation, full: bool = True) -> str:
     return " ".join(x for x in bits if x)
 
 
+def _age(minutes: int) -> str:
+    """'5h', '45min': how old a report is, in the unit that fits a DM."""
+    return f"{minutes // 60}h" if minutes >= 60 else f"{minutes}min"
+
+
+def _station(ob: Observation) -> str:
+    """'KAUS 12km', or 'KAUS 12km, 5h old' for a report that is not current:
+    the weather as last seen is worth more than a blank, but only labelled."""
+    where = f"{ob.station} {ob.distance_km:.0f}km"
+    return f"{where}, {_age(ob.age_min)} old" if ob.stale else where
+
+
 def observation(loc: dict, ob: Observation | None) -> str:
     if ob is None:
-        return _cap(f"{place_label(loc)}: no current obs within 2h of nearby stations")
+        return _cap(f"{place_label(loc)}: no current obs within 12h of nearby stations")
+    if ob.stale:
+        # Up to twelve hours old, so the day matters: 'Thu 9:53PM', not a
+        # clock reading that would pass for today's.
+        return _cap(
+            f"{place_label(loc)} {_when(ob.observed_at, tz_for_loc(loc))} ({_station(ob)}): "
+            + _conditions(ob)
+        )
     hh, mm = divmod(ob.obs_utc_min, 60)
     obs_dt = datetime.now(timezone.utc).replace(hour=hh, minute=mm, second=0, microsecond=0)
     return _cap(
-        f"{place_label(loc)} {_clock(obs_dt, tz_for_loc(loc))} ({ob.station} {ob.distance_km:.0f}km): "
+        f"{place_label(loc)} {_clock(obs_dt, tz_for_loc(loc))} ({_station(ob)}): "
         + _conditions(ob)
     )
 
@@ -201,37 +226,70 @@ def forecast(loc: dict, fc: Forecast | None, days: int = 5) -> str:
     return _cap(head + " " + " | ".join(parts))
 
 
+def event_label(w: dict) -> str:
+    """'Flash Flood Wrn', 'Air Quality Alert': a warning's name for a reply."""
+    if w.get("event_name"):
+        return _title(w["event_name"])
+    return _title(short_name(w.get("vtec_phenomenon"), w.get("vtec_significance")))
+
+
+def _until(w: dict, tz: ZoneInfo) -> str:
+    """'til 7:15PM', or 'until further notice' for a warning NWS gave no end
+    (VTEC 000000T0000Z): its wire expiry is invented and never shown."""
+    if w.get("until_further_notice"):
+        return "until further notice"
+    return f"til {_when(w['expires_at'], tz)}"
+
+
 def warnings(loc: dict, ws: list[dict]) -> str:
     if not ws:
         return _cap(f"No active warnings for {place_label(loc)}")
     items = []
     tz = tz_for_loc(loc)
     for w in ws:
-        name = _title(short_name(w.get("vtec_phenomenon"), w.get("vtec_significance")))
+        name = event_label(w)
         exp = w.get("expires_at")
         onset = w.get("onset_at")
         now = datetime.now(timezone.utc)
         if onset and onset > now:
-            items.append(f"{name} {_when(onset, tz)}-{_when(exp, tz)}")
+            end = "until further notice" if w.get("until_further_notice") else _when(exp, tz)
+            items.append(f"{name} {_when(onset, tz)}-{end}")
         else:
-            items.append(f"{name} til {_when(exp, tz)}")
+            items.append(f"{name} {_until(w, tz)}")
     head = f"{len(ws)} active, {place_label(loc)}: " if len(ws) > 1 else f"{place_label(loc)}: "
     return fit_list(head, items)
 
 
-def summary(loc: dict, ob: Observation | None, ws: list[dict], fc: Forecast | None) -> str:
-    """The 'wx <place>' reply: warnings first, then obs, then tomorrow."""
+def summary(loc: dict, ob: Observation | None, ws: list[dict], fc: Forecast | None,
+            now: datetime | None = None) -> str:
+    """The 'wx <place>' reply: warnings first, then obs, then tomorrow.
+
+    What is old says so. "Woodcreek, TX 78676: !Wind Adv til 7:00PM | 70/49
+    20%" (2026-10-16) read as complete while the forecast was five hours old
+    and the observation had been left out for being over two hours old; now
+    the observation comes with its age and the forecast with its issue time.
+
+    The forecast's first day is named when it is not today at the place:
+    Taunton MA showed Tuesday's 59/44 bare on Saturday (2026-10-17), read as
+    today's, when the first three days had not been parsed.
+    """
     bits = []
     if ws:
         w = ws[0]
-        bits.append(f"!{_title(short_name(w.get('vtec_phenomenon'), w.get('vtec_significance')))} til {_when(w['expires_at'], tz_for_loc(loc))}")
+        bits.append(f"!{event_label(w)} {_until(w, tz_for_loc(loc))}")
     if ob:
-        bits.append(f"{_conditions(ob, full=False)} ({ob.station} {ob.distance_km:.0f}km)")
+        bits.append(f"{_conditions(ob, full=False)} ({_station(ob)})")
     if fc and fc.periods:
         p = fc.periods[0]
         seg = f"{p['high_f']}/{p['low_f']}"
+        if fc.start_date is not None:
+            today = (now or datetime.now(UTC)).astimezone(tz_for_loc(loc)).date()
+            if fc.start_date.date() != today:
+                seg = f"{fc.start_date:%a} {seg}"
         if p.get("precip_pct", 0) >= 20:
             seg += f" {p['precip_pct']}%"
+        if fc.stale and fc.issued_at:
+            seg += f" fc issued {_when(fc.issued_at, tz_for_loc(loc))}"
         bits.append(seg)
     if not bits:
         return _cap(f"{place_label(loc)}: no data yet")
@@ -282,9 +340,18 @@ def nowcast(loc: dict, nc) -> str:
 
 def raw_metar(loc: dict, found) -> str:
     if not found:
-        return _cap(f"{place_label(loc)}: no METAR within 2h from nearby stations")
+        return _cap(f"{place_label(loc)}: no METAR within 12h from nearby stations")
     icao, km, line = found
-    return _cap(f"METAR {line}" if km == 0 else f"METAR ({icao} {km:.0f}km) {line}")
+    # A report over two hours old is served when nothing is current
+    # (services.raw_metar_for) and says so: its own DDHHMMZ group is easy to
+    # misread as recent.
+    now = datetime.now(UTC)
+    observed = metar_observed_at(line, now)
+    age = max(0, int((now - observed).total_seconds() // 60)) if observed else 0
+    old = f"{_age(age)} old" if age > OBS_MAX_AGE_MIN else ""
+    if km == 0:
+        return _cap(f"METAR ({old}) {line}" if old else f"METAR {line}")
+    return _cap(f"METAR ({icao} {km:.0f}km{', ' + old if old else ''}) {line}")
 
 
 def taf(loc: dict, tf) -> str:
@@ -305,7 +372,7 @@ def coverage(facts: dict, digest_minutes: int = 180) -> str:
     often the active-warning list goes out.
 
     `facts` is v5_builders.coverage_facts(), the same numbers the Coverage
-    message puts on the wire (spec 7A). The bot states this itself because an
+    message puts on the wire (spec 10). The bot states this itself because an
     app that infers it from the stations and warnings it happens to have heard
     gets it wrong: one phone was told WX-AUS might not carry alerts for Travis
     County, the bot's own home, because the only warning active at that moment

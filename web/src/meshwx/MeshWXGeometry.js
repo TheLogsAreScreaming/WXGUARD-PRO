@@ -1,6 +1,6 @@
 // Port of MC1Services/Sources/MeshWX/MeshWXGeometry.swift
 //
-// Zone and county outlines, keyed by UGC code (spec §9, `zones.geojson` and `counties.geojson`).
+// Zone and county outlines, keyed by UGC code (spec §16, `zones.geojson` and `counties.geojson`).
 //
 // A warning either carries a polygon or names areas. Storm-based products (tornado, severe
 // thunderstorm, flash flood) carry the polygon and the area list is just the counties under it;
@@ -10,7 +10,7 @@
 //
 // **Not every code has a ring.** The bundle is a cut in time and the UGC tables grow, so
 // `rings()` returning null is a normal outcome, not a failure: fall back to the centroid that
-// `zones.json` / `counties.json` carry (spec §9).
+// `zones.json` / `counties.json` carry (spec §16).
 //
 // PORTING §8: `MeshWXGeometry.shared` exists from import, and the two GeoJSON files load only
 // through `await preload()` (both) or `preloadZones()` / `preloadCounties()`. Until a file has

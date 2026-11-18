@@ -68,7 +68,7 @@ export function WeatherRadioScreen({ app, page }) {
 
   /**
    * How many zones the statement lists. A list the bot had to cut says "and more it didn't list",
-   * never that the rest are uncovered (spec §7A).
+   * never that the rest are uncovered (spec §10).
    */
   const zones = (coverage) => {
     if ((coverage.areas ?? []).length === 0) return null
@@ -200,7 +200,7 @@ export function WeatherRadioScreen({ app, page }) {
             })
             : null),
 
-        // The source bot's own statement of its area (spec §7A), and nothing weaker: the stations
+        // The source bot's own statement of its area (spec §10), and nothing weaker: the stations
         // it happens to report this hour describe the weather, not the coverage (§3.1 I-B18).
         Card({
           label: t('weather.covers.header'),

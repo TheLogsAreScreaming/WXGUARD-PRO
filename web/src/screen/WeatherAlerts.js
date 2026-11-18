@@ -242,7 +242,7 @@ export const WeatherAlertItems = Object.freeze({
   /**
    * Every alert held by any bot, one item per identity, placed against the place and sorted.
    *
-   * Two bots can hold different copies of one warning (spec §12). The copy shown is the one still
+   * Two bots can hold different copies of one warning (spec §20). The copy shown is the one still
    * active over one that has expired — a bot that heard the extension beats one that did not —
    * then the one with the later expiry. An upgrade marker stands in only when no bot holds a copy
    * of the warning at all.
@@ -418,7 +418,7 @@ export const WeatherAlertStatus = Object.freeze({
 
   noPlace: Object.freeze({ kind: 'noPlace' }),
   /**
-   * The place is outside every bot's area, on the bots' own complete statements (spec §7A) or,
+   * The place is outside every bot's area, on the bots' own complete statements (spec §10) or,
    * for a bot that has stated nothing, on its station footprint.
    */
   outOfCoverage: Object.freeze({ kind: 'outOfCoverage' }),
@@ -471,7 +471,7 @@ export const WeatherAlertStatus = Object.freeze({
 
   evaluate({ place, coverage, states, items, isRadioConnected, sessionStartedAt, tables, now }) {
     if (place == null) return WeatherAlertStatus.noPlace
-    // Only a bot's own complete statement (spec §7A), or its station footprint where it has
+    // Only a bot's own complete statement (spec §10), or its station footprint where it has
     // stated nothing, can put a place outside an area. A list the bot had to cut means "not
     // listed", which is `unknown` and lands on `coverageUnknown` below.
     const verdict = WeatherCoverage.verdict(coverage, { for: place })

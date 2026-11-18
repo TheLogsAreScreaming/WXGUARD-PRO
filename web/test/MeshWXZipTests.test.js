@@ -1,7 +1,7 @@
 // Port of MC1Services/Tests/MeshWXTests/MeshWXZipTests.swift
 //
-// US ZIP codes (spec §9 `zips.json`, §11): the bot's own table, looked up and labelled by the
-// label rule of spec §9.1, so a ZIP resolves and reads the same texted to the bot as typed into
+// US ZIP codes (spec §16 `zips.json`, §21): the bot's own table, looked up and labelled by the
+// label rule of spec §16.2, so a ZIP resolves and reads the same texted to the bot as typed into
 // the app.
 //
 // Every expected label here is the bot's (`resolver.resolve(zip)['name']`, asserted by the same
@@ -158,7 +158,7 @@ describe('MeshWX ZIP codes', () => {
     assert.equal(sha256(labels.join('\n')), BOT_LABELS_SHA256);
   });
 
-  /** The spec §9.1 cases, as meshwx `tests/test_place_names.py` asserts them for the bot. */
+  /** The spec §16.2 cases, as meshwx `tests/test_place_names.py` asserts them for the bot. */
   describe('placeNamesFollowTheLabelRule', () => {
     const cases = [
       ["HELL'S KITCHEN", "Hell's Kitchen"],

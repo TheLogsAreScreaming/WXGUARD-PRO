@@ -142,7 +142,7 @@ describe('Weather tool model over a host', () => {
     await W.flush()
 
     // Past the five-minute window, so the request goes out rather than being served from the
-    // channel (spec §13).
+    // channel (spec §19).
     await clock.advance(6 * 60)
     await model.send(WeatherRequest.digest)
     await W.flush()
@@ -245,7 +245,7 @@ describe('Weather tool model over a host', () => {
     model.update(plan, { pageID: 'at:32.777,-96.797' })
     assert.equal(model.isUpdating({ pageID: 'at:32.777,-96.797' }), false)
 
-    // The service refuses a second request inside the window, so the steps are queued (spec §13).
+    // The service refuses a second request inside the window, so the steps are queued (spec §19).
     await clock.advance(5)
     await W.flush()
     assert.deepEqual(transport.channelSent.map((one) => one.text), ['>d', '>o'])

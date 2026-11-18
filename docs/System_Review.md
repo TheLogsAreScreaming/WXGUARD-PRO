@@ -6,6 +6,7 @@
 >   - The wire is now MeshWX v5 (ad6dc24), so 0x20, 0x21, 0x30, 0x31, 0x37 and 0x3E are no longer sent. The event code lives on as the v5 `event` byte.
 >   - Text replies page at 147 chars with `more` (c8066a5, d8e4da0).
 >   - A stranger with no DM path gets one budgeted channel reply again (48a1e34).
+>   - 2026-10-17: an observation no longer has to be under 2 h old to be used. With no station in reach that fresh, `observation_for()` and `raw_metar_for()` return the newest report up to 12 h old, flagged stale, and the reply says how old it is: `63F dp37 N23g35 bkn (KAUS 45km, 5h old)` (95cb6b3). The owner's reason, from NOAA's ten-hour backlog of 2026-10-16: a `wx` reply with the observation left out read as complete. §2's "≤2 h" and §3 item 7 are the rule as it was.
 > - Done from the open lists: Guam and USVI places (e19f8a0), and a low-above-high swap in the PFM daily downsampler (6908e27).
 > - Still open:
 >   - PGUM is still missing from `stations.json`.
@@ -62,7 +63,7 @@ EMWIN files ──► WeatherStore
                     │                         ambiguous [states…]
                     ▼
             core.services                     ONE parse per product:
-              observation_for()  → Observation  (nearest station that reported ≤2 h)
+              observation_for()  → Observation  (nearest station that reported ≤2 h) [2026-10-17: else the newest ≤12 h, with its age]
               forecast_for()     → Forecast     (nearest PFM point ≤80 km, 7 days)
               warnings_for()     → [warning]    (pyIEM; zone match or polygon contains point)
                     │
@@ -105,7 +106,7 @@ Springfield, LA (also AR/MO/CO; add state) 1:55PM (KREG 47km): 93F …
 | 4 | Coverage was zone-set-by-state; a WFO implied its whole state | `MCW_HOME_RADIUS_KM` (default 120) around the first home city: every public zone whose polygon intersects the circle. Storm polygons are tested against the circle itself, so a small SVR that contains no zone centroid is still caught. A WFO now adds only its zones; only `MCW_HOME_STATES` widens to a state. |
 | 5 | Old regex text helpers in `WeatherStore` | Deleted (1,160 → 400 lines). State and national overviews come from `core/overview.py` on the pyIEM extraction; marine UGC prefixes are excluded from state counts. |
 | 6 | Places table had no population and no territories | `scripts/build_places.py` merges GeoNames cities500 (population, PR/GU/VI/AS/MP) with the Census list (34,937 rows). Resolver ranks local candidates by distance, non-local by population, and still flags ambiguity. `wx hagatna` and `wx charlotte amalie` resolve. |
-| 7 | Observation had no roundup fallback | Left out deliberately; a station must be within 150 km and have reported within 2 h, otherwise the reply says so. |
+| 7 | Observation had no roundup fallback | Left out deliberately; a station must be within 150 km and have reported within 2 h, otherwise the reply says so. [2026-10-17: still no roundup fallback, but with nothing within 2 h the newest report up to 12 h old is used, labelled with its age; past 12 h, none (95cb6b3)] |
 
 Verified through the real command dispatcher on the production cache (12,133 products): `wx`, `wx TX`, `warn`, `warn TX`, `outlook`, `storm TX`, `rain TX`, `metar kyle tx`, `taf round rock`, `wx springfield` (→ MO by population, alternatives listed), `wx hagatna`, `wx charlotte amalie`, `forecast san juan pr`. 161 tests pass.
 

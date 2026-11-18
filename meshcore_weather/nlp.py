@@ -11,6 +11,7 @@ Supported formats:
     taf KJFK
     radar Austin TX     (what the newest radar picture shows there)
     sat
+    status              (the operator's notices, and where the public page is)
     help
 """
 
@@ -27,6 +28,10 @@ COMMAND_RE = re.compile(
 # Receiver status takes no argument, so only the bare word counts:
 # "satellite beach fl" and "signal mountain tn" stay places.
 SAT_RE = re.compile(r"^(sat|satellite|goes|signal)[\s?!.]*$", re.IGNORECASE)
+
+# The operator's notices (written on wx-admin, shown on the public page). The
+# bare word only, as for sat.
+STATUS_RE = re.compile(r"^(status|notices?)[\s?!.]*$", re.IGNORECASE)
 
 # What the bot covers. No argument either, so the bare word only: "cove tx"
 # and "coverage of round rock" stay places.
@@ -53,6 +58,9 @@ async def parse_intent(text: str) -> dict:
 
     if COV_RE.match(text):
         return {"command": "cov", "location": ""}
+
+    if STATUS_RE.match(text):
+        return {"command": "status", "location": ""}
 
     m = COMMAND_RE.match(text)
     if m:
@@ -145,7 +153,7 @@ def is_conversation(text: str, *, resolve: Callable[[str], dict | None], states:
     t = strip_mentions(text)
     if not any(c.isalnum() for c in t):
         return True
-    if SAT_RE.match(t) or COV_RE.match(t):
+    if SAT_RE.match(t) or COV_RE.match(t) or STATUS_RE.match(t):
         return False
     m = COMMAND_RE.match(t)
     if not m:

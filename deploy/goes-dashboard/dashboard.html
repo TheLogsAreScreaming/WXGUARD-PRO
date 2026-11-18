@@ -1,126 +1,452 @@
 <!doctype html>
-<html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="color-scheme" content="light dark">
 <title>mesh-wx · GOES-19 + MeshCore weather bot</title>
 <style>
-:root{--bg:#0d1117;--panel:#161b22;--fg:#e6edf3;--dim:#8b949e;--ok:#3fb950;--warn:#d29922;--bad:#f85149;--line:#30363d;--acc:#58a6ff}
-*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--fg);font:14px/1.4 -apple-system,system-ui,sans-serif}
-header{display:flex;flex-wrap:wrap;gap:10px 16px;align-items:center;padding:10px 14px;border-bottom:1px solid var(--line);position:sticky;top:0;background:var(--bg);z-index:2}
-h1{font-size:16px;margin:0}.badge{padding:3px 10px;border-radius:999px;font-weight:600;font-size:13px;background:#21262d}
-.badge.ok{background:#1a4d2e;color:#7ee2a8}.badge.bad{background:#4d1a1a;color:#ffa198}.badge.warn{background:#4d3a1a;color:#ffd27e}
-.chip{color:var(--dim);font-size:12px}.chip b{color:var(--fg)}
-button,select{background:#21262d;color:var(--fg);border:1px solid var(--line);border-radius:6px;padding:5px 10px;font-size:13px;cursor:pointer}
-button.primary{background:#1f6feb;border-color:#1f6feb}button:disabled{opacity:.5;cursor:default}
-main{padding:12px 14px;display:grid;gap:12px;grid-template-columns:repeat(12,1fr)}
-.card{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:12px;grid-column:span 12;min-width:0}
-.card h2{font-size:12px;text-transform:uppercase;letter-spacing:.06em;color:var(--dim);margin:0 0 8px}
-@media(min-width:900px){.c4{grid-column:span 4}.c6{grid-column:span 6}.c8{grid-column:span 8}.c3{grid-column:span 3}}
-.tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:10px}
-.tile{background:#0a0e14;border:1px solid var(--line);border-radius:8px;padding:10px}
-.tile .v{font-size:30px;font-weight:700;line-height:1.1;font-variant-numeric:tabular-nums}.tile .l{color:var(--dim);font-size:12px;margin-top:2px}
+/* Light by default, dark when the viewer's device is: every colour is a token, the
+   canvases read the same tokens when they draw. */
+:root{--bg:#f5f6f8;--panel:#fff;--inset:#f0f2f5;--fg:#1b1f24;--dim:#5c6672;--line:#d9dee4;--acc:#0969da;
+ --ok:#1a7f37;--ok-bg:#dcf5e3;--warn:#8a5a00;--warn-bg:#fff4c7;--bad:#c4202b;--bad-bg:#ffe7e6;--info:#0759b8;--info-bg:#dff0ff;
+ --series:#0969da;--series2:#1a7f37;--alert:#c4202b;
+ --water:#d9e6f0;--land:#fbfbf9;--land2:#eceee9;--border:#98a2ad;--home:#0969da}
+@media (prefers-color-scheme:dark){:root{--bg:#0d1117;--panel:#161b22;--inset:#0b0f15;--fg:#e6edf3;--dim:#8b949e;--line:#30363d;--acc:#58a6ff;
+ --ok:#3fb950;--ok-bg:#12321f;--warn:#e3b341;--warn-bg:#382b10;--bad:#ff7b72;--bad-bg:#3d1618;--info:#79c0ff;--info-bg:#10263d;
+ --series:#58a6ff;--series2:#3fb950;--alert:#f85149;
+ --water:#0a1824;--land:#1e252e;--land2:#161b21;--border:#56616d;--home:#58a6ff}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--fg);font:15px/1.45 -apple-system,BlinkMacSystemFont,"Segoe UI",system-ui,sans-serif}
+a{color:var(--acc)}
+.wrap{max-width:1240px;margin:0 auto;padding:0 16px}
+header.top{border-bottom:1px solid var(--line);background:var(--panel)}
+header.top .wrap{display:flex;flex-wrap:wrap;align-items:center;gap:8px 16px;padding-top:12px;padding-bottom:12px}
+h1{font-size:20px;margin:0;letter-spacing:-.01em}
+.sub{margin:2px 0 0;color:var(--dim);font-size:13px}
+.ops{margin-left:auto;display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+button,select{font:inherit;font-size:13px;background:var(--inset);color:var(--fg);border:1px solid var(--line);border-radius:8px;padding:6px 12px;cursor:pointer}
+button.primary{background:var(--acc);border-color:var(--acc);color:#fff}
+#msg{color:var(--warn);font-size:13px}
+main{padding:16px 0 32px;display:flex;flex-direction:column;gap:16px}
+.hidden{display:none!important}
+
+/* At a glance */
+.summary{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:12px}
+.stat{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:14px 16px;display:flex;gap:12px;align-items:flex-start;min-width:0}
+.stat .dot{flex:none;width:12px;height:12px;border-radius:50%;margin-top:5px;background:var(--dim)}
+.stat .k{font-size:12px;text-transform:uppercase;letter-spacing:.06em;color:var(--dim)}
+.stat .v{font-size:18px;font-weight:650;margin-top:1px}
+.stat .d{font-size:13px;color:var(--dim);margin-top:2px;overflow-wrap:anywhere}
+.stat.ok .dot{background:var(--ok)}.stat.warn .dot{background:var(--warn)}.stat.bad .dot{background:var(--bad)}.stat.info .dot{background:var(--info)}
+.notice{border-radius:12px;padding:12px 16px;font-size:14px;border:1px solid var(--line)}
+.notice.warn{background:var(--warn-bg);border-color:transparent}.notice.bad{background:var(--bad-bg);border-color:transparent}.notice.info{background:var(--info-bg);border-color:transparent}
+/* The operator's notes, above every tab */
+.opnotes{display:grid;gap:8px;margin-bottom:16px}.opnotes:empty{display:none}
+.opnotes .det{overflow-wrap:anywhere}.opnotes .by{color:var(--dim);font-size:12.5px;margin-top:4px}
+
+/* Sections */
+.block{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:16px;min-width:0}
+.block>h2,.block>summary{font-size:13px;text-transform:uppercase;letter-spacing:.06em;color:var(--dim);margin:0 0 12px;font-weight:600}
+details.block>summary{cursor:pointer;margin:0;list-style:none;display:flex;gap:8px;align-items:baseline}
+details.block>summary::-webkit-details-marker{display:none}
+details.block>summary::before{content:"▸";color:var(--dim);transition:transform .15s}
+details.block[open]>summary::before{transform:rotate(90deg)}
+details.block[open]>summary{margin-bottom:12px}
+.count{text-transform:none;letter-spacing:0;font-weight:400}
+.split{display:grid;gap:16px;grid-template-columns:1fr}
+@media(min-width:900px){.split{grid-template-columns:minmax(0,5fr) minmax(0,7fr)}.split.even{grid-template-columns:minmax(0,7fr) minmax(0,5fr)}}
+.tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px}
+.tile{background:var(--inset);border-radius:10px;padding:10px 12px;min-width:0}
+.tile .v{font-size:26px;font-weight:700;line-height:1.15;font-variant-numeric:tabular-nums}
+.tile .l{color:var(--dim);font-size:12px;margin-top:2px}
 .tile.good .v{color:var(--ok)}.tile.warn .v{color:var(--warn)}.tile.bad .v{color:var(--bad)}
-canvas{width:100%;display:block;background:#0a0e14;border:1px solid var(--line);border-radius:8px}
-.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:8px}
-.grid a{display:block;background:#0a0e14;border:1px solid var(--line);border-radius:8px;overflow:hidden;color:var(--dim);font-size:11px;text-decoration:none}
-.grid img{width:100%;aspect-ratio:1;object-fit:cover;display:block}.grid span{display:block;padding:4px 6px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-table{width:100%;border-collapse:collapse;font-size:12px}td{padding:3px 6px;border-bottom:1px solid var(--line);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:0}td.r{text-align:right;color:var(--dim);width:1%;max-width:none}
-td a{color:var(--acc);text-decoration:none}
-.meter{height:26px;background:#0a0e14;border:1px solid var(--line);border-radius:6px;overflow:hidden;position:relative;margin:8px 0 4px}
-.meter .fill{height:100%;background:linear-gradient(90deg,var(--bad),var(--warn) 40%,var(--ok) 70%);width:0;transition:width .3s}.meter .pk{position:absolute;top:0;width:2px;height:100%;background:#fff}
-.hint{color:var(--dim);font-size:12px}.hidden{display:none!important}#msg{color:var(--warn);font-size:12px}
-.prose{font-size:13px;line-height:1.5;color:#c9d1d9}.prose p{margin:0 0 8px}.prose ol{margin:0 0 8px;padding-left:20px}.prose li{margin:2px 0}
-.prose code,.cmd td code{background:#0a0e14;border:1px solid var(--line);border-radius:4px;padding:1px 5px;font-size:12px;color:#e6edf3}
-.cmd td{white-space:normal;max-width:none}.cmd td:first-child,.cmd td.r{white-space:nowrap;width:1%}
-.feed{font:12px/1.5 ui-monospace,SFMono-Regular,Menlo,monospace;background:#0a0e14;border:1px solid var(--line);border-radius:8px;padding:8px;height:250px;overflow:auto}
-.feed div{white-space:pre-wrap;word-break:break-word}.feed .t{color:var(--dim)}.feed .in{color:#58a6ff}.feed .out{color:#d2a8ff}.feed .drop{color:var(--warn)}.feed .who{font-weight:600}
-.tag{display:inline-block;padding:0 6px;border-radius:4px;font-size:11px;font-weight:600;background:#21262d;color:var(--dim);min-width:28px;text-align:center}
+.hint{color:var(--dim);font-size:13px}
+.lines p{margin:8px 0 0}
+.feed{font:12.5px/1.5 ui-monospace,SFMono-Regular,Menlo,monospace;background:var(--inset);border-radius:10px;padding:10px;height:300px;overflow:auto}
+.feed div{white-space:pre-wrap;word-break:break-word;padding:1px 0}
+.feed .t{color:var(--dim)}.feed .in{color:var(--info)}.feed .out{color:var(--ok)}.feed .drop{color:var(--warn)}.feed .who{font-weight:650}
+.tag{display:inline-block;padding:0 6px;border-radius:4px;font-size:11px;font-weight:600;background:var(--panel);color:var(--dim);min-width:30px;text-align:center}
+canvas{width:100%;display:block;background:var(--inset);border-radius:10px}
+.charts{display:grid;gap:12px;grid-template-columns:1fr;margin-top:12px}
+@media(min-width:900px){.charts{grid-template-columns:minmax(0,1fr) minmax(0,2fr)}}
+.cap{font-size:12px;color:var(--dim);margin:6px 2px 0}
+.sys{display:flex;flex-wrap:wrap;gap:6px 18px;margin-top:12px;font-size:13px;color:var(--dim)}.sys b{color:var(--fg);font-weight:600}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px}
+.grid a{display:block;background:var(--inset);border-radius:10px;overflow:hidden;color:var(--dim);font-size:12px;text-decoration:none}
+.grid img{width:100%;aspect-ratio:1;object-fit:cover;display:block}.grid span{display:block;padding:5px 8px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+table{width:100%;border-collapse:collapse;font-size:13px}
+td{padding:5px 6px;border-bottom:1px solid var(--line);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:0}
+td.r{text-align:right;color:var(--dim);width:1%;max-width:none}
+td a{text-decoration:none}
+.net{color:var(--warn);font-weight:600}
+.howto{font-size:14px}.howto ol,.howto ul{margin:0 0 10px;padding-left:22px}.howto li{margin:4px 0}
+/* Ways to get the weather: the Overview's cards and the guide tab */
+.ways{display:grid;gap:12px;grid-template-columns:1fr}
+@media(min-width:620px){.ways{grid-template-columns:1fr 1fr}}
+@media(min-width:1000px){.ways{grid-template-columns:repeat(4,minmax(0,1fr))}}
+.ways a{display:block;text-decoration:none;color:inherit;background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:14px 16px}
+.ways a:hover,.ways a:focus-visible{border-color:var(--acc)}
+.ways .k{font-size:12px;text-transform:uppercase;letter-spacing:.06em;color:var(--dim)}
+.ways .v{font-size:16px;font-weight:650;margin:2px 0 4px}.ways .d{font-size:13px;color:var(--dim)}
+a.golink{display:inline-flex;align-items:center;padding:6px 12px;border-radius:8px;background:var(--acc);color:#fff;text-decoration:none;font-size:13px;font-weight:600}
+.links td{white-space:normal;max-width:none}.links td:first-child{width:1%;white-space:nowrap}
+code{background:var(--inset);border:1px solid var(--line);border-radius:5px;padding:1px 5px;font-size:12.5px}
+.cmd td{white-space:normal;max-width:none;vertical-align:top}.cmd td:first-child{white-space:nowrap;width:1%}
+.meter{height:28px;background:var(--inset);border-radius:8px;overflow:hidden;position:relative;margin:8px 0 4px}
+.meter .fill{height:100%;background:linear-gradient(90deg,var(--bad),var(--warn) 40%,var(--ok) 70%);width:0;transition:width .3s}
+.meter .pk{position:absolute;top:0;width:2px;height:100%;background:var(--fg)}
+.bigsnr{font-size:60px;font-weight:700;line-height:1}
+footer{color:var(--dim);font-size:12px;padding:0 0 24px}
+[hidden]{display:none!important}
+nav.tabs{display:flex;gap:4px;flex-wrap:wrap}
+@media(max-width:520px){nav.tabs{gap:2px}nav.tabs a{padding:7px 8px;font-size:13px}.cmd td.r{display:none}}
+nav.tabs a{padding:7px 14px;border-radius:8px;text-decoration:none;color:var(--dim);font-weight:600;font-size:14px}
+nav.tabs a[aria-selected="true"]{background:var(--inset);color:var(--fg)}
+.tab{display:flex;flex-direction:column;gap:16px}
+.subnav{display:flex;flex-wrap:wrap;gap:6px}
+.subnav button{border-radius:999px;font-size:12.5px;padding:4px 12px}
+.block{scroll-margin-top:12px}
+.bh{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:12px}
+.bh h2{font-size:13px;text-transform:uppercase;letter-spacing:.06em;color:var(--dim);margin:0;font-weight:600}
+.bh .right{margin-left:auto;display:flex;gap:6px;flex-wrap:wrap;align-items:center}
+button.on,button[aria-pressed="true"]{background:var(--acc);border-color:var(--acc);color:#fff}
+.why{font-size:13px;color:var(--dim);margin:-4px 0 12px;max-width:80ch}
+.key{display:flex;flex-wrap:wrap;gap:4px 14px;font-size:12px;color:var(--dim);margin-top:8px}
+.sw{display:inline-block;width:12px;height:12px;border-radius:3px;vertical-align:-2px;margin-right:5px}
+.grid2{display:grid;gap:16px;grid-template-columns:1fr}
+@media(min-width:900px){.grid2{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}.grid2.wide{grid-template-columns:minmax(0,3fr) minmax(0,2fr)}}
+.tbl{overflow-x:auto}
+th{text-align:left;font-size:12px;color:var(--dim);font-weight:600;padding:6px;border-bottom:1px solid var(--line);white-space:nowrap}
+td.n{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap;max-width:none;width:1%}
+td.w{white-space:normal;max-width:none}
+td.k{white-space:nowrap;max-width:none;width:1%;color:var(--dim)}
+.bar{height:6px;border-radius:3px;background:var(--inset);overflow:hidden;min-width:60px}.bar i{display:block;height:100%;background:var(--series)}
+.pill{display:inline-block;font-size:11.5px;font-weight:600;border-radius:999px;padding:1px 8px;background:var(--inset);color:var(--dim);white-space:nowrap}
+.pill.ok{background:var(--ok-bg);color:var(--ok)}.pill.warn{background:var(--warn-bg);color:var(--warn)}.pill.bad{background:var(--bad-bg);color:var(--bad)}.pill.info{background:var(--info-bg);color:var(--info)}
+.events{list-style:none;margin:0;padding:0}
+.events li{display:grid;grid-template-columns:130px 1fr;gap:4px 12px;padding:9px 0;border-bottom:1px solid var(--line);font-size:14px}
+.events li:last-child{border-bottom:0}.events time{color:var(--dim);font-size:13px;font-variant-numeric:tabular-nums}
+.events .det{color:var(--dim);font-size:13px}
+@media(max-width:520px){.events li{grid-template-columns:1fr}}
+h3.sm{font-size:12.5px;color:var(--dim);font-weight:600;margin:0 0 6px}
+/* Warnings map and product browser */
+.map{position:relative;user-select:none;-webkit-user-select:none}
+.map canvas{touch-action:none;cursor:grab}.map canvas.drag{cursor:grabbing}
+.maptools{position:absolute;right:8px;top:8px;display:flex;flex-direction:column;gap:4px}
+.maptools button{width:32px;height:32px;padding:0;font-size:18px;line-height:1;background:var(--panel)}
+.chartline{position:absolute;width:1px;background:var(--fg);opacity:.4;pointer-events:none}
+.tiprows{width:auto;border-collapse:collapse;margin-top:2px;font-variant-numeric:tabular-nums}.tiprows td{padding:0 0 0 12px;border:0;white-space:nowrap;font-size:12.5px;max-width:none;overflow:visible}.tiprows td:first-child{padding-left:0;color:var(--dim)}
+.maptip{position:absolute;pointer-events:none;background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:6px 9px;font-size:12.5px;max-width:260px;box-shadow:0 2px 8px rgba(0,0,0,.18);z-index:2}
+.maphint{position:absolute;left:8px;bottom:8px;font-size:12px;color:var(--dim);background:var(--panel);border-radius:6px;padding:2px 7px;opacity:.9}
+.wlist{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:6px;max-height:420px;overflow:auto}
+.wlist li{display:flex;gap:10px;align-items:flex-start;padding:8px 10px;border-radius:8px;background:var(--inset);cursor:pointer}
+.wlist li:hover,.wlist li.hl,.wlist li:focus-visible{outline:2px solid var(--acc);outline-offset:-2px}
+.wlist .sw{flex:none;margin-top:3px;box-shadow:inset 0 0 0 1px rgba(0,0,0,.25)}
+.wlist .t1{font-weight:600;font-size:14px}.wlist .t2{font-size:12.5px;color:var(--dim)}
+.wdet{margin-top:10px;font-size:13.5px;background:var(--inset);border-radius:10px;padding:10px 12px}
+.wdet .t2{color:var(--dim);font-size:12.5px;margin-top:2px}.wdet p{margin:6px 0 0}
+.filters{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px}
+.filters input{flex:1 1 220px;font:inherit;font-size:14px;padding:7px 10px;border:1px solid var(--line);border-radius:8px;background:var(--inset);color:var(--fg);min-width:0}
+.filters select{max-width:100%;min-width:0}
+.chips{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px}
+.chips button{border-radius:999px;font-size:12.5px;padding:4px 12px}.chips .c{opacity:.75;font-size:11.5px;margin-left:5px}
+.results{list-style:none;margin:0;padding:0;max-height:560px;overflow:auto;border:1px solid var(--line);border-radius:10px}
+.results li{padding:9px 12px;border-bottom:1px solid var(--line);cursor:pointer;display:grid;grid-template-columns:minmax(0,1fr) auto;gap:2px 10px}
+.results li:last-child{border-bottom:0}.results li[aria-selected="true"]{background:var(--inset)}
+.results li:focus-visible{outline:2px solid var(--acc);outline-offset:-2px}
+.results .t1{font-weight:600;font-size:14px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.results .t2{font-size:12.5px;color:var(--dim)}
+.reader{background:var(--inset);border-radius:10px;padding:12px;font:12.5px/1.5 ui-monospace,SFMono-Regular,Menlo,monospace;white-space:pre-wrap;overflow:auto;max-height:560px;min-height:200px;overflow-wrap:anywhere}
+.reader img{max-width:100%;display:block;margin:auto;background:#fff}
+.viewer{display:grid;gap:16px;grid-template-columns:1fr}
+@media(min-width:900px){.viewer{grid-template-columns:minmax(0,3fr) minmax(0,2fr)}}
+.frame{position:relative;background:#000;border-radius:10px;overflow:hidden;aspect-ratio:1/1;max-height:720px}
+.frame img{width:100%;height:100%;object-fit:contain;display:block}
+.fcap{position:absolute;left:8px;bottom:8px;background:rgba(0,0,0,.6);color:#fff;font-size:12.5px;border-radius:6px;padding:3px 8px;max-width:calc(100% - 16px)}
+.play{display:flex;gap:10px;align-items:center;margin-top:8px;flex-wrap:wrap}
+.play input[type=range]{flex:1 1 140px;min-width:0;accent-color:var(--acc)}
+.radar{background:#000;border-radius:10px;overflow:hidden;min-height:120px}
+.radar img{width:100%;display:block}.radar.chart{background:#fff}.radar img:not([src]),.frame img:not([src]){visibility:hidden}
+.chips .g{width:100%;font-size:12px;color:var(--dim);margin-top:4px}
+.reader mark{background:var(--warn-bg);color:inherit;outline:1px solid var(--warn);border-radius:2px}
+.rhead{font-size:13px;margin-bottom:8px;display:flex;flex-wrap:wrap;gap:6px 12px;align-items:center}
 </style></head><body>
-<header>
-<h1>mesh-wx · GOES-19 HRIT · MeshCore weather bot</h1>
-<span class="badge" id="lock">connecting</span>
-<span class="badge" id="botBadge">bot ?</span>
-<span class="chip" id="mode"></span>
-<button id="btnPoint">Pointing mode</button>
-<button id="btnRecv" class="primary hidden">Back to receiving</button>
-<span id="msg"></span>
-<span style="flex:1"></span>
-<span class="chip">goesrecv <b id="s_goesrecv">–</b></span>
-<span class="chip">goesproc <b id="s_goesproc">–</b></span>
-<span class="chip">cpu <b id="temp">–</b></span>
-<span class="chip">disk <b id="disk">–</b></span>
-<span class="chip">feed <b id="feed">–</b></span>
-</header>
-<main>
-<section id="botView" style="display:contents">
- <div class="card c4"><h2>Mesh weather bot · <span id="botName">WX-AUS</span></h2>
-  <div class="prose">
-   <p class="hint" id="botSub"></p>
-   <p>The dish receives the GOES-19 HRIT downlink. NOAA relays EMWIN inside it: every National Weather Service text product for the whole country. The bot parses those products as they arrive and answers over LoRa on the MeshCore mesh. No internet connection is involved. A reply is one mesh packet.</p>
-   <p><b>To use it on the Austin mesh</b></p>
-   <ol>
-    <li>Radio: <span id="botRadio">US MeshCore default (910.525 MHz, 62.5 kHz, SF7, CR5)</span>.</li>
-    <li>Add the channel <code id="botChannel">#meshwx</code> in the MeshCore app. Type the name only; the key is derived from it.</li>
-    <li>Post a command, for example <code>wx round rock tx</code>. <span id="botReplyHow">Replies go by DM when the bot knows your node.</span></li>
-    <li>Or DM <code id="botNameDm">WX-AUS</code> directly. Its advert has to be in your contacts first. It adverts every few hours and whenever a stranger talks to it on the channel.</li>
-    <li>Products cover the whole country. If another <code>WX-</code> bot is nearer to the place you ask about, that bot answers.</li>
-   </ol>
-   <details><summary class="hint" style="cursor:pointer">Commands</summary>
-    <table class="cmd" id="botCmds"></table>
-    <p class="hint" style="margin-top:6px">Apps: the MeshWX iOS app reads binary datagrams on <code id="botDataChannel">#meshwx</code>.</p>
-   </details>
+<header class="top"><div class="wrap">
+ <div><h1>mesh-wx</h1><p class="sub">The GOES-19 satellite receiver and the <span id="hName">WX-AUS</span> weather bot on the Austin MeshCore mesh</p></div>
+ <nav class="tabs" aria-label="Dashboard"><a href="#overview" id="t-overview" aria-selected="true">Overview</a><a href="#weather" id="t-weather" aria-selected="false">Weather</a><a href="#station" id="t-station" aria-selected="false">Station</a><a href="#use" id="t-use" aria-selected="false">Get the weather</a></nav>
+ <div class="ops hidden" id="ops"><button id="btnPoint">Pointing mode</button><button id="btnRecv" class="primary hidden">Back to receiving</button><span id="msg"></span></div>
+</div></header>
+
+<main class="wrap">
+<div class="opnotes" id="opNotes" aria-live="polite"></div>
+<div class="tab" id="overview">
+ <section class="summary" aria-label="Status at a glance">
+  <div class="stat" id="stBot"><span class="dot" aria-hidden="true"></span><div><div class="k">Weather bot</div><div class="v">Checking…</div><div class="d"></div></div></div>
+  <div class="stat" id="stSat"><span class="dot" aria-hidden="true"></span><div><div class="k">Satellite</div><div class="v">Checking…</div><div class="d"></div></div></div>
+  <div class="stat" id="stData"><span class="dot" aria-hidden="true"></span><div><div class="k">Weather data</div><div class="v">Checking…</div><div class="d"></div></div></div>
+ </section>
+ <div class="notice hidden" id="notice" role="status"></div>
+ <nav class="ways" aria-label="Ways to get the weather">
+  <a href="#use" data-jump="useMesh"><div class="k">On the mesh</div><div class="v">Any MeshCore app</div><div class="d">Send <code>wx austin tx</code> on <code>#meshwx</code> and get the weather back as text.</div></a>
+  <a href="#use" data-jump="useWeb"><div class="k">In your browser</div><div class="v">MeshWX web client</div><div class="d">Maps, alerts and radar in Chrome, with your radio on USB or Bluetooth. No internet needed.</div></a>
+  <a href="#use" data-jump="useIos"><div class="k">On iPhone</div><div class="v">DigitainoMesh beta</div><div class="d">A MeshCore app with the weather built in, on TestFlight.</div></a>
+  <a href="#use" data-jump="useDev"><div class="k">Build your own</div><div class="v">The open protocol</div><div class="d">Ask the bot from your own MeshCore client: the spec, test vectors and tables.</div></a>
+ </nav>
+
+ <section class="block" aria-labelledby="hAct">
+  <h2 id="hAct">Mesh activity · last 24 hours</h2>
+  <div class="split">
+   <div>
+    <div class="tiles">
+     <div class="tile"><div class="v" id="aReq">–</div><div class="l">requests</div></div>
+     <div class="tile"><div class="v" id="aNodes">–</div><div class="l">nodes served</div></div>
+     <div class="tile"><div class="v" id="aRep">–</div><div class="l">replies</div></div>
+     <div class="tile"><div class="v" id="aBc">–</div><div class="l">data broadcasts</div></div>
+    </div>
+    <div class="lines hint"><p id="aSplit"></p><p id="aTop"></p><p id="aLife"></p></div>
+   </div>
+   <div>
+    <div class="hint" style="margin-bottom:6px">Live on <span id="chText">#meshwx</span> <span id="feedHint"></span></div>
+    <div class="feed" id="feed" aria-live="off"><div class="hint">Connecting to the bot…</div></div>
+    <div class="cap">Channel messages are shown as sent. A DM shows only the command and how long the reply was.</div>
+   </div>
   </div>
- </div>
- <div class="card c4"><h2>Bot · requests and replies</h2>
+ </section>
+
+
+ <section class="block" aria-labelledby="hImg">
+  <div class="bh"><h2 id="hImg">Latest satellite images</h2><div class="right"><a class="hint" href="#weather" data-jump="hrImg">Loops of every channel →</a></div></div>
+  <div class="grid" id="imgs"><span class="hint">Nothing decoded yet.</span></div>
+ </section>
+
+</div>
+<div class="tab" id="use" hidden>
+ <div class="subnav" aria-label="Ways to get the weather"><button data-go="useMesh">On the mesh</button><button data-go="useWeb">In your browser</button><button data-go="useIos">On iPhone</button><button data-go="useDev">Build your own</button></div>
+ <p class="why" style="margin-top:12px">The bot answers on the MeshCore mesh, over LoRa radio, from the National Weather Service products its dish receives from the GOES-19 satellite. Nothing on your side needs the internet: a MeshCore radio within reach of the mesh is enough. Every way below talks to the same bot.</p>
+
+ <section class="block howto" id="useMesh" aria-labelledby="hUseMesh">
+  <div class="bh"><h2 id="hUseMesh">On the mesh, with any MeshCore app</h2></div>
+  <p class="why">Text in, text back. It works with the MeshCore app on a phone, or anything else that can post on a channel or send a message.</p>
+  <ol>
+   <li>Set your radio to <span id="uRadio">the US MeshCore default (910.525 MHz, 62.5 kHz, SF7, CR5)</span>.</li>
+   <li>Add the channel <code id="uChannel">#meshwx</code> in the MeshCore app. Type the name only; the key comes from it.</li>
+   <li>Post a command there, for example <code>wx round rock tx</code>. <span id="uReply">Replies go by DM when the bot knows your node.</span></li>
+   <li>Or DM <code id="uName">WX-AUS</code> directly once its advert is in your contacts. It adverts every few hours and whenever someone new talks to it.</li>
+   <li>Products cover the whole country. If another <code>WX-</code> bot is nearer to the place you ask about, that bot answers.</li>
+  </ol>
+  <table class="cmd" id="uCmds"></table>
+  <p class="hint">A long reply comes a page at a time: send <code>more</code> for the next page. <code>status</code> gives any notice from the station's operator.</p>
+ </section>
+
+ <section class="block howto" id="useWeb" aria-labelledby="hUseWeb">
+  <div class="bh"><h2 id="hUseWeb">In your browser: the MeshWX web client</h2><div class="right"><a class="golink" href="https://github.com/digitaino/meshwx/releases/latest" target="_blank" rel="noopener">Download MeshWX.html</a></div></div>
+  <p class="why">Warnings on a map, current conditions, the forecast and radar, from the bot over your own radio. It is one file that runs in your browser, and it never touches the internet: the maps, the place names and the words are all inside it.</p>
+  <div class="grid2">
+   <div><h3 class="sm">What you need</h3><ul>
+    <li>A computer with macOS, Windows, Linux or ChromeOS</li>
+    <li>Chrome, Edge, Brave or Vivaldi. Safari and Firefox cannot talk to a radio</li>
+    <li>A MeshCore radio with firmware 1.15 or newer, on USB or paired over Bluetooth, and not connected to your phone's MeshCore app at the same time</li>
+    <li>A weather bot in range: a node named <code>WX-</code> something on <code>#meshwx</code></li>
+   </ul></div>
+   <div><h3 class="sm">Start it</h3><ol>
+    <li>Download <b>MeshWX.html</b> from the <a href="https://github.com/digitaino/meshwx/releases/latest" target="_blank" rel="noopener">latest release</a>.</li>
+    <li>Open it. If it opens in Safari or Firefox, right-click the file, choose <b>Open With</b> and pick Chrome.</li>
+    <li>Press <b>No radio</b> at the top, then <b>Connect over Bluetooth</b> or <b>Connect over USB</b>, and pick your radio.</li>
+    <li>Add a place and press <b>Update</b>. The weather comes in over the air.</li>
+   </ol></div>
+  </div>
+  <p class="hint">Nothing arriving? Your radio has to be on exactly the mesh's frequency and settings: press your radio's name at the top, then <b>Radio settings</b>, pick your region under <b>Preset</b> and apply it. To look around without a radio, press <b>No radio</b> and choose <b>Show recorded data</b>.</p>
+ </section>
+
+ <section class="block howto" id="useIos" aria-labelledby="hUseIos">
+  <div class="bh"><h2 id="hUseIos">On iPhone: DigitainoMesh</h2><div class="right"><a class="golink" href="https://testflight.apple.com/join/Cbpf5S7D" target="_blank" rel="noopener">Join the beta on TestFlight</a></div></div>
+  <p class="why">A build of the MeshCore One app with the weather built in, in public beta through Apple's TestFlight.</p>
+  <ol>
+   <li>On the iPhone, open the <a href="https://testflight.apple.com/join/Cbpf5S7D" target="_blank" rel="noopener">TestFlight invitation</a>, install Apple's TestFlight app if it asks, and install <b>DigitainoMesh</b>.</li>
+   <li>Connect your MeshCore radio (firmware 1.15 or newer) as in any MeshCore app.</li>
+   <li>Open the <b>Tools</b> tab, then <b>Weather</b>. When it offers to add <code>#meshwx</code> to your radio, say yes.</li>
+   <li>Add a place: warnings on the map, current conditions, the forecast and radar come from the bot over the mesh.</li>
+  </ol>
+  <p class="hint">It is a beta, so things change: send feedback from the TestFlight app. A radio talks to one app at a time.</p>
+ </section>
+
+ <section class="block howto" id="useDev" aria-labelledby="hUseDev">
+  <div class="bh"><h2 id="hUseDev">Build it into your own app</h2></div>
+  <p class="why">The weather protocol, MeshWX v5, is open. Any MeshCore client can ask the bot for the weather and draw what comes back.</p>
+  <ul>
+   <li><b>Find a bot.</b> Weather bots advertise as chat nodes named <code>WX-</code> and a city (<code>WX-AUS</code>) and work on the channel <code>#meshwx</code>, added by name like any hashtag channel.</li>
+   <li><b>Ask</b> with the commands people type, starting with <code>&gt;</code>: <code>&gt;w</code> for the warnings, <code>&gt;o KAUS</code> for conditions, <code>&gt;f 78701</code> for a forecast, <code>&gt;radar 30.270,-97.740</code> for radar. Send it as a Request datagram on <code>#meshwx</code>, or as a DM or channel message.</li>
+   <li><b>Listen.</b> Answers come back on <code id="uData">#meshwx</code> as MeshCore channel data packets (<code>GRP_DATA</code>, data type <code>0xFF10</code>): compact binary messages of at most 165 bytes that every app listening can use. Companion firmware 1.15 or newer delivers them.</li>
+   <li><b>Draw</b> them with the preload tables (forecast zones, stations, forecast points, places): only numbers go over the air.</li>
+   <li><b>Mind the airtime.</b> Send a request only when someone asks for the weather, never on a timer, and leave five seconds between requests.</li>
+  </ul>
+  <div class="tbl"><table class="links"><tbody>
+   <tr><td><a href="https://github.com/digitaino/meshwx/blob/main/docs/MeshWX_v5_Spec.md" target="_blank" rel="noopener">Protocol spec</a></td><td>Every message, the request grammar, rendering and a build checklist</td></tr>
+   <tr><td><a href="https://github.com/digitaino/meshwx/blob/main/docs/meshwx_v5_vectors.json" target="_blank" rel="noopener">Test vectors</a></td><td>Encoded messages and what they decode to, to test a decoder against</td></tr>
+   <tr><td><a href="https://github.com/digitaino/meshwx/tree/main/meshcore_weather/client_data" target="_blank" rel="noopener">Preload tables</a></td><td>The zones, stations, forecast points and places the messages refer to by number</td></tr>
+   <tr><td><a href="https://github.com/digitaino/meshwx/tree/main/web/src/meshwx" target="_blank" rel="noopener">JavaScript codec</a></td><td>The web client's decoder and encoder, plain ES modules</td></tr>
+   <tr><td><a href="https://github.com/digitaino/meshwx" target="_blank" rel="noopener">The bot</a></td><td>This weather bot's source, in Python</td></tr>
+  </tbody></table></div>
+ </section>
+</div>
+
+<div class="tab" id="weather" hidden>
+ <div class="subnav" aria-label="Weather sections"><button data-go="emWarn">Warnings</button><button data-go="emRadar">Radar and charts</button><button data-go="hrImg">Satellite imagery</button><button data-go="emProd">Products</button></div>
+ <section class="block" id="emWarn" aria-labelledby="hWarn">
+  <div class="bh"><h2 id="hWarn">Warnings and watches in effect</h2><span class="hint" id="wCount"></span>
+   <div class="right" role="group" aria-label="Map view"><button data-mv="tx" class="on">Texas</button><button data-mv="us">All US</button><button data-mv="ak">Alaska</button><button data-mv="hi">Hawaii</button><button data-mv="pr">Puerto Rico</button><button data-mv="gu">Guam</button></div></div>
+  <div class="grid2 wide">
+   <div><div class="map" id="mapBox"><canvas id="mapC" aria-label="Map of the warnings and watches in effect. The list beside it has the same events."></canvas>
+    <div class="maptools"><button id="mapIn" aria-label="Zoom in" title="Zoom in">+</button><button id="mapOut" aria-label="Zoom out" title="Zoom out">−</button></div>
+    <div class="maptip" id="mapTip" hidden></div><div class="maphint" id="mapHint">Drag to move · pinch or ⌘/Ctrl + scroll to zoom</div></div>
+    <div class="wdet" id="wDet" hidden></div></div>
+   <div><h3 class="sm" id="wListHead">In view</h3><ul class="wlist" id="wList"><li class="hint">Loading…</li></ul></div>
+  </div>
+  <p class="cap" id="wNote">What the bot holds right now: the same warnings it answers with on the mesh. An outline is the storm's own polygon where NWS drew one, else the zones and counties the product names. Colours follow the NWS hazard map; the dashed line is the area the bot covers. Base map: Natural Earth.</p>
+ </section>
+ <section class="block" id="emRadar" aria-labelledby="hRad">
+  <div class="bh"><h2 id="hRad">Radar and charts</h2></div>
+  <div class="grid2">
+   <div style="min-width:0">
+    <div class="filters"><select id="radRegion" aria-label="Radar region"></select>
+     <select id="radSpan" aria-label="Loop length"><option value="2">Last 2 hours</option><option value="4" selected>Last 4 hours</option><option value="8">Last 8 hours</option></select></div>
+    <div class="radar"><img id="radImg" alt="Radar mosaic"></div>
+    <div class="play"><button id="radPlay">Play</button><input type="range" id="radScrub" min="0" max="0" value="0" aria-label="Radar frame"><span class="hint" id="radPos"></span></div>
+    <p class="hint" id="radCap"></p>
+   </div>
+   <div style="min-width:0">
+    <div class="chips" id="chChips" role="group" aria-label="Chart"></div>
+    <div class="radar chart"><img id="chImg" alt=""></div>
+    <div class="play"><button id="chPrev">‹ Older</button><button id="chNext">Newer ›</button><span class="hint" id="chPos"></span></div>
+    <p class="hint" id="chCap"></p>
+   </div>
+  </div>
+  <p class="cap">Radar mosaics and most charts come down with EMWIN, so they run as late as the feed does; the surface analysis and the tropical Atlantic charts come with HRIT's NWS channel. A loop plays its frames in the order they were made, whatever order they reached the dish.</p>
+ </section>
+ <section class="block" id="hrImg" aria-labelledby="hIm">
+  <div class="bh"><h2 id="hIm">Satellite imagery</h2><span class="hint" id="imCount"></span>
+   <div class="right" role="group" aria-label="Loop length"><button data-ls="3">3 h</button><button data-ls="6" class="on">6 h</button><button data-ls="24">24 h</button></div></div>
+  <div class="viewer">
+   <div style="min-width:0">
+    <div class="frame"><img id="imMain" alt=""><span class="fcap" id="imCap">Loading…</span></div>
+    <div class="play"><button id="imPlay">Play</button><input type="range" id="imScrub" min="0" max="0" value="0" aria-label="Frame"><span class="hint" id="imPos"></span></div>
+   </div>
+   <div style="min-width:0">
+    <h3 class="sm">Satellite and sector</h3><div class="chips" id="imSect" role="group" aria-label="Sector"></div>
+    <h3 class="sm" style="margin-top:12px">Channel</h3><div class="chips" id="imChan" role="group" aria-label="Channel"></div>
+    <p class="hint" id="imHelp"></p>
+    <p class="hint"><a id="imFull" href="#" target="_blank" rel="noopener">This frame at full resolution</a></p>
+   </div>
+  </div>
+  <p class="cap">Pictures decoded here from the HRIT downlink, as goesproc writes them; loops play the frames already on disk. Times are when the scan started. The meso sectors move to wherever NOAA is watching the weather.</p>
+ </section>
+ <section class="block" id="emProd" aria-labelledby="hProd">
+  <div class="bh"><h2 id="hProd">Product browser</h2><span class="hint" id="pCount"></span></div>
+  <div class="filters"><input type="search" id="pq" placeholder="Search names, AWIPS ids, offices or text" aria-label="Search products" autocomplete="off" spellcheck="false">
+   <select id="pOffice" aria-label="Office"><option value="">All offices</option></select></div>
+  <div class="chips" id="pKinds" role="group" aria-label="Kind"></div>
+  <div class="grid2">
+   <ul class="results" id="pList" role="listbox" aria-label="Products"><li class="t2">Loading…</li></ul>
+   <div style="min-width:0"><div class="rhead" id="pHead"></div><div class="reader" id="pText" tabindex="0">Pick a product to read it.</div></div>
+  </div>
+  <p class="cap" id="pNote"></p>
+ </section>
+</div>
+<div class="tab" id="station" hidden>
+ <div class="subnav" aria-label="Station sections"><button data-go="stHealth">Health</button><button data-go="hrLive">Live signal</button><button data-go="hrHist">Signal history</button><button data-go="emHealth">EMWIN feed</button><button data-go="hrVc">Channels</button><button data-go="hrEv">Events</button></div>
+ <section class="block" id="stHealth" aria-labelledby="hHe">
+  <div class="bh"><h2 id="hHe">Health right now</h2></div>
   <div class="tiles">
-   <div class="tile"><div class="v" id="b_req24">–</div><div class="l">requests · 24 h</div></div>
-   <div class="tile"><div class="v" id="b_rep24">–</div><div class="l">replies · 24 h</div></div>
-   <div class="tile"><div class="v" id="b_send24">–</div><div class="l">nodes served · 24 h</div></div>
-   <div class="tile"><div class="v" id="b_lat">–</div><div class="l">median reply · ms</div></div>
-   <div class="tile"><div class="v" id="b_life">–</div><div class="l" id="b_lifel">requests all time</div></div>
-   <div class="tile"><div class="v" id="b_bc24">–</div><div class="l">data broadcasts · 24 h</div></div>
+   <div class="tile" id="hSigT"><div class="v" id="hSig">–</div><div class="l" id="hSigL">satellite signal</div></div>
+   <div class="tile" id="hLostT"><div class="v" id="hLost">–</div><div class="l">frames lost · last hour</div></div>
+   <div class="tile" id="eLagT"><div class="v" id="eLag">–</div><div class="l">EMWIN behind NOAA</div></div>
+   <div class="tile" id="hFillT"><div class="v" id="hFill">–</div><div class="l" id="hFillL">internet fill</div></div>
+   <div class="tile" id="hOutT"><div class="v" id="hOut">–</div><div class="l" id="hOutL">last time without a signal</div></div>
   </div>
-  <div class="hint" style="margin-top:8px" id="botStatsHint"></div>
-  <div class="hint" id="botTop"></div>
- </div>
- <div class="card c4"><h2>Live on <span id="botChannel2">#meshwx</span> <span class="hint" id="botFeedHint"></span></h2>
-  <div class="feed" id="botFeed"><div class="hint">connecting to the bot…</div></div>
-  <div class="hint" style="margin-top:6px">Channel traffic is shown as is. A DM shows the command and reply length only.</div>
- </div>
-</section>
-<section id="recvView" style="display:contents">
- <div class="card c8"><h2>Decoder</h2>
-  <div class="tiles">
-   <div class="tile" id="t_vit"><div class="v" id="vit">–</div><div class="l">vit(avg) · Viterbi errors/frame</div></div>
-   <div class="tile" id="t_pk"><div class="v" id="pk">–</div><div class="l">packets / s</div></div>
-   <div class="tile" id="t_dr"><div class="v" id="dr">–</div><div class="l">drops / s</div></div>
-   <div class="tile" id="t_rs"><div class="v" id="rs">–</div><div class="l">rs(sum) · RS corrections/s</div></div>
-   <div class="tile"><div class="v" id="freq">–</div><div class="l">carrier offset kHz</div></div>
-   <div class="tile"><div class="v" id="lockt">–</div><div class="l">locked for</div></div>
+  <p class="why hidden" id="hNote" style="margin:12px 0 0"></p>
+ </section>
+ <section class="block" id="hrLive" aria-labelledby="hRx">
+  <div class="bh"><h2 id="hRx">Live signal</h2><div class="right"><span class="pill" id="rxPill">–</span><span class="pill">updates every second</span></div></div>
+  <div id="rxView">
+   <div class="tiles">
+    <div class="tile" id="tVit"><div class="v" id="rVit">–</div><div class="l">Viterbi errors per frame (under 200 is good)</div></div>
+    <div class="tile" id="tPk"><div class="v" id="rPk">–</div><div class="l">packets per second</div></div>
+    <div class="tile" id="tDr"><div class="v" id="rDr">–</div><div class="l">packets dropped per second</div></div>
+    <div class="tile"><div class="v" id="rLock">–</div><div class="l">locked for</div></div>
+   </div>
+   <div class="charts">
+    <div><canvas id="const" height="220" aria-label="Constellation"></canvas><div class="cap">Constellation: two tight clusters mean a clean signal.</div></div>
+    <div><canvas id="hist" height="220" aria-label="Signal over the last 15 minutes"></canvas><div class="cap">Last 15 minutes: Viterbi errors (line, lower is better) and packets per second (the band along the bottom).</div></div>
+   </div>
+   <div class="sys"><span>Reed-Solomon corrections <b id="rRs">–</b>/s</span><span>carrier offset <b id="rFreq">–</b> kHz</span><span id="rTot"></span></div>
   </div>
-  <div class="hint" style="margin-top:8px">totals since goesrecv start: <b id="tot"></b></div>
- </div>
- <div class="card c4"><h2>Constellation (BPSK)</h2><canvas id="const" height="240"></canvas></div>
- <div class="card c12"><h2>Last 15 minutes · vit(avg) line, packets/s bars</h2><canvas id="hist" height="150"></canvas></div>
- <div class="card c8"><h2>Latest images</h2><div class="grid" id="imgs"><span class="hint">nothing decoded yet</span></div></div>
- <div class="card c4"><h2>Latest EMWIN products <span class="hint" id="emcount"></span></h2><table id="emwin"></table></div>
-</section>
-<section id="pointView" style="display:contents" class="hidden">
- <div class="card c12"><h2>Pointing meter · in-band minus noise floor</h2>
-  <div style="display:flex;gap:16px;align-items:center;flex-wrap:wrap">
-   <div style="font-size:64px;font-weight:700;line-height:1"><span id="snr">–</span><span style="font-size:20px;color:var(--dim)"> dB</span></div>
-   <div style="flex:1;min-width:240px"><div class="meter"><div class="fill" id="fill"></div><div class="pk" id="pkm"></div></div>
-   <div class="hint">peak <b id="peak">–</b> dB · in-band <b id="inb">–</b> · floor <b id="oob">–</b> · <span id="verdict"></span></div></div>
-   <span id="meterCtl"><label class="chip">gain <select id="gain"></select></label> <button id="resetpk">Reset peak</button>
-   <label class="chip"><input type="checkbox" id="tone"> tone</label></span>
+  <div id="ptView" class="hidden">
+   <p class="hint" id="ptNote">The dish is being aimed right now, so the receiver is paused. This is the live signal meter.</p>
+   <div style="display:flex;gap:16px;align-items:center;flex-wrap:wrap">
+    <div class="bigsnr"><span id="snr">–</span><span style="font-size:20px;color:var(--dim)"> dB</span></div>
+    <div style="flex:1;min-width:220px"><div class="meter"><div class="fill" id="fill"></div><div class="pk" id="pkm"></div></div>
+     <div class="hint">peak <b id="peak">–</b> dB · in-band <b id="inb">–</b> · floor <b id="oob">–</b> · <span id="verdict"></span></div></div>
+    <span id="meterCtl" class="hidden"><label class="hint">gain <select id="gain"></select></label> <button id="resetpk">Reset peak</button>
+     <label class="hint"><input type="checkbox" id="tone"> tone</label></span>
+   </div>
+   <canvas id="spec" height="240" style="margin-top:12px"></canvas>
+   <canvas id="snrh" height="110" style="margin-top:12px"></canvas>
+   <div class="cap">5 dB or more decodes, 8 dB or more is clean. From Austin the satellite is at 138° compass, 47° up.</div>
   </div>
-  <canvas id="spec" height="260" style="margin-top:10px"></canvas>
-  <canvas id="snrh" height="120" style="margin-top:10px"></canvas>
-  <div class="hint">≥5 dB decodes, ≥8 dB is clean. Aim: 138° compass, 47° up from Austin. Rotate the feed for polarisation once you find the hump.</div>
- </div>
-</section>
+  <div class="grid2" style="margin-top:14px">
+   <div><h3 class="sm">Receiver chain</h3><div class="tbl"><table><tbody id="chain"></tbody></table></div></div>
+   <div><h3 class="sm">This Pi</h3><div class="sys" style="margin-top:0"><span>goesrecv <b id="sRecv">–</b></span><span>goesproc <b id="sProc">–</b></span><span>CPU <b id="sTemp">–</b></span><span>disk <b id="sDisk">–</b></span><span>receiver feed <b id="sFeed">–</b></span><span>goesrecv up <b id="sUp">–</b></span><span>watchdog restarts <b id="sDog">–</b></span><span>power <b id="sThr">–</b></span></div></div>
+  </div>
+ </section>
+
+ <section class="block" id="hrHist" aria-labelledby="hHist">
+  <div class="bh"><h2 id="hHist">Signal history</h2><div class="right" role="group" aria-label="Range"><button data-vr="6">6 h</button><button data-vr="24">24 h</button><button data-vr="168" class="on">7 days</button></div></div>
+  <p class="why">One-minute summaries kept for 7 days on the Pi. Times without a lock are shaded red, the hours around midday when the sun sits near the satellite are shaded yellow, and restarts are marked ▲.</p>
+  <canvas id="vitChart" height="260" aria-label="Viterbi errors over time"></canvas>
+  <div class="key"><span><i class="sw" style="background:var(--alert)"></i>Viterbi errors, median</span><span><i class="sw" style="background:var(--series);opacity:.35"></i>spread within the period</span><span><i class="sw" style="background:var(--warn);opacity:.35"></i>sun near the satellite</span><span><i class="sw" style="background:var(--bad);opacity:.35"></i>no lock</span><span><i class="sw" style="background:var(--dim);opacity:.25"></i>not recorded</span></div>
+ </section>
+ <section class="block" id="emHealth" aria-labelledby="hFh">
+  <div class="bh"><h2 id="hFh">EMWIN feed</h2></div>
+  <p class="why">EMWIN is the weather-text part of the downlink (channels 20 to 22): every National Weather Service product, sent up by NOAA. When NOAA's uplink falls behind, everything here runs late, however clean the signal.</p>
+  <div class="grid2">
+   <div><h3 class="sm">Delay behind NOAA, hourly · 7 days</h3><canvas id="lagChart" height="220" aria-label="EMWIN delay per hour"></canvas>
+    <div class="key"><span><i class="sw" style="background:var(--alert)"></i>median delay of what arrived that hour</span><span><i class="sw" style="background:var(--dim);opacity:.25"></i>not recorded</span></div></div>
+   <div><h3 class="sm">Products received, hourly · 7 days <span class="count" id="eHour"></span></h3><canvas id="volChart" height="220" aria-label="EMWIN products per hour"></canvas>
+    <div class="key"><span><i class="sw" style="background:var(--series2)"></i>from the dish</span><span><i class="sw" style="background:var(--warn)"></i>filled from NWS over the internet</span></div></div>
+  </div>
+  <h3 class="sm" style="margin-top:14px">Received in the last 24 hours, by kind</h3>
+  <div class="grid2"><div class="tbl"><table><tbody id="kindsA"></tbody></table></div><div class="tbl"><table><tbody id="kindsB"></tbody></table></div></div>
+  <p class="hint" id="emSince"></p>
+ </section>
+ <section class="block" id="hrVc" aria-labelledby="hVc">
+  <div class="bh"><h2 id="hVc">Per-channel traffic · last hour</h2></div>
+  <p class="why">What each virtual channel of the downlink carries, and how many of its frames the dish lost. A lost frame can cost a whole image or product. Imagery comes in bursts, so an hour shows every channel.</p>
+  <div class="tbl"><table><thead><tr><th>VC</th><th>Carries</th><th class="n">frames / min</th><th>share</th><th class="n">lost</th><th class="n">last frame</th></tr></thead><tbody id="vcRows"><tr><td class="hint" colspan="6">Counting starts when the dashboard starts; the first numbers come within a minute.</td></tr></tbody></table></div>
+ </section>
+ <section class="block" id="hrEv" aria-labelledby="hEv">
+  <div class="bh"><h2 id="hEv">Events and predictions</h2></div>
+  <p class="why">Everything the station noticed in one list: time without a signal, restarts, aiming, EMWIN running late, the backups switching on and off, and notes.</p>
+  <div class="grid2 wide">
+   <div><h3 class="sm">What happened · last 7 days</h3><ul class="events" id="evAll"></ul></div>
+   <div><h3 class="sm">Coming up</h3><ul class="events" id="prList"></ul></div>
+  </div>
+ </section>
+</div>
 </main>
+<footer class="wrap">Weather data: NOAA / National Weather Service, received from GOES-19. This page updates live.</footer>
+
 <script>
-const $=id=>document.getElementById(id);const dpr=devicePixelRatio||1;
-let state={},yMin=-60,yMax=0,audio=null,osc=null,curGain=null;
+const $=id=>document.getElementById(id),dpr=window.devicePixelRatio||1;
+const esc=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const css=n=>getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+const age=s=>{s=Math.max(0,Math.round(s));return s<60?s+' s':s<3600?Math.floor(s/60)+' min':Math.floor(s/3600)+' h '+String(Math.floor(s%3600/60)).padStart(2,'0')+' min'};
+const late=m=>m<120?m+' min':Math.floor(m/60)+' h '+String(m%60).padStart(2,'0')+' min';
+const clock=t=>new Date(t*1000).toLocaleTimeString([],{hour:'numeric',minute:'2-digit'});
+const clockS=t=>new Date(t*1000).toLocaleTimeString([],{hour:'2-digit',minute:'2-digit',second:'2-digit'});
+const n=v=>v==null?'–':Number(v).toLocaleString();
+function stat(id,level,value,detail){const el=$(id);el.className='stat'+(level?' '+level:'');el.querySelector('.v').textContent=value;el.querySelector('.d').textContent=detail||''}
+function tile(id,level){$(id).className='tile'+(level?' '+level:'')}
+function sigTile(level,value,label){tile('hSigT',level);$('hSig').textContent=value;$('hSigL').textContent=label}
+
+// ---------------------------------------------------------------- receiver (this Pi's dashboard)
+let rx={},bot=null,audio=null,osc=null,curGain=null,yMin=-60,yMax=0;
 const gains=[0,0.9,1.4,2.7,3.7,7.7,8.7,12.5,14.4,15.7,16.6,19.7,20.7,22.9,25.4,28,29.7,32.8,33.8,36.4,37.2,38.6,40.2,42.1,43.4,43.9,44.5,48,49.6];
 gains.forEach(g=>{const o=document.createElement('option');o.value=g;o.textContent=g;$('gain').appendChild(o)});
 const post=u=>fetch(u,{method:'POST'});
@@ -128,76 +454,105 @@ $('btnPoint').onclick=()=>{if(confirm('Stop goesrecv and switch the dongle to th
 $('btnRecv').onclick=()=>{post('/mode/receive');$('msg').textContent='switching…'};
 $('gain').onchange=()=>post('/meter/gain/'+$('gain').value);$('resetpk').onclick=()=>post('/meter/resetpeak');
 $('tone').onchange=()=>{if($('tone').checked){audio=audio||new (window.AudioContext||window.webkitAudioContext)();osc=audio.createOscillator();const g=audio.createGain();g.gain.value=.15;osc.connect(g).connect(audio.destination);osc.start()}else if(osc){osc.stop();osc=null}};
-const fmtAge=s=>s<60?s+'s':s<3600?Math.floor(s/60)+'m':Math.floor(s/3600)+'h '+Math.floor(s%3600/60)+'m';
-const fmtT=t=>new Date(t*1000).toLocaleTimeString([],{hour:'2-digit',minute:'2-digit',second:'2-digit'});
-function cls(el,c){el.className='tile'+(c?' '+c:'')}
-function render(d){state=d;
- const status=d.status;
- if(status){$('s_goesrecv').textContent=status.services.goesrecv;$('s_goesproc').textContent=status.services.goesproc;
-  $('temp').textContent=status.temp!=null?status.temp.toFixed(0)+'°C':'–';$('disk').textContent=status.disk_free_gb+' GB free';
-  renderImages(status.latest_images);renderEmwin(status.latest_emwin,status.counts)}
- const point=d.mode==='point',ctl=!!d.control;$('recvView').classList.toggle('hidden',point);$('pointView').classList.toggle('hidden',!point);
- $('btnPoint').classList.toggle('hidden',point||!ctl);$('btnRecv').classList.toggle('hidden',!point||!ctl);$('meterCtl').classList.toggle('hidden',!ctl);
- $('mode').textContent=ctl?(d.mode_msg||''):(point?'station is being aimed right now':'');
- if(d.msg)$('msg').textContent=d.msg; else if(!$('msg').textContent.startsWith('switching')||d.mode_msg)$('msg').textContent='';
- if(point){renderMeter(d.meter);$('lock').textContent='POINTING';$('lock').className='badge warn';return}
- const s=d.stats||{};$('feed').textContent=s.feed_alive?'live':'no data';
- if(!s.feed_alive){$('lock').textContent='NO STATS';$('lock').className='badge bad'}
- else if(s.locked){$('lock').textContent='LOCKED';$('lock').className='badge ok'}else{$('lock').textContent='NO LOCK';$('lock').className='badge bad'}
- const v=s.vit_avg;$('vit').textContent=v==null?'–':v;cls($('t_vit'),v==null?'':v<200?'good':v<600?'warn':'bad');
- $('pk').textContent=s.packets??'–';cls($('t_pk'),s.packets>0?'good':'');
- $('dr').textContent=s.drops??'–';cls($('t_dr'),s.drops>0&&s.packets>0?'warn':s.drops>0?'bad':'');
- $('rs').textContent=s.rs_sum??'–';cls($('t_rs'),s.rs_sum>50?'warn':'');
- $('freq').textContent=s.freq!=null?(s.freq/1000).toFixed(1):'–';
- $('lockt').textContent=s.lock_since?fmtAge(Math.round(d.t-s.lock_since)):'–';
- if(s.totals)$('tot').textContent=`${s.totals.packets} packets · ${s.totals.drops} drops · ${s.totals.rs_errors} RS corrections`;
+
+function renderRx(d){rx=Object.assign(rx,d);
+ const point=d.mode==='point',ctl=!!d.control,s=d.stats||{};
+ $('ops').classList.toggle('hidden',!ctl);$('btnPoint').classList.toggle('hidden',point);$('btnRecv').classList.toggle('hidden',!point);$('meterCtl').classList.toggle('hidden',!ctl);
+ $('rxView').classList.toggle('hidden',point);$('ptView').classList.toggle('hidden',!point);
+ $('ptNote').textContent=ctl?(d.mode_msg||'Pointing mode: goesrecv is stopped and the dongle feeds this meter.'):'The dish is being aimed right now, so the receiver is paused. This is the live signal meter.';
+ if(d.msg)$('msg').textContent=d.msg;else if(!$('msg').textContent.startsWith('switching')||d.mode_msg)$('msg').textContent='';
+ if(d.status){const st=d.status,sv=st.services||{};$('sRecv').textContent=sv.goesrecv||'–';$('sProc').textContent=sv.goesproc||'–';
+  $('sUp').textContent=st.goesrecv_up_s!=null?age(st.goesrecv_up_s):'–';$('sDog').textContent=(st.watchdog||{}).restarts??'–';$('sThr').textContent=st.throttled==null?'–':st.throttled==='0x0'?'no throttling':'throttled ('+st.throttled+')';
+  $('sTemp').textContent=st.temp!=null?st.temp.toFixed(0)+' °C':'–';$('sDisk').textContent=st.disk_free_gb!=null?st.disk_free_gb+' GB free':'–';
+  renderImages(st.latest_images)}
+ if(point){stat('stSat','info','Being aimed','The dish is being adjusted; reception is paused.');sigTile('','Being aimed','reception paused while the dish is adjusted');$('rxPill').textContent='Being aimed';$('rxPill').className='pill info';renderMeter(d.meter);return}
+ $('sFeed').textContent=s.feed_alive?'live':'no data';
+ const v=s.vit_avg,q=v==null?null:v<200?'good':v<600?'fair':'poor';
+ if(!s.feed_alive){stat('stSat','bad','No data','The receiver is not reporting.');sigTile('bad','No data','the receiver is not reporting')}
+ else if(!s.locked){stat('stSat','bad','No lock','GOES-19 is not being received.');sigTile('bad','No lock','GOES-19 is not being received')}
+ else{stat('stSat',q==='good'?'ok':'warn','Locked · '+q+' signal',`GOES-19 · locked for ${age(d.t-s.lock_since)}`);sigTile(q==='good'?'good':'warn',q[0].toUpperCase()+q.slice(1),`signal · Viterbi ${v} · locked for ${age(d.t-s.lock_since)}`)}
+ $('rxPill').textContent=!s.feed_alive?'No data':s.locked?'Locked · '+age(d.t-s.lock_since):'No lock';$('rxPill').className='pill '+(!s.feed_alive||!s.locked?'bad':q==='good'?'ok':'warn');
+ $('rVit').textContent=v??'–';tile('tVit',v==null?'':v<200?'good':v<600?'warn':'bad');
+ $('rPk').textContent=s.packets??'–';$('rDr').textContent=s.drops??'–';tile('tDr',s.drops>0?'warn':'');
+ $('rLock').textContent=s.lock_since?age(d.t-s.lock_since):'–';
+ $('rRs').textContent=s.rs_sum??'–';$('rFreq').textContent=s.freq!=null?(s.freq/1000).toFixed(1):'–';
+ if(s.totals)$('rTot').textContent=`since goesrecv started: ${n(s.totals.packets)} packets, ${n(s.totals.drops)} dropped`;
  drawConst(s.const||[]);if(d.history)drawHist(d.history)}
-function renderImages(list){const g=$('imgs');if(!list||!list.length)return;g.innerHTML='';list.forEach(i=>{const a=document.createElement('a');a.href='/img/'+i.path;a.target='_blank';a.innerHTML=`<img loading="lazy" src="/thumb/${i.path}"><span title="${i.name}">${i.name.replace(/^GOES1[89]_/,'').replace(/\.jpg$/,'')} · ${fmtAge(Math.round(Date.now()/1000-i.mtime))} ago</span>`;g.appendChild(a)})}
-function renderEmwin(list,counts){const t=$('emwin');t.innerHTML='';(list||[]).forEach(f=>{const tr=document.createElement('tr');tr.innerHTML=`<td><a href="/img/${f.path}" target="_blank">${f.name}</a></td><td class="r">${fmtT(f.mtime)}</td>`;t.appendChild(tr)});
- if(!list||!list.length)t.innerHTML='<tr><td class="hint">no EMWIN files yet</td></tr>';if(counts)$('emcount').textContent=`· ${counts.emwin_today} today, ${counts.emwin} total`}
-function drawConst(pts){const c=$('const'),W=c.width=c.clientWidth*dpr,H=c.height=240*dpr,x=c.getContext('2d');x.clearRect(0,0,W,H);
- x.strokeStyle='#30363d';x.beginPath();x.moveTo(W/2,0);x.lineTo(W/2,H);x.moveTo(0,H/2);x.lineTo(W,H/2);x.stroke();
- if(!pts.length){x.fillStyle='#8b949e';x.font=(12*dpr)+'px system-ui';x.fillText('no samples',10*dpr,20*dpr);return}
- let m=0;for(let i=0;i<pts.length;i++)m=Math.max(m,Math.abs(pts[i]));const sc=(Math.min(W,H)/2-10*dpr)/(m||1);
- x.fillStyle='rgba(88,166,255,.7)';for(let i=0;i+1<pts.length;i+=2){x.fillRect(W/2+pts[i]*sc-1.5*dpr,H/2-pts[i+1]*sc-1.5*dpr,3*dpr,3*dpr)}}
-function drawHist(h){const c=$('hist'),W=c.width=c.clientWidth*dpr,H=c.height=150*dpr,x=c.getContext('2d');x.clearRect(0,0,W,H);if(!h.length)return;
- const t1=h[h.length-1][0],t0=t1-900,px=t=>(t-t0)/900*W;const maxP=Math.max(60,...h.map(p=>p[2]));
- x.fillStyle='rgba(63,185,80,.35)';h.forEach(p=>{if(p[0]<t0)return;const y=p[2]/maxP*H;x.fillRect(px(p[0]),H-y,Math.max(1,W/900),y)});
- x.strokeStyle='#30363d';x.font=(11*dpr)+'px system-ui';x.fillStyle='#8b949e';[500,1000,1500,2000].forEach(v=>{const y=H-v/2500*H;x.beginPath();x.moveTo(0,y);x.lineTo(W,y);x.stroke();x.fillText('vit '+v,4*dpr,y-3)});
- x.strokeStyle='#f85149';x.lineWidth=1.5*dpr;x.beginPath();let pen=false;h.forEach(p=>{if(p[0]<t0||p[1]==null){pen=false;return}const X=px(p[0]),Y=H-Math.min(p[1],2500)/2500*H;pen?x.lineTo(X,Y):x.moveTo(X,Y);pen=true});x.stroke();
- x.fillStyle='#8b949e';x.fillText('packets/s max '+maxP,W-110*dpr,14*dpr)}
+
+// Rebuilt only when the set of images changes: every status refresh (5 s) used to
+// replace the grid and make each viewer fetch all twelve thumbnails again.
+let imgKey='';
+function renderImages(list){if(!list||!list.length)return;const g=$('imgs'),key=list.map(i=>i.path).join('|'),label=i=>`${i.name.replace(/^GOES1[89]_/,'').replace(/\.jpg$/,'').replace(/_/g,' ')} · ${age(Date.now()/1000-i.mtime)} ago`;
+ if(key===imgKey){g.querySelectorAll('span').forEach((s,k)=>{if(list[k])s.textContent=label(list[k])});return}
+ imgKey=key;g.innerHTML=list.map(i=>`<a href="/img/${esc(i.path)}" target="_blank" rel="noopener"><img loading="lazy" alt="${esc(i.name)}" src="/thumb/${esc(i.path)}"><span title="${esc(i.name)}">${esc(label(i))}</span></a>`).join('')}
+
+// Canvases: drawn in the page's own colours, redrawn when the device switches light/dark.
+function canvas(id,h){const c=$(id),W=c.width=c.clientWidth*dpr,H=c.height=h*dpr,x=c.getContext('2d');x.clearRect(0,0,W,H);x.font=(11*dpr)+'px system-ui';return [x,W,H]}
+function drawConst(pts){const [x,W,H]=canvas('const',220);x.strokeStyle=css('--line');x.beginPath();x.moveTo(W/2,0);x.lineTo(W/2,H);x.moveTo(0,H/2);x.lineTo(W,H/2);x.stroke();
+ if(!pts.length){x.fillStyle=css('--dim');x.fillText('no samples',10*dpr,20*dpr);return}
+ let m=0;for(const p of pts)m=Math.max(m,Math.abs(p));const sc=(Math.min(W,H)/2-10*dpr)/(m||1);
+ x.fillStyle=css('--series');x.globalAlpha=.65;for(let i=0;i+1<pts.length;i+=2)x.fillRect(W/2+pts[i]*sc-1.5*dpr,H/2-pts[i+1]*sc-1.5*dpr,3*dpr,3*dpr);x.globalAlpha=1}
+// Viterbi on 0-1000 (a locked signal stays well inside it; higher is clipped), with the
+// good/fair lines; packets per second as a low band along the bottom so they never hide it.
+function drawHist(h){const [x,W,H]=canvas('hist',220);if(!h.length)return;
+ const t1=h[h.length-1][0],t0=t1-900,px=t=>(t-t0)/900*W,maxP=Math.max(60,...h.map(p=>p[2]||0)),band=H*.12,VMAX=1000;
+ x.fillStyle=css('--series2');x.globalAlpha=.3;for(const p of h){if(p[0]<t0)continue;const y=(p[2]||0)/maxP*band;x.fillRect(px(p[0]),H-y,Math.max(1,W/900),y)}x.globalAlpha=1;
+ x.strokeStyle=css('--line');x.fillStyle=css('--dim');x.setLineDash([4,4]);for(const [v,l] of [[200,'200 good'],[600,'600 fair']]){const y=H-v/VMAX*H;x.beginPath();x.moveTo(0,y);x.lineTo(W,y);x.stroke();x.fillText(l,W-x.measureText(l).width-6*dpr,y-4*dpr)}x.setLineDash([]);
+ x.strokeStyle=css('--alert');x.lineWidth=1.5*dpr;x.beginPath();let pen=false;for(const p of h){if(p[0]<t0||p[1]==null){pen=false;continue}const X=px(p[0]),Y=H-Math.min(p[1],VMAX)/VMAX*H;pen?x.lineTo(X,Y):x.moveTo(X,Y);pen=true}x.stroke();
+ x.fillStyle=css('--dim');x.fillText('Viterbi errors',6*dpr,14*dpr)}
 function renderMeter(m){if(!m){$('snr').textContent='–';return}
  if(curGain!==m.gain){const o=[...$('gain').options].reduce((a,b)=>Math.abs(b.value-m.gain)<Math.abs(a.value-m.gain)?b:a);$('gain').value=o.value;curGain=m.gain}
  if(m.err)$('msg').textContent=m.err;
  if(m.snr!=null){const s=m.snr;$('snr').textContent=s.toFixed(1);$('peak').textContent=(m.peak||0).toFixed(1);$('inb').textContent=m.inband_lvl.toFixed(1);$('oob').textContent=m.oob_lvl.toFixed(1);
   $('fill').style.width=Math.max(0,Math.min(100,s/20*100))+'%';$('pkm').style.left=Math.max(0,Math.min(100,(m.peak||0)/20*100))+'%';
-  $('verdict').textContent=s<2?'no signal':s<5?'signal found, fine tune':s<9?'good, will decode':'excellent';
+  $('verdict').textContent=s<2?'no signal':s<5?'signal found, fine-tune':s<9?'good, will decode':'excellent';
   if(osc)osc.frequency.setTargetAtTime(220+Math.max(0,s)*90,audio.currentTime,.05)}
  drawSpec(m);drawSnrHist(m.history||[])}
-function drawSpec(d){const c=$('spec'),W=c.width=c.clientWidth*dpr,H=c.height=260*dpr,x=c.getContext('2d');x.clearRect(0,0,W,H);if(!d.freqs||!d.freqs.length)return;
+function drawSpec(d){const [x,W,H]=canvas('spec',240);if(!d.freqs||!d.freqs.length)return;
  const f0=d.freqs[0],f1=d.freqs[d.freqs.length-1],mn=Math.min(...d.db),mx=Math.max(...d.db);yMin+=(mn-4-yMin)*.1;yMax+=(mx+4-yMax)*.1;
  const px=f=>(f-f0)/(f1-f0)*W,py=v=>H-(v-yMin)/(yMax-yMin)*H;
- x.fillStyle='rgba(63,185,80,.12)';x.fillRect(px(d.inband[0]),0,px(d.inband[1])-px(d.inband[0]),H);
- x.fillStyle='rgba(139,148,158,.10)';d.oob.forEach(r=>x.fillRect(px(r[0]),0,px(r[1])-px(r[0]),H));
- x.strokeStyle='#30363d';x.font=(11*dpr)+'px system-ui';x.fillStyle='#8b949e';
- for(let f=Math.ceil(f0/1e6);f<=f1/1e6;f++){x.beginPath();x.moveTo(px(f*1e6),0);x.lineTo(px(f*1e6),H);x.stroke();x.fillText(f+' MHz',px(f*1e6)+3,H-6)}
- x.strokeStyle='#58a6ff';x.lineWidth=1.5*dpr;x.beginPath();d.freqs.forEach((f,i)=>{i?x.lineTo(px(f),py(d.db[i])):x.moveTo(px(f),py(d.db[i]))});x.stroke();
- if(d.oob_lvl!=null){x.strokeStyle='#8b949e';x.setLineDash([6,4]);x.beginPath();x.moveTo(0,py(d.oob_lvl));x.lineTo(W,py(d.oob_lvl));x.stroke();x.setLineDash([])}}
-function drawSnrHist(h){const c=$('snrh'),W=c.width=c.clientWidth*dpr,H=c.height=120*dpr,x=c.getContext('2d');x.clearRect(0,0,W,H);if(!h.length)return;
+ x.fillStyle=css('--series2');x.globalAlpha=.15;x.fillRect(px(d.inband[0]),0,px(d.inband[1])-px(d.inband[0]),H);x.fillStyle=css('--dim');x.globalAlpha=.12;d.oob.forEach(r=>x.fillRect(px(r[0]),0,px(r[1])-px(r[0]),H));x.globalAlpha=1;
+ x.strokeStyle=css('--line');x.fillStyle=css('--dim');for(let f=Math.ceil(f0/1e6);f<=f1/1e6;f++){x.beginPath();x.moveTo(px(f*1e6),0);x.lineTo(px(f*1e6),H);x.stroke();x.fillText(f+' MHz',px(f*1e6)+3,H-6)}
+ x.strokeStyle=css('--series');x.lineWidth=1.5*dpr;x.beginPath();d.freqs.forEach((f,i)=>{i?x.lineTo(px(f),py(d.db[i])):x.moveTo(px(f),py(d.db[i]))});x.stroke();
+ if(d.oob_lvl!=null){x.strokeStyle=css('--dim');x.setLineDash([6,4]);x.beginPath();x.moveTo(0,py(d.oob_lvl));x.lineTo(W,py(d.oob_lvl));x.stroke();x.setLineDash([])}}
+function drawSnrHist(h){const [x,W,H]=canvas('snrh',110);if(!h.length)return;
  const t1=h[h.length-1][0],t0=Math.min(h[0][0],t1-60),mx=Math.max(15,...h.map(p=>p[1])),px=t=>(t-t0)/(t1-t0||1)*W,py=v=>H-Math.max(0,v)/mx*H;
- x.strokeStyle='#30363d';x.font=(11*dpr)+'px system-ui';x.fillStyle='#8b949e';for(let v=0;v<=mx;v+=5){x.beginPath();x.moveTo(0,py(v));x.lineTo(W,py(v));x.stroke();x.fillText(v+' dB',4*dpr,py(v)-3)}
- x.strokeStyle='#3fb950';x.lineWidth=2*dpr;x.beginPath();h.forEach((p,i)=>{i?x.lineTo(px(p[0]),py(p[1])):x.moveTo(px(p[0]),py(p[1]))});x.stroke()}
-function connect(){const es=new EventSource('/events');es.onmessage=e=>{try{render(JSON.parse(e.data))}catch(err){console.error(err)}};
- es.onerror=()=>{$('lock').textContent='RECONNECTING';$('lock').className='badge bad';es.close();setTimeout(connect,2000)}}
-fetch('/api/state').then(r=>r.json()).then(render).finally(connect);
+ x.strokeStyle=css('--line');x.fillStyle=css('--dim');for(let v=0;v<=mx;v+=5){x.beginPath();x.moveTo(0,py(v));x.lineTo(W,py(v));x.stroke();x.fillText(v+' dB',4*dpr,py(v)-3)}
+ x.strokeStyle=css('--series2');x.lineWidth=2*dpr;x.beginPath();h.forEach((p,i)=>{i?x.lineTo(px(p[0]),py(p[1])):x.moveTo(px(p[0]),py(p[1]))});x.stroke()}
+matchMedia('(prefers-color-scheme: dark)').addEventListener('change',()=>{if(rx.mode==='point')renderMeter(rx.meter);else{drawConst((rx.stats||{}).const||[]);if(rx.history)drawHist(rx.history)}drawHistory()});
+function connect(){const es=new EventSource('/events');es.onmessage=e=>{try{renderRx(JSON.parse(e.data))}catch(err){console.error(err)}};
+ es.onerror=()=>{stat('stSat','warn','Reconnecting…','Lost the live connection to this page.');es.close();setTimeout(connect,2000)}}
+fetch('/api/state').then(r=>r.json()).then(renderRx).catch(()=>{}).finally(connect);
 
-// ---- mesh weather bot (read-only bundle proxied from the bot's portal) ----
-const esc=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
-let botLastId=0,botFeedInit=false,botStarted=null;
+// ---------------------------------------------------------------- the weather bot (read-only bundle from its portal)
+// Where the weather comes from, in words: EMWIN off the dish (or NOAA's bundles on a bot
+// without one), and the internet fill, which takes from NWS whatever the feed has not
+// delivered in time. Times in the bundle are unix seconds.
+const fillTook=f=>{const h=(f&&f.last_hour)||{};return (h.text||0)+(h.obs_files||0)+(h.radar||0)};
+// Why the bot is filling in (the bot's own reason, emwin/fill.py InternetFill.reason), in plain
+// words: a card's few words, and the Overview's sentence.
+const fillCase=f=>{const r=(f&&f.reason)||'',m=r.match(/running (.+) late/),q=r.match(/quiet for (.+)/);return r.startsWith('the dish')?['dish',q&&q[1]]:m?['late',m[1]]:['missed']};
+function fillShort(f){const [k,v]=fillCase(f);return k==='dish'?'the dish is receiving nothing':k==='late'?`the satellite feed is ${v} late`:'some products missed the dish'}
+function fillWhy(f){const [k,v]=fillCase(f);
+ const why=k==='dish'?(v?`The dish has received nothing from the satellite for ${v}, so the bot is getting the weather`:'The dish is receiving nothing from the satellite, so the bot is getting the weather')
+  :k==='late'?`NOAA's satellite broadcast is running about ${v} late, so the bot is getting anything late`
+  :'Some weather products did not come through the satellite in time, so the bot got those';
+ return `${why} from the National Weather Service over the internet instead. The forecasts, warnings, current conditions and radar it sends on the mesh stay up to date.`}
+function renderData(d){const fd=d.feed||{},f=fd.fill,lag=fd.lag_min,notes=[],filling=!!(f&&f.active);
+ const newest=fd.newest_product_at?`newest product ${clock(fd.newest_product_at)}`:'';
+ const fillLine=filling?[fillShort(f),f.since?'from NWS since '+clock(f.since):'from NWS',`${n(fillTook(f))} products from NWS in the last hour`]:[];
+ if(fd.source==='internet')stat('stData',filling?'warn':'info','Over the internet',['This bot has no dish',...(filling?fillLine:[lag!=null&&lag>=30?'NOAA is '+late(lag)+' behind':newest])].filter(Boolean).join(' · '));
+ else if(filling)stat('stData','warn','Filling in from NWS',fillLine.filter(Boolean).join(' · '));
+ else if(lag!=null&&lag>=30)stat('stData',lag>=120?'bad':'warn',late(lag)+' late',['NOAA\'s EMWIN feed is behind',newest].filter(Boolean).join(' · '));
+ else stat('stData','ok','On time',['From the dish, NOAA EMWIN',lag!=null?`within ${lag} min of NOAA`:newest].filter(Boolean).join(' · '));
+ if(filling)notes.push(fillWhy(f));
+ else if(lag!=null&&lag>=30)notes.push(`NOAA's EMWIN feed is running about ${late(lag)} late, so forecasts and warnings reach the mesh late.`);
+ const box=$('notice');box.classList.toggle('hidden',!notes.length);box.className='notice'+(notes.length?(!filling&&lag>=120?' bad':' warn'):' hidden');box.textContent=notes.join(' ');$('hNote').textContent=notes.join(' ');$('hNote').classList.toggle('hidden',!notes.length)}
+
+let lastId=0,feedInit=false,started=null;
 function dvKey(ev){const d=ev.delivery;return d?`${d.result||''}${d.resent||0}${d.observed_by||0}${d.observed_repeats||0}`:''}
-function dlv(d){if(!d)return '';let t=d.acked?`ack${d.rtt_ms!=null?' '+(d.rtt_ms/1000).toFixed(1)+' s':''}`:d.echo?`repeated${d.echo_ms!=null?' '+(d.echo_ms/1000).toFixed(1)+' s':''}${d.via?' via '+esc(d.via):''}`:'no repeat heard';if(d.resent)t+=` · resent ×${d.resent}`;const rep=d.observed_repeats||0,dir=(d.observed_by||0)-rep;if(rep)t+=` · repeat heard by ${rep} observer${rep===1?'':'s'}`;if(dir)t+=` · ${dir} heard it direct only`;return ` <span class="t">[${t}]</span>`}
-function botLine(ev){const ts=new Date(ev.t*1000).toLocaleTimeString([],{hour:'2-digit',minute:'2-digit',second:'2-digit'});
- const tr=ev.transport==='channel'?'CH':ev.transport==='channel_data'?'DGM':ev.transport==='dm'?'DM':ev.kind.startsWith('advert')?'ADV':'';const who=ev.sender?`<span class="who">${esc(ev.sender)}</span> `:'';
+function dlv(d){if(!d)return '';let t=d.acked?`ack${d.rtt_ms!=null?' '+(d.rtt_ms/1000).toFixed(1)+' s':''}`:d.echo?`repeated${d.echo_ms!=null?' '+(d.echo_ms/1000).toFixed(1)+' s':''}${d.via?' via '+esc(d.via):''}`:'no repeat heard';if(d.resent)t+=` · resent ×${d.resent}`;const rep=d.observed_repeats||0,dir=(d.observed_by||0)-rep;if(rep)t+=` · heard repeated by ${rep} observer${rep===1?'':'s'}`;if(dir)t+=` · ${dir} heard it direct only`;return ` <span class="t">[${t}]</span>`}
+function line(ev){const tr=ev.transport==='channel'?'CH':ev.transport==='channel_data'?'APP':ev.transport==='dm'?'DM':ev.kind.startsWith('advert')?'ADV':'';const who=ev.sender?`<span class="who">${esc(ev.sender)}</span> `:'';
  const cmd=ev.command?` <span class="t">[${esc(ev.command)}${ev.location?' · '+esc(ev.location):''}]</span>`:'';let cls='in',body='';
  switch(ev.kind){
   case 'channel_in':body=esc(ev.text)+cmd+(ev.hops!=null?` <span class="t">${ev.hops} hops</span>`:'');break;
@@ -208,34 +563,331 @@ function botLine(ev){const ts=new Date(ev.t*1000).toLocaleTimeString([],{hour:'2
   case 'dm_failed':cls='drop';body='DM could not be delivered';break;
   case 'peer':body=`<span class="t">another weather bot:</span> ${esc(ev.text)}`;break;
   case 'advert':body='<span class="t">advert heard</span>';break;
-  case 'advert_out':cls='out';body='<span class="t">bot advert (flood)</span>';break;
-  case 'data_request':body='<span class="t">app data request</span>';break;
+  case 'advert_out':cls='out';body='<span class="t">bot advert</span>';break;
+  case 'data_request':body='<span class="t">app request</span>';break;
   case 'reply_data':cls='out';body=`<span class="t">app answer</span> ${esc(ev.text||'')}${ev.ms!=null?` <span class="t">· ${ev.ms} ms</span>`:''}`+dlv(ev.delivery);break;
   default:body=esc(ev.text||ev.reason||ev.kind)}
- return `<div data-id="${ev.id}" data-dv="${dvKey(ev)}"><span class="t">${ts}</span> <span class="${cls}">${ev.dir==='in'?'←':'→'}</span> <span class="tag">${tr||ev.kind}</span> ${who}${body}</div>`}
-function renderBot(d){const b=$('botBadge');
- if(!d.online){b.textContent='BOT OFFLINE';b.className='badge bad';$('botSub').textContent=d.error||'';return}
- const bot=d.bot||{},r=d.radio,st=d.stats||{},w=(st.windows||{})['24h']||{},lt=st.lifetime||{},lat=st.latency||{};
- b.textContent=bot.connected?(bot.tx_enabled?'BOT ON AIR':'BOT RX ONLY'):'BOT: NO RADIO';b.className='badge '+(bot.connected&&bot.tx_enabled?'ok':'warn');
- if(bot.name){$('botName').textContent=bot.name;$('botNameDm').textContent=bot.name}
- $('botSub').textContent=`up ${fmtAge(bot.uptime_s||0)} · ${bot.products||0} NWS products in memory`+(bot.lat!=null?` · ${(+bot.lat).toFixed(2)}, ${(+bot.lon).toFixed(2)}`:'')+(d.peers&&d.peers.length?` · peers: ${d.peers.map(p=>p.name).join(', ')}`:'');
- if(r)$('botRadio').textContent=`${r.preset?r.preset+': ':''}${r.freq_mhz} MHz, ${r.bw_khz} kHz, SF${r.sf}, CR${r.cr}`;
- const ch=(d.channels||{});if(ch.text){$('botChannel').textContent=ch.text;$('botChannel2').textContent=ch.text}if(ch.data)$('botDataChannel').textContent=ch.data;
- $('botReplyHow').textContent=bot.reply_mode==='channel'?'Replies currently go out on the channel.':bot.reply_mode==='dm_only'?'Replies go by DM only, so the bot needs your advert (next step).':'Replies go by DM when the bot knows your node. Otherwise it answers once on the channel and adverts so the next exchange can be a DM.';
- if(d.commands&&!$('botCmds').childElementCount)$('botCmds').innerHTML=d.commands.map(c=>`<tr><td><code>${esc(c.cmd)}</code></td><td>${esc(c.what)}</td><td class="r"><code>${esc(c.example)}</code></td></tr>`).join('');
- $('b_req24').textContent=w.requests??'–';$('b_rep24').textContent=w.replies??'–';$('b_send24').textContent=w.senders??'–';
- $('b_lat').textContent=lat.median_ms!=null?lat.median_ms:'–';$('b_life').textContent=lt.requests??'–';
- if(lt.since)$('b_lifel').textContent='requests since '+new Date(lt.since*1000).toLocaleDateString();
- $('b_bc24').textContent=((d.broadcasts||{})['24h']||{}).messages??'–';
- $('botStatsHint').textContent=`last 24 h: ${w.dm_replies||0} replies by DM, ${w.channel_replies||0} on the channel, ${w.dropped||0} not answered · ${w.chars_sent||0} characters sent`;
- const top=Object.entries(w.by_command||{}).sort((a,b)=>b[1]-a[1]).slice(0,5).map(([k,v])=>`${k} ×${v}`).join(', ');$('botTop').textContent=top?'most asked: '+top:'';
- const feed=$('botFeed'),recent=d.recent||[];
- if(botStarted!==null&&st.started!==botStarted)botFeedInit=false;   // the bot restarted: ids start over, redraw
- botStarted=st.started||null;
- if(!botFeedInit){feed.innerHTML=recent.length?recent.map(botLine).join(''):'<div class="hint">Nothing asked yet.</div>';botFeedInit=true;botLastId=recent.length?recent[recent.length-1].id:0;feed.scrollTop=feed.scrollHeight}
- else{recent.forEach(e=>{if(e.id<=botLastId&&e.delivery){const el=feed.querySelector(`[data-id="${e.id}"]`);if(el&&el.dataset.dv!==dvKey(e))el.outerHTML=botLine(e)}});
-  const fresh=recent.filter(e=>e.id>botLastId);if(fresh.length){if(botLastId===0)feed.innerHTML='';const atBottom=feed.scrollHeight-feed.scrollTop-feed.clientHeight<40;feed.insertAdjacentHTML('beforeend',fresh.map(botLine).join(''));while(feed.childElementCount>300)feed.removeChild(feed.firstChild);botLastId=fresh[fresh.length-1].id;if(atBottom)feed.scrollTop=feed.scrollHeight}}
- $('botFeedHint').textContent=st.last_request_at?`· last request ${fmtAge(Math.max(0,Math.round(d.t-st.last_request_at)))} ago`:''}
-function pollBot(){fetch('/api/bot').then(r=>r.json()).then(renderBot).catch(()=>renderBot({online:false,error:'dashboard cannot reach the bot'})).finally(()=>setTimeout(pollBot,5000))}
+ return `<div data-id="${ev.id}" data-dv="${dvKey(ev)}"><span class="t">${clockS(ev.t)}</span> <span class="${cls}">${ev.dir==='in'?'←':'→'}</span> <span class="tag">${tr||ev.kind}</span> ${who}${body}</div>`}
+
+function renderBot(d){bot=d;
+ if(!d.online){stat('stBot','bad','Offline',d.error||'');stat('stData','','–','The bot is not reachable.');return}
+ const b=d.bot||{},r=d.radio,st=d.stats||{},w=(st.windows||{})['24h']||{},lt=st.lifetime||{},t=d.t||Date.now()/1000;
+ stat('stBot',b.connected&&b.tx_enabled?'ok':'warn',b.connected?(b.tx_enabled?'On air':'Listening only'):'No radio',
+  [b.name,b.uptime_s!=null?'up '+age(b.uptime_s):'',st.last_request_at?'last request '+age(t-st.last_request_at)+' ago':''].filter(Boolean).join(' · '));
+ if(b.name){$('hName').textContent=b.name;$('uName').textContent=b.name}
+ renderData(d);if(E)renderFeedHealth();
+ $('aReq').textContent=n(w.requests);$('aNodes').textContent=n(w.senders);$('aRep').textContent=n(w.replies);$('aBc').textContent=n(((d.broadcasts||{})['24h']||{}).messages);
+ const parts=[[w.app_replies,'to the app'],[w.dm_replies,'by DM'],[w.channel_replies,'on the channel']].filter(p=>p[0]).map(p=>`${n(p[0])} ${p[1]}`);
+ $('aSplit').textContent=(parts.length?'Replies: '+parts.join(', ')+'. ':'')+(w.dropped?`${n(w.dropped)} not answered.`:'');
+ const top=Object.entries(w.by_command||{}).sort((a,b)=>b[1]-a[1]).slice(0,5).map(([k,v])=>`${k} ×${v}`).join(', ');$('aTop').textContent=top?'Most asked: '+top+'.':'';
+ $('aLife').textContent=lt.requests!=null?`${n(lt.requests)} requests since ${lt.since?new Date(lt.since*1000).toLocaleDateString():'the start'}.`:'';
+ if(r)$('uRadio').textContent=`${r.preset?r.preset+': ':''}${r.freq_mhz} MHz, ${r.bw_khz} kHz, SF${r.sf}, CR${r.cr}`;
+ const ch=d.channels||{};if(ch.text){$('uChannel').textContent=ch.text;$('chText').textContent=ch.text}if(ch.data)$('uData').textContent=ch.data;
+ $('uReply').textContent=b.reply_mode==='channel'?'Replies go out on the channel.':b.reply_mode==='dm_only'?'Replies go by DM only, so the bot needs your advert (next step).':'Replies go by DM when the bot knows your node. Otherwise it answers once on the channel and adverts so the next exchange can be a DM.';
+ if(d.commands&&!$('uCmds').childElementCount)$('uCmds').innerHTML=d.commands.map(c=>`<tr><td><code>${esc(c.cmd)}</code></td><td>${esc(c.what)}</td><td class="r"><code>${esc(c.example)}</code></td></tr>`).join('');
+ const feed=$('feed'),recent=d.recent||[];
+ if(started!==null&&st.started!==started)feedInit=false;     // the bot restarted: event ids start over
+ started=st.started||null;
+ if(!feedInit){feed.innerHTML=recent.length?recent.map(line).join(''):'<div class="hint">Nothing asked yet.</div>';feedInit=true;lastId=recent.length?recent[recent.length-1].id:0;feed.scrollTop=feed.scrollHeight}
+ else{for(const e of recent){if(e.id<=lastId&&e.delivery){const el=feed.querySelector(`[data-id="${e.id}"]`);if(el&&el.dataset.dv!==dvKey(e))el.outerHTML=line(e)}}
+  const fresh=recent.filter(e=>e.id>lastId);if(fresh.length){if(lastId===0)feed.innerHTML='';const atBottom=feed.scrollHeight-feed.scrollTop-feed.clientHeight<40;feed.insertAdjacentHTML('beforeend',fresh.map(line).join(''));while(feed.childElementCount>300)feed.removeChild(feed.firstChild);lastId=fresh[fresh.length-1].id;if(atBottom)feed.scrollTop=feed.scrollHeight}}
+ $('feedHint').textContent=st.last_request_at?`· last request ${age(t-st.last_request_at)} ago`:''}
+function pollBot(){fetch('/api/bot').then(r=>r.json()).then(renderBot).catch(()=>renderBot({online:false,error:'This page cannot reach the bot.'})).finally(()=>setTimeout(pollBot,5000))}
 pollBot();
+
+// ---------------------------------------------------------------- tabs (bare #token links)
+// Weather is everything to look at, Station everything about whether the dish and feed work.
+// The tabs used to be the two parts of the downlink; their old addresses still land.
+const TABS=['overview','weather','station','use'],MOVED={hrit:'station',emwin:'weather'};
+function showTab(tab,jump){if(MOVED[tab]){tab=MOVED[tab];history.replaceState(null,'','#'+tab)}if(!TABS.includes(tab))tab='overview';TABS.forEach(t=>{$(t).hidden=t!==tab;$('t-'+t).setAttribute('aria-selected',t===tab)});
+ requestAnimationFrame(()=>{drawHistory();if(rx.history&&tab==='station'){drawConst((rx.stats||{}).const||[]);drawHist(rx.history)}if(tab==='weather'){emwinShown();imageryShown()}LOOPS.forEach(l=>{if($(tab)&&!$(tab).contains(l.img))l.stop()});if(jump)$(jump).scrollIntoView({behavior:'smooth',block:'start'})})}
+addEventListener('hashchange',()=>showTab(location.hash.slice(1)));
+document.querySelectorAll('[data-jump]').forEach(a=>a.addEventListener('click',e=>{e.preventDefault();history.replaceState(null,'',a.getAttribute('href'));showTab(a.getAttribute('href').slice(1),a.dataset.jump)}));
+document.querySelectorAll('[data-go]').forEach(b=>b.addEventListener('click',()=>$(b.dataset.go).scrollIntoView({behavior:'smooth',block:'start'})));
+
+// ---------------------------------------------------------------- 7-day history (/api/hrit, /api/emwin)
+let H=null,E=null,vRange=168;const HOUR=3600;
+const when=t=>new Date(t*1000).toLocaleString([],{month:'short',day:'numeric',hour:'numeric',minute:'2-digit'});
+const dayLabel=t=>new Date(t*1000).toLocaleDateString([],{weekday:'short',day:'numeric'});
+const visible=id=>{const c=$(id);return c&&c.offsetParent!==null};
+function frame(id,h,padL){const [x,W,Hh]=canvas(id,h);return [x,W,Hh,padL*dpr]}
+function timeAxis(x,W,Hh,px,t0,t1,step){x.strokeStyle=css('--line');x.fillStyle=css('--dim');
+ const start=new Date(t0*1000);start.setMinutes(0,0,0);if(step>=86400)start.setHours(0);let t=start.getTime()/1000;
+ while(t<t0)t+=step;for(;t<=t1;t+=step){const X=px(t);x.beginPath();x.moveTo(X,0);x.lineTo(X,Hh-14*dpr);x.stroke();x.fillText(step>=86400?dayLabel(t):clock(t),X+3*dpr,Hh-3*dpr)}}
+function shadeUnrecorded(x,px,t0,since,Hh){if(since==null||since<=t0)return;x.fillStyle=css('--dim');x.globalAlpha=.15;x.fillRect(px(t0),0,px(since)-px(t0),Hh);x.globalAlpha=1;x.fillStyle=css('--dim');x.fillText('not recorded',px(t0)+6*dpr,16*dpr)}
+
+// Hover (a finger held too) on the history charts: a cursor at the hour or bucket under the
+// pointer and a card of its figures. GEO keeps where each chart last put its time axis (CSS px),
+// and each chart's redraw shows the card again for the pointer where it is.
+const GEO={};
+function chartTip(id,pick){const c=$(id),host=c.parentNode,line=document.createElement('div'),box=document.createElement('div');let at=null;
+ host.style.position='relative';c.style.cursor='crosshair';line.className='chartline';box.className='maptip';line.hidden=box.hidden=true;host.append(line,box);
+ const show=()=>{const g=GEO[id],p=at==null||!g?null:pick(g.t0+(at-g.pad)/g.span*(g.t1-g.t0));line.hidden=box.hidden=!p;if(!p)return;
+  const X=c.offsetLeft+g.pad+(p.t-g.t0)/(g.t1-g.t0)*g.span;line.style.left=X+'px';line.style.top=c.offsetTop+'px';line.style.height=c.clientHeight+'px';
+  box.innerHTML=p.html;box.style.maxWidth='none';const bw=box.offsetWidth;box.style.left=Math.max(c.offsetLeft,X+12+bw>c.offsetLeft+c.clientWidth?X-12-bw:X+12)+'px';box.style.top=c.offsetTop+6+'px'};
+ const move=e=>{at=e.offsetX;show()},out=()=>{at=null;show()};
+ ['pointermove','pointerdown'].forEach(k=>c.addEventListener(k,move));['pointerleave','pointercancel'].forEach(k=>c.addEventListener(k,out));return show}
+const tipRows=rows=>'<table class="tiprows">'+rows.map(([k,v])=>`<tr><td>${esc(k)}</td><td>${esc(v)}</td></tr>`).join('')+'</table>';
+// an hour of the EMWIN history: its delay and what came in
+function hourTip(t){const r=E&&E.hourly.find(q=>q[0]<=t&&t<q[0]+HOUR);if(!r)return null;
+ return {t:r[0]+HOUR/2,html:`<b>${esc(when(r[0]))} – ${esc(clock(r[0]+HOUR))}</b>`+tipRows([['delay behind NOAA',r[3]==null?'–':r[3]<1?'on time':late(Math.round(r[3]))],['from the dish',n(r[1])],['from NWS over the internet',n(r[2])],['in all',n(r[1]+r[2])]])}}
+// a bucket of the signal history: [t, Viterbi median, 10th, 90th percentile, packets, drops, share locked]
+function vitTip(t){if(!H||!H.signal.length)return null;const b=H.bucket_s,r=H.signal.reduce((a,q)=>Math.abs(q[0]-t)<Math.abs(a[0]-t)?q:a);if(Math.abs(r[0]-t)>2*b)return null;
+ const w=v=>v<200?'good':v<600?'fair':'poor',d=r[4]?` (${(r[5]*100/(r[4]+r[5])).toFixed(1)}%)`:'';
+ return {t:r[0],html:`<b>${esc(when(r[0]))}</b> · ${Math.round(b/60)} min`+tipRows([['Viterbi errors',r[1]==null?'–':`${Math.round(r[1])} (${w(r[1])})`],['10th–90th percentile',r[2]==null?'–':`${Math.round(r[2])}–${Math.round(r[3])}`],['packets',n(r[4])],['dropped',n(r[5])+d],['locked',r[6]==null?'–':Math.round(r[6]*100)+'% of the time']])}}
+const TIPS={vitChart:chartTip('vitChart',vitTip),lagChart:chartTip('lagChart',hourTip),volChart:chartTip('volChart',hourTip)};
+const geo=(id,t0,t1,W,pad)=>{GEO[id]={t0,t1,pad:pad/dpr,span:(W-pad-4*dpr)/dpr}};
+
+function drawVitHist(){if(!H||!visible('vitChart'))return;const rows=H.signal,t1=H.now,t0=t1-H.hours*HOUR,[x,W,Hh,pad]=frame('vitChart',260,4),VM=800;
+ const px=t=>pad+(t-t0)/(t1-t0)*(W-pad-4*dpr),py=v=>Hh-14*dpr-Math.min(v,VM)/VM*(Hh-26*dpr);geo('vitChart',t0,t1,W,pad);
+ // the sun near the satellite: today's closest approach +-75 min, each day, when it is within 12 degrees
+ const sun=H.sun&&H.sun.today;if(sun&&sun.closest_deg<12){const tod=sun.at%86400;x.fillStyle=css('--warn');x.globalAlpha=.16;for(let d=Math.floor(t0/86400)-1;d<=Math.floor(t1/86400)+1;d++){const c=d*86400+tod;x.fillRect(px(c-4500),0,px(c+4500)-px(c-4500),Hh)}x.globalAlpha=1}
+ shadeUnrecorded(x,px,t0,H.recorded_since,Hh);
+ x.fillStyle=css('--bad');x.globalAlpha=.25;rows.forEach(r=>{if(r[6]===0)x.fillRect(px(r[0]),0,Math.max(1,px(r[0]+H.bucket_s)-px(r[0])),Hh)});x.globalAlpha=1;
+ x.strokeStyle=css('--line');x.fillStyle=css('--dim');x.setLineDash([4,4]);[[200,'200 good'],[600,'600 fair']].forEach(([v,l])=>{x.beginPath();x.moveTo(pad,py(v));x.lineTo(W,py(v));x.stroke();x.fillText(l,W-x.measureText(l).width-6*dpr,py(v)-4*dpr)});x.setLineDash([]);
+ timeAxis(x,W,Hh,px,t0,t1,H.hours<=6?HOUR:H.hours<=24?4*HOUR:86400);
+ const gap=H.bucket_s*2.5,seg=[];let cur=[];rows.forEach(r=>{if(r[1]==null||(cur.length&&r[0]-cur[cur.length-1][0]>gap)){if(cur.length)seg.push(cur);cur=[]}if(r[1]!=null)cur.push(r)});if(cur.length)seg.push(cur);
+ x.fillStyle=css('--series');x.globalAlpha=.22;seg.forEach(g=>{x.beginPath();g.forEach((r,i)=>i?x.lineTo(px(r[0]),py(r[3]??r[1])):x.moveTo(px(r[0]),py(r[3]??r[1])));[...g].reverse().forEach(r=>x.lineTo(px(r[0]),py(r[2]??r[1])));x.fill()});x.globalAlpha=1;
+ x.strokeStyle=css('--alert');x.lineWidth=1.5*dpr;seg.forEach(g=>{x.beginPath();g.forEach((r,i)=>i?x.lineTo(px(r[0]),py(r[1])):x.moveTo(px(r[0]),py(r[1])));x.stroke()});
+ x.fillStyle=css('--fg');(H.events||[]).filter(e=>e.kind==='restart'&&e.t>=t0).forEach(e=>{const X=px(e.t);x.beginPath();x.moveTo(X,10*dpr);x.lineTo(X-5*dpr,2*dpr);x.lineTo(X+5*dpr,2*dpr);x.fill()});
+ if(!rows.length){x.fillStyle=css('--dim');x.fillText('The first minutes of history appear here within a minute of the dashboard starting.',pad+8*dpr,Hh/2)}}
+
+// The EMWIN delay and signal sparklines left the Overview at the owner's word (2026-10-19): the
+// operator's view of them is on wx-admin's Station tab; the public keeps these charts here.
+function drawLagChart(id,h){if(!E||!visible(id))return;const rows=E.hourly,t1=E.now,t0=t1-168*HOUR,[x,W,Hh,pad]=frame(id,h,32),VM=480;
+ const px=t=>pad+(t-t0)/(t1-t0)*(W-pad-4*dpr),py=v=>Hh-14*dpr-Math.min(v,VM)/VM*(Hh-26*dpr);geo(id,t0,t1,W,pad);
+ shadeUnrecorded(x,px,t0,E.recorded_since,Hh);x.strokeStyle=css('--line');x.setLineDash([4,4]);[[60,'1 h'],[180,'3 h'],[360,'6 h']].forEach(([v,l])=>{x.beginPath();x.moveTo(pad,py(v));x.lineTo(W,py(v));x.stroke();x.fillStyle=css('--dim');x.fillText(l,4*dpr,py(v)+4*dpr)});x.setLineDash([]);timeAxis(x,W,Hh,px,t0,t1,86400);
+ x.strokeStyle=css('--alert');x.lineWidth=2*dpr;x.beginPath();let pen=false,last=null;rows.forEach(r=>{if(r[0]<t0||r[3]==null){pen=false;return}const X=px(r[0]+HOUR/2),Y=py(r[3]);pen?x.lineTo(X,Y):x.moveTo(X,Y);pen=true;last=[X,Y]});x.stroke();
+ if(last){x.fillStyle=css('--alert');x.beginPath();x.arc(last[0],last[1],3.5*dpr,0,7);x.fill()}}
+function drawVolChart(){if(!E||!visible('volChart'))return;const rows=E.hourly,t1=E.now,t0=t1-168*HOUR,[x,W,Hh,pad]=frame('volChart',220,36),VM=Math.max(1500,...rows.map(r=>r[1]+r[2]));
+ const px=t=>pad+(t-t0)/(t1-t0)*(W-pad-4*dpr),py=v=>Hh-14*dpr-v/VM*(Hh-26*dpr),bw=Math.max(1,px(HOUR)-px(0)-1*dpr);geo('volChart',t0,t1,W,pad);
+ shadeUnrecorded(x,px,t0,E.recorded_since,Hh);x.strokeStyle=css('--line');x.fillStyle=css('--dim');x.setLineDash([4,4]);[1000,2000,4000].filter(v=>v<VM).forEach(v=>{x.beginPath();x.moveTo(pad,py(v));x.lineTo(W,py(v));x.stroke();x.fillText(v.toLocaleString(),2*dpr,py(v)+4*dpr)});x.setLineDash([]);timeAxis(x,W,Hh,px,t0,t1,86400);
+ rows.forEach(r=>{if(r[0]<t0)return;x.fillStyle=css('--series2');x.globalAlpha=.85;x.fillRect(px(r[0]),py(r[1]),bw,Hh-14*dpr-py(r[1]));if(r[2]){x.fillStyle=css('--warn');x.fillRect(px(r[0]),py(r[1]+r[2]),bw,py(r[1])-py(r[1]+r[2]))}});x.globalAlpha=1}
+function drawHistory(){drawVitHist();drawLagChart('lagChart',220);drawVolChart();Object.values(TIPS).forEach(f=>f())}
+addEventListener('resize',drawHistory);
+
+const LEVEL={bad:['bad','outage'],warn:['warn','late'],info:['info','note']};
+function evItem(e){let [cls,word]=LEVEL[e.level]||['','event'];if(e.kind==='note')word='note';const open=e.t_end==null&&['lock','pointing','emwin_late','fill','inet_backup','nws_metar'].includes(e.kind);
+ return `<li><time>${esc(when(e.t))}</time><div><span class="pill ${cls}" style="margin-right:6px">${open?'now':word}</span><b>${esc(e.title)}</b>${e.detail?`<div class="det">${esc(e.detail)}</div>`:''}</div></li>`}
+function renderHrit(){if(!H)return;
+ const ch=H.station||{},sun=(H.sun||{}).satellite||{};$('chain').innerHTML=[['Satellite',`${ch.satellite||'GOES-19'}, ${Math.abs(ch.sat_lon||75.2)}° W · HRIT/EMWIN downlink`],['Frequency',ch.freq_mhz?`${ch.freq_mhz.toFixed(1)} MHz · BPSK, 927 kbps`:'–'],['Aim from the dish',`${sun.compass??'–'}° compass (${sun.az??'–'}° true), ${sun.el??'–'}° up`],['Front end',`${ch.lna||'LNA'}${ch.bias_tee?', powered by the bias tee':''}`],['Radio',`${ch.radio||'SDR'}${ch.sample_msps?` at ${ch.sample_msps} MS/s`:''}${ch.gain_db!=null?`, tuner gain ${ch.gain_db} dB`:''}`],['Software','goesrecv (demodulator) → goesproc (images, EMWIN)']].map(([k,v])=>`<tr><td class="k">${k}</td><td class="w">${esc(v)}</td></tr>`).join('');
+ const vcs=H.vc||[],tot=vcs.reduce((a,v)=>a+v.frames_per_min,0)||1;
+ if(vcs.length)$('vcRows').innerHTML=[...vcs.filter(v=>v.vc!==63),...vcs.filter(v=>v.vc===63)].map(v=>`<tr${v.vc===63?' style="opacity:.6"':''}><td class="n">${v.vc}</td><td class="w">${v.name?esc(v.name):`Not identified yet${v.apids&&v.apids.length?` <span class="hint">(packet IDs ${v.apids.join(', ')})</span>`:''}`}</td><td class="n">${n(Math.round(v.frames_per_min))}</td><td><div class="bar"><i style="width:${(v.frames_per_min/tot*100).toFixed(1)}%"></i></div></td><td class="n">${v.lost_pct==null?'–':`<span class="pill ${v.lost_pct>=1?'warn':'ok'}">${v.lost_pct.toFixed(2)}%</span>`}</td><td class="n hint">${v.last_seen?age(H.now-v.last_seen)+' ago':'–'}</td></tr>`).join('')+(H.vc_minutes<60?`<tr><td colspan="6" class="hint">Counted over ${H.vc_minutes} min so far; a full hour shows every channel.</td></tr>`:'');
+ const ev=H.events||[];$('evAll').innerHTML=ev.length?ev.map(evItem).join(''):'<li class="hint">Nothing in the last 7 days.</li>';
+ // health row: frames lost on the channels that carry something (63 is fill), and the last time without a lock
+ const real=vcs.filter(v=>v.vc!==63&&v.lost_pct!=null),fpm=real.reduce((a,v)=>a+v.frames_per_min,0),lost=fpm?real.reduce((a,v)=>a+v.lost_pct*v.frames_per_min,0)/fpm:null;
+ $('hLost').textContent=lost==null?'–':lost.toFixed(lost<1?2:1)+'%';tile('hLostT',lost==null?'':lost<1?'good':lost<5?'warn':'bad');
+ const out=ev.find(e=>e.kind==='lock'&&e.level==='bad');
+ if(!out){$('hOut').textContent='None';$('hOutL').textContent='no time without a signal in 7 days';tile('hOutT','good')}
+ else if(out.t_end==null){$('hOut').textContent='Now';$('hOutL').textContent='no signal since '+when(out.t);tile('hOutT','bad')}
+ else{$('hOut').textContent=new Date(out.t*1000).toLocaleDateString([],{month:'short',day:'numeric'});$('hOutL').textContent=`last time without a signal, for ${age(out.t_end-out.t)}`;tile('hOutT',H.now-out.t_end<86400?'warn':'')}
+ const p=H.sun||{},items=[];if(p.today){const s=p.today;items.push([clock(s.at)+' today',`Sun ${s.closest_deg}° from the satellite`,s.closest_deg<2?'Close: expect a few minutes of lost signal around then.':s.closest_deg<12?'Close enough to add some noise around midday.':'Too far to matter.'])}
+ (p.windows||[]).forEach(w=>{const a=new Date(w.start+'T12:00'),b=new Date(w.end+'T12:00'),f=d=>d.toLocaleDateString([],{month:'short',day:'numeric',year:a.getFullYear()!==new Date().getFullYear()?'numeric':undefined});items.push([`${f(a)} – ${f(b)}`,'Sun passes behind the satellite',`Within 5° each day around ${clock(w.best_at)}, closest ${w.best}° on ${new Date(w.best_at*1000).toLocaleDateString([],{month:'short',day:'numeric'})}. Expect a few minutes of lost signal each day near the centre.`])});
+ $('prList').innerHTML=items.map(([t,w,d])=>`<li><time>${esc(t)}</time><div><b>${esc(w)}</b><div class="det">${esc(d)}</div></div></li>`).join('');
+}
+const KIND={SA:'Airport reports (METAR)',SP:'Special airport reports',FT:'Airport forecasts (TAF)',FP:'Public forecasts',FX:'Forecast discussions',FZ:'Marine forecasts',FO:'Model and aviation guidance',SR:'River and rain data',CD:'Climate reports',QA:'Radar images',AS:'Regional summaries and analyses',WW:'Watches and warnings',WU:'Severe weather warnings',WF:'Tornado and flood warnings',WH:'Marine warnings',SX:'Other text',NO:'Notices',SM:'Synoptic and marine reports'};
+// The delay shown is the bot's (the median of its last 50 arrivals, the figure that switches the
+// NWS feed), so every card on the page says the same; the history's own is the fallback.
+function renderFeedHealth(){if(!E)return;const fd=(bot&&bot.feed)||{},f=fd.fill,lag=fd.lag_min!=null?fd.lag_min:E.lag_now;
+ $('eLag').textContent=lag==null?'–':lag<1?'on time':late(Math.round(lag));tile('eLagT',lag==null?'':lag<30?'good':lag<120?'warn':'bad');
+ $('eHour').textContent=`· ${n(E.last_hour.files+E.last_hour.inet)} in the last hour`;
+ // the internet fill: filling in, or standing by with how much came down the dish in time
+ const pct=f&&f.last_hour?f.last_hour.in_time_pct:null;
+ const [fv,fl,flv]=!f?['–','internet fill','']:!f.enabled?['Off','internet fill switched off','']
+  :f.active?['Filling in',`internet fill · ${n(fillTook(f))} from NWS in the last hour`,'warn']
+  :pct==null?['Standing by','internet fill · nothing to compare yet','good']
+  :[pct+'%','came down the dish in time · internet fill standing by',pct>=90?'good':pct>=50?'warn':'bad'];
+ $('hFill').textContent=fv;$('hFillL').textContent=fl;tile('hFillT',flv);
+ const k=E.kinds_24h||[],kmax=Math.max(1,...k.map(r=>r[1])),half=Math.ceil(k.length/2),row=([c,v])=>`<tr><td class="w">${esc(KIND[c]||'Other')} <span class="hint">${esc(c)}</span></td><td style="width:40%"><div class="bar"><i style="width:${v/kmax*100}%"></i></div></td><td class="n">${n(v)}</td></tr>`;
+ $('kindsA').innerHTML=k.slice(0,half).map(row).join('');$('kindsB').innerHTML=k.slice(half).map(row).join('');
+ $('emSince').textContent=E.recorded_since?`History from ${when(E.recorded_since)}, rebuilt at install from the products on disk, then recorded minute by minute.`:'';}
+function fetchHistory(){Promise.all([fetch('/api/hrit?hours='+vRange).then(r=>r.json()),fetch('/api/emwin?hours=168').then(r=>r.json())]).then(([h,e])=>{H=h;E=e;renderHrit();renderFeedHealth();drawHistory()}).catch(()=>{}).finally(()=>setTimeout(fetchHistory,60000))}
+document.querySelectorAll('[data-vr]').forEach(b=>b.addEventListener('click',()=>{vRange=+b.dataset.vr;document.querySelectorAll('[data-vr]').forEach(o=>o.classList.toggle('on',o===b));fetch('/api/hrit?hours='+vRange).then(r=>r.json()).then(h=>{H=h;renderHrit();drawHistory()}).catch(()=>{})}));
+// ---------------------------------------------------------------- warnings map (/api/warnings, /api/basemap)
+// Each view has its own Albers equal-area projection, so Alaska, Hawaii, Puerto Rico and Guam
+// are not drawn bent; Texas shares the lower 48's. Coordinates arrive as [lon, lat].
+const VIEWS={tx:{p:[29.5,45.5,-96,37.5],box:[-106.7,25.8,-93.5,36.6]},us:{p:[29.5,45.5,-96,37.5],box:[-124.8,24.4,-66.9,49.4]},
+ ak:{p:[55,65,-154,50],box:[-179,51.2,-129.9,71.5]},hi:{p:[19,22,-157,20],box:[-160.3,18.9,-154.7,22.3]},
+ pr:{p:[17.5,18.5,-66,18],box:[-67.4,17.8,-64.5,18.6]},gu:{p:[13,16,145,14],box:[144.55,13.2,145.9,15.35]}};
+function albers([la1,la2,lo0,la0]){const d=Math.PI/180,p1=la1*d,p2=la2*d,n=(Math.sin(p1)+Math.sin(p2))/2,C=Math.cos(p1)**2+2*n*Math.sin(p1),r0=Math.sqrt(C-2*n*Math.sin(la0*d))/n;
+ return (lo,la)=>{const dl=((lo-lo0+540)%360)-180,r=Math.sqrt(C-2*n*Math.sin(la*d))/n,th=n*dl*d;return [r*Math.sin(th),r0-r*Math.cos(th)]}}
+let BM=null,WD=null,mview='tx',projKey='',PB=null,PW=[],PA=null,PH=null,vs=1,vx=0,vy=0,fitS=1,whl=-1,wsel=-1,mapW=0,mapH=0,mapActive=false,moved=false,emwinStarted=false;
+// One ring as a flat [X0,Y0,X1,Y1,...] array in projected units, with its bounds.
+function projRings(rings,P){const out=[],b=[1e9,1e9,-1e9,-1e9];for(const r of rings){const a=new Float64Array(r.length*2);r.forEach(([lo,la],i)=>{const [X,Y]=P(lo,la);a[2*i]=X;a[2*i+1]=Y;if(X<b[0])b[0]=X;if(X>b[2])b[2]=X;if(Y<b[1])b[1]=Y;if(Y>b[3])b[3]=Y});out.push(a)}return {rings:out,b}}
+function reproject(){const v=VIEWS[mview],key=v.p.join();if(key===projKey&&PB)return;projKey=key;const P=albers(v.p);
+ PB=BM?{land:projRings(BM.land||[],P),states:(BM.states||[]).map(s=>({id:s.id,...projRings(s.rings,P)}))}:null;
+ PW=WD?(WD.warnings||[]).map(w=>({w,...projRings(w.rings||[],P)})):[];
+ const a=WD&&WD.area;PA=a&&a.rings&&a.rings.length?projRings(a.rings,P):null;PH=a&&a.center?P(a.center[0],a.center[1]):null}
+function fitView(){const v=VIEWS[mview],P=albers(v.p),[w,s,e,nn]=v.box,b=[1e9,1e9,-1e9,-1e9];
+ for(let i=0;i<=20;i++){const lo=w+(e-w)*i/20,la=s+(nn-s)*i/20;for(const [X,Y] of [P(lo,s),P(lo,nn),P(w,la),P(e,la)]){b[0]=Math.min(b[0],X);b[1]=Math.min(b[1],Y);b[2]=Math.max(b[2],X);b[3]=Math.max(b[3],Y)}}
+ fitS=vs=Math.min(mapW/(b[2]-b[0]),mapH/(b[3]-b[1]))*.94;vx=mapW/2-(b[0]+b[2])/2*vs;vy=mapH/2+(b[1]+b[3])/2*vs}
+function setView(k){mview=k;moved=false;document.querySelectorAll('[data-mv]').forEach(b=>b.classList.toggle('on',b.dataset.mv===k));reproject();sizeMap();fitView();pickWarning(-1);drawMap();renderWarnList()}
+// A new width or height refits the view until the viewer has moved it; after that it keeps its centre.
+function sizeMap(){const c=$('mapC'),w=mapW,h=mapH;mapW=c.clientWidth||600;mapH=innerWidth<600?360:460;
+ if(w&&(w!==mapW||h!==mapH)){if(moved){vx+=(mapW-w)/2;vy+=(mapH-h)/2}else fitView()}}
+const onScreen=b=>!(vx+b[2]*vs<0||vx+b[0]*vs>mapW||vy-b[1]*vs<0||vy-b[3]*vs>mapH);
+let mapQueued=false;function queueMap(){if(!mapQueued){mapQueued=true;requestAnimationFrame(()=>{mapQueued=false;drawMap()})}}
+function drawMap(){const c=$('mapC');if(!c||!visible('mapC'))return;sizeMap();c.style.height=mapH+'px';c.width=mapW*dpr;c.height=mapH*dpr;const x=c.getContext('2d');x.setTransform(dpr,0,0,dpr,0,0);
+ x.fillStyle=css('--water');x.fillRect(0,0,mapW,mapH);if(!PB){x.fillStyle=css('--dim');x.font='13px system-ui';x.fillText(BM&&BM.error?BM.error:'Loading the map…',12,22);return}
+ const path=g=>{x.beginPath();for(const a of g.rings){for(let i=0;i<a.length;i+=2){const X=vx+a[i]*vs,Y=vy-a[i+1]*vs;i?x.lineTo(X,Y):x.moveTo(X,Y)}x.closePath()}};
+ if(onScreen(PB.land.b)){path(PB.land);x.fillStyle=css('--land2');x.fill('evenodd')}
+ const land=css('--land'),border=css('--border');x.fillStyle=land;PB.states.forEach(s=>{if(onScreen(s.b)){path(s);x.fill('evenodd')}});
+ x.globalAlpha=.6;for(let i=PW.length-1;i>=0;i--){const g=PW[i];if(!g.rings.length||!onScreen(g.b))continue;path(g);x.fillStyle=g.w.color;x.fill('evenodd')}x.globalAlpha=1;
+ x.strokeStyle=border;x.lineWidth=.8;PB.states.forEach(s=>{if(onScreen(s.b)){path(s);x.stroke()}});
+ x.lineWidth=1;for(let i=PW.length-1;i>=0;i--){const g=PW[i];if(!g.rings.length||!onScreen(g.b))continue;path(g);x.strokeStyle=g.w.color;x.stroke()}
+ if(PA){path(PA);x.strokeStyle=css('--home');x.setLineDash([6,4]);x.lineWidth=1.6;x.stroke();x.setLineDash([])}
+ for(const k of [whl,wsel]){const g=PW[k];if(!g||!g.rings.length)continue;path(g);x.strokeStyle=css('--fg');x.lineWidth=2.5;x.stroke()}
+ if(PH){const X=vx+PH[0]*vs,Y=vy-PH[1]*vs;x.fillStyle=css('--home');x.beginPath();x.arc(X,Y,4,0,7);x.fill();x.font='12px system-ui';x.fillText((WD.area.name||'').split(',')[0],X+7,Y+4)}}
+// The topmost event under a point of the canvas: warnings before watches before advisories.
+function inRings(X,Y,rings){let inside=false;for(const a of rings){for(let i=0,j=a.length-2;i<a.length;j=i,i+=2){const xi=a[i],yi=a[i+1],xj=a[j],yj=a[j+1];if((yi>Y)!==(yj>Y)&&X<(xj-xi)*(Y-yi)/(yj-yi)+xi)inside=!inside}}return inside}
+function hitAt(sx,sy){const X=(sx-vx)/vs,Y=(vy-sy)/vs;for(let i=0;i<PW.length;i++){const g=PW[i];if(g.rings.length&&X>=g.b[0]&&X<=g.b[2]&&Y>=g.b[1]&&Y<=g.b[3]&&inRings(X,Y,g.rings))return i}return -1}
+function zoomAt(f,sx,sy){moved=true;const ns=Math.max(fitS*.5,Math.min(fitS*96,vs*f));f=ns/vs;vx=sx-(sx-vx)*f;vy=sy-(sy-vy)*f;vs=ns;queueMap();listSoon()}
+const until=w=>w.expires==null?'until further notice':'until '+(w.expires-Date.now()/1000<20*3600?clock(w.expires):when(w.expires));
+function tip(i,sx,sy){const t=$('mapTip');if(i<0){t.hidden=true;return}const w=PW[i].w;t.innerHTML=`<b>${esc(w.name)}</b><div class="hint">${esc(w.where)} · ${esc(until(w))}</div>`;t.hidden=false;
+ t.style.left=Math.min(sx+14,mapW-t.offsetWidth-4)+'px';t.style.top=Math.max(4,sy-t.offsetHeight-10)+'px'}
+(()=>{const c=$('mapC'),pts=new Map();let down=null,travel=0,pinch=null;
+ c.addEventListener('pointerdown',e=>{c.setPointerCapture(e.pointerId);pts.set(e.pointerId,[e.offsetX,e.offsetY]);mapActive=true;$('mapHint').hidden=true;
+  if(pts.size===2){const [a,b]=[...pts.values()];pinch={d:Math.hypot(a[0]-b[0],a[1]-b[1]),s:vs}}else{down=[e.offsetX,e.offsetY];travel=0}});
+ c.addEventListener('pointermove',e=>{if(!pts.has(e.pointerId)){if(e.pointerType==='mouse'){const i=hitAt(e.offsetX,e.offsetY);if(i!==whl){whl=i;queueMap();markList()}tip(i,e.offsetX,e.offsetY)}return}
+  const prev=pts.get(e.pointerId);pts.set(e.pointerId,[e.offsetX,e.offsetY]);
+  if(pts.size===2&&pinch){const [a,b]=[...pts.values()],d=Math.hypot(a[0]-b[0],a[1]-b[1]);zoomAt(pinch.s*d/pinch.d/vs,(a[0]+b[0])/2,(a[1]+b[1])/2);return}
+  const dx=e.offsetX-prev[0],dy=e.offsetY-prev[1];travel+=Math.abs(dx)+Math.abs(dy);if(travel>4){c.classList.add('drag');moved=true;vx+=dx;vy+=dy;queueMap();listSoon();tip(-1)}});
+ const up=e=>{if(!pts.has(e.pointerId))return;pts.delete(e.pointerId);c.classList.remove('drag');if(pts.size<2)pinch=null;
+  if(pts.size===0&&down&&travel<=4){pickWarning(hitAt(e.offsetX,e.offsetY),false)}if(pts.size===0)down=null};
+ c.addEventListener('pointerup',up);c.addEventListener('pointercancel',up);
+ c.addEventListener('pointerleave',()=>{mapActive=false;if(whl>=0){whl=-1;queueMap();markList()}tip(-1)});
+ c.addEventListener('wheel',e=>{if(!(mapActive||e.ctrlKey||e.metaKey)){$('mapHint').hidden=false;return}e.preventDefault();zoomAt(Math.exp(-e.deltaY*(e.ctrlKey?.01:.0015)),e.offsetX,e.offsetY)},{passive:false});
+ c.addEventListener('dblclick',e=>{e.preventDefault();zoomAt(2,e.offsetX,e.offsetY)});
+ $('mapIn').onclick=()=>zoomAt(1.6,mapW/2,mapH/2);$('mapOut').onclick=()=>zoomAt(1/1.6,mapW/2,mapH/2);
+ document.querySelectorAll('[data-mv]').forEach(b=>b.onclick=()=>setView(b.dataset.mv))})();
+// The list beside the map: what is in view, the bot's own area first, most serious first.
+let listT=null;const listSoon=()=>{clearTimeout(listT);listT=setTimeout(renderWarnList,150)};
+function renderWarnList(){if(!WD)return;const inView=PW.map((g,i)=>({g,i})).filter(({g})=>g.rings.length&&onScreen(g.b));
+ inView.sort((a,b)=>(b.g.w.in_area-a.g.w.in_area)||(a.g.w.rank-b.g.w.rank));const shown=inView.slice(0,60);
+ $('wListHead').textContent=inView.length?`In view · ${n(inView.length)}`:'In view';
+ $('wList').innerHTML=shown.length?shown.map(({g,i})=>{const w=g.w;return `<li data-wi="${i}" tabindex="0"><i class="sw" style="background:${esc(w.color)}"></i><div><div class="t1">${esc(w.name)}${w.in_area?' <span class="pill info">'+esc(areaName())+' area</span>':''}</div><div class="t2">${esc(w.where)} · ${esc(until(w))}</div></div></li>`}).join('')+(inView.length>shown.length?`<li class="hint" style="cursor:default">and ${n(inView.length-shown.length)} more; zoom in to list them.</li>`:'')
+  :`<li class="hint" style="cursor:default">${WD.count?'Nothing in effect in this view.':'No warnings or watches in effect anywhere.'}</li>`;
+ $('wList').querySelectorAll('[data-wi]').forEach(li=>{const i=+li.dataset.wi;li.onmouseenter=()=>{whl=i;queueMap()};li.onmouseleave=()=>{whl=-1;queueMap()};li.onclick=()=>pickWarning(i,true);li.onkeydown=e=>{if(e.key==='Enter')pickWarning(i,true)}});markList()}
+function markList(){$('wList').querySelectorAll('[data-wi]').forEach(li=>li.classList.toggle('hl',+li.dataset.wi===wsel||+li.dataset.wi===whl))}
+const areaName=()=>(bot&&bot.bot&&bot.bot.name)||'Bot';
+function pickWarning(i,center){wsel=i;const d=$('wDet');if(i<0){d.hidden=true;queueMap();markList();return}const g=PW[i],w=g.w;
+ if(center&&g.rings.length&&!onScreen(g.b)){moved=true;const cx=(g.b[0]+g.b[2])/2,cy=(g.b[1]+g.b[3])/2;vx=mapW/2-cx*vs;vy=mapH/2+cy*vs;listSoon()}
+ const area=w.storm_based?'Drawn from the polygon the forecaster drew.':`Drawn from the ${n(w.areas)} zones and counties it names${w.missing?`, ${n(w.missing)} of them without an outline here`:''}.`;
+ d.innerHTML=`<div><span class="sw" style="background:${esc(w.color)}"></span><b>${esc(w.name)}</b>${w.in_area?' <span class="pill info">'+esc(areaName())+' area</span>':''}</div>
+  <div class="t2">${esc(w.where)} · NWS ${esc(w.office_name||w.office)} · ${w.issued?'issued '+esc(when(w.issued))+' · ':''}${esc(until(w))}</div>
+  ${w.headline?`<p>${esc(w.headline)}</p>`:''}<p class="t2">${esc(area)}${w.source==='internet'?' Received over the internet.':''}</p>
+  ${w.product?`<p><button id="wRead">Read the product</button></p>`:''}`;d.hidden=false;
+ if(w.product)$('wRead').onclick=()=>{openProduct({name:w.product});$('emProd').scrollIntoView({behavior:'smooth',block:'start'})};
+ queueMap();markList();const li=$('wList').querySelector(`[data-wi="${i}"]`);if(li)li.scrollIntoView({block:'nearest'})}
+function fetchWarnings(){fetch('/api/warnings').then(r=>r.json()).then(d=>{if(d.error&&!d.warnings){$('wCount').textContent='The bot is not reachable.';return}
+  const selId=wsel>=0&&PW[wsel]?PW[wsel].w.id:null;WD=d;projKey='';reproject();if(!mapW){sizeMap();fitView()}
+  wsel=selId?PW.findIndex(g=>g.w.id===selId):-1;if(wsel<0)$('wDet').hidden=true;
+  const mine=(d.warnings||[]).filter(w=>w.in_area).length,lag=bot&&bot.feed?bot.feed.lag_min:null;
+  $('wCount').textContent=`· ${n(d.count)} in effect${mine?`, ${n(mine)} in the ${areaName()} area`:''}`;
+  $('wNote').dataset.base=$('wNote').dataset.base||$('wNote').textContent;$('wNote').textContent=(lag!=null&&lag>=30?`EMWIN is running ${late(lag)} late, so this is what had arrived by then. `:'')+$('wNote').dataset.base;
+  drawMap();renderWarnList()}).catch(()=>{$('wCount').textContent='Could not load the warnings.'})}
+function fetchBasemap(){return fetch('/api/basemap').then(r=>r.json()).then(d=>{BM=d;projKey='';reproject();drawMap();renderWarnList()}).catch(()=>{BM={error:'The base map did not load.'};drawMap()})}
+function emwinShown(){if(!emwinStarted){emwinStarted=true;sizeMap();fitView();fetchBasemap().then(fetchWarnings);fetchProducts();fetchRadar();setInterval(()=>{if(!$('weather').hidden)fetchRadar(true)},60000);
+  setInterval(()=>{if(!$('weather').hidden)fetchWarnings()},120000);setInterval(()=>{if(!$('weather').hidden&&!PQ.q)fetchProducts(true)},60000)}
+ else{drawMap()}}
+addEventListener('resize',()=>{if(!$('weather').hidden){drawMap();listSoon()}});
+matchMedia('(prefers-color-scheme: dark)').addEventListener('change',drawMap);
+
+// ---------------------------------------------------------------- product browser (/api/products, /api/product)
+let PQ={q:'',kind:'',office:'EWX'},PL=null,pSel=null,pSeq=0,pTimer=null,officeKey='';
+const ago2=t=>{const d=new Date(t*1000),now=new Date();return d.toDateString()===now.toDateString()?clock(t):when(t)};
+const lateBy=p=>p.filed?Math.round((p.received-p.filed)/60):null;
+function latePill(p){const m=lateBy(p);return m!=null&&m>=30?`<span class="pill ${m>=120?'bad':'warn'}">${late(m)} late</span>`:''}
+function fetchProducts(keep){const seq=++pSeq,u=new URLSearchParams({q:PQ.q,kind:PQ.kind,office:PQ.office,limit:100});if(!keep)$('pCount').textContent='· searching…';
+ fetch('/api/products?'+u).then(r=>r.json()).then(d=>{if(seq!==pSeq)return;PL=d;renderProducts(keep)}).catch(()=>{if(seq===pSeq)$('pCount').textContent='· could not load the products'})}
+function renderProducts(keep){const d=PL;if(!d)return;
+ const key=d.offices.map(o=>o[0]).join();if(key!==officeKey){officeKey=key;const sel=$('pOffice');sel.innerHTML='<option value="">All offices</option>'+d.offices.map(([c,nm,k])=>`<option value="${esc(c)}">${esc(nm?nm+' ('+c+')':c)} · ${n(k)}</option>`).join('');sel.value=PQ.office;if(sel.value!==PQ.office){PQ.office='';sel.value=''}}
+ $('pKinds').innerHTML=[['',d.total],...d.kinds].map(([k,c])=>`<button data-pk="${esc(k)}" aria-pressed="${k===PQ.kind}">${esc(k||'All')}<span class="c">${n(c)}</span></button>`).join('');
+ $('pKinds').querySelectorAll('[data-pk]').forEach(b=>b.onclick=()=>{PQ.kind=b.dataset.pk;fetchProducts()});
+ $('pCount').textContent=`· ${n(d.matched)}${d.matched>=100?'+':''} shown`;
+ const L=$('pList');L.innerHTML=d.products.length?d.products.map((p,i)=>`<li role="option" tabindex="0" data-pi="${i}" aria-selected="${pSel===p.id}"><span class="t1">${esc(p.name)}</span><span class="pill">${esc(p.awips)}</span><span class="t2">${esc(p.office_name||p.office)} · ${p.src==='inet'?'over the internet ':'filed '}${esc(ago2(p.filed||p.received))}</span><span class="t2">${p.hit==='text'?'<span class="pill info">text match</span> ':''}${latePill(p)||esc(p.kind)}</span></li>`).join('')
+  :`<li class="t2" style="cursor:default">Nothing matches${PQ.office?' at this office; try All offices':''}${PQ.kind?' or another kind':''}.</li>`;
+ L.querySelectorAll('[data-pi]').forEach(li=>{const p=d.products[+li.dataset.pi];li.onclick=()=>openProduct(p);li.onkeydown=e=>{if(e.key==='Enter')openProduct(p);else if(e.key==='ArrowDown'||e.key==='ArrowUp'){e.preventDefault();const nx=e.key==='ArrowDown'?li.nextElementSibling:li.previousElementSibling;if(nx&&nx.dataset.pi!=null){nx.focus();openProduct(d.products[+nx.dataset.pi])}}}});
+ const notes=[`${n(d.total)} products from the last two days${d.oldest?' (since '+when(d.oldest)+')':''}, newest first.`];
+ if(d.text_partial)notes.push(`Text searched in the newest ${n(d.text_scanned)}; pick an office or a kind to search further back.`);
+ notes.push('Filed is when NOAA put the product on the EMWIN uplink; reached the dish is when it came down here.');$('pNote').textContent=notes.join(' ');
+ if(!keep&&!pSel&&d.products.length)openProduct(d.products[0])}
+function openProduct(p){const q=p.id?'id='+encodeURIComponent(p.id):'name='+encodeURIComponent(p.name);pSel=p.id||null;
+ $('pList').querySelectorAll('[data-pi]').forEach(li=>li.setAttribute('aria-selected',PL&&PL.products[+li.dataset.pi]&&PL.products[+li.dataset.pi].id===pSel));
+ $('pText').textContent='Loading…';
+ fetch('/api/product?'+q).then(r=>r.json()).then(d=>{if(d.error){$('pHead').innerHTML='';$('pText').textContent=d.error==='no such product in the last two days'?'That product is no longer on the dish (only the last two days are kept).':d.error;return}
+  const m=d.product;pSel=m.id;$('pList').querySelectorAll('[data-pi]').forEach(li=>li.setAttribute('aria-selected',PL&&PL.products[+li.dataset.pi]&&PL.products[+li.dataset.pi].id===pSel));
+  $('pHead').innerHTML=`<b>${esc(m.name)}</b><span class="pill">${esc(m.awips)}</span><span class="hint">${esc(m.wmo)} · ${esc(m.office_name||m.office)}</span><span class="hint">${m.filed?'filed '+esc(ago2(m.filed))+' · ':''}${m.src==='inet'?'fetched over the internet ':'reached the dish '}${esc(ago2(m.received))}</span>${latePill(m)}<a class="hint" href="/img/${esc(m.id)}" target="_blank" rel="noopener">file</a>`;
+  const box=$('pText');box.scrollTop=0;
+  if(d.text==null){box.innerHTML=`<img alt="${esc(m.name)}" src="/img/${esc(m.id)}">`;return}
+  // A text search's phrase, marked where it is (line breaks in the product count as spaces).
+  const words=PQ.q.split(/\s+/).filter(Boolean).map(w=>w.replace(/[.*+?^${}()|[\]\\]/g,'\\$&'));
+  if(!words.length){box.textContent=d.text;return}
+  const re=new RegExp(words.map(w=>esc(w)).join('\\s+'),'gi');box.innerHTML=esc(d.text).replace(re,x=>`<mark>${x}</mark>`);
+  const hit=box.querySelector('mark');if(hit)box.scrollTop=hit.offsetTop-box.offsetTop-40})
+ .catch(()=>{$('pText').textContent='Could not load the product.'})}
+$('pq').addEventListener('input',()=>{clearTimeout(pTimer);pTimer=setTimeout(()=>{PQ.q=$('pq').value.trim();pSel=null;fetchProducts()},350)});
+$('pOffice').onchange=()=>{PQ.office=$('pOffice').value;pSel=null;fetchProducts()};
+// ---------------------------------------------------------------- loops (imagery viewer, radar)
+// Every frame is fetched ahead; playing steps only onto frames that have loaded, and rests a
+// moment on the newest before going round again.
+const LOOPS=[];
+function Loop(img,scrub,btn,pos,onShow,ms){Object.assign(this,{img,scrub,btn,pos,onShow,ms,f:[],pre:[],i:0,t:null});LOOPS.push(this);
+ scrub.addEventListener('input',()=>{this.stop();this.show(+scrub.value)});btn.addEventListener('click',()=>this.t?this.stop():this.play())}
+Loop.prototype.set=function(frames,keep){const was=!!this.t;this.stop();this.f=frames;
+ this.pre=frames.map(fr=>{const im=new Image();im.decoding='async';im.src=fr.src;return im});
+ this.scrub.max=Math.max(0,frames.length-1);this.scrub.disabled=this.btn.disabled=frames.length<2;this.show(frames.length-1);if(was&&keep)this.play()};
+Loop.prototype.show=function(i){if(!this.f.length){this.img.removeAttribute('src');this.pos.textContent='';this.onShow(null);return}
+ this.i=i;this.img.src=this.f[i].src;this.scrub.value=i;this.pos.textContent=`${i+1} of ${this.f.length}`;this.onShow(this.f[i])};
+Loop.prototype.play=function(){if(this.f.length<2)return;this.btn.textContent='Pause';let rest=0;if(this.i===this.f.length-1)this.show(0);
+ this.t=setInterval(()=>{if(this.i===this.f.length-1&&rest++<3)return;rest=0;const k=(this.i+1)%this.f.length;if(this.pre[k].complete)this.show(k)},this.ms)};
+Loop.prototype.stop=function(){if(this.t){clearInterval(this.t);this.t=null}this.btn.textContent='Play'};
+
+// ---------------------------------------------------------------- imagery viewer (/api/imagery, HRIT tab)
+let IM=null,imSect='goes19-fd',imChan='ch13_enhanced',imSpan=6,imKey='',imStarted=false;
+const imLoop=new Loop($('imMain'),$('imScrub'),$('imPlay'),$('imPos'),fr=>{if(!fr){$('imCap').textContent='No pictures.';return}
+ $('imCap').textContent=`${fr.sat} · ${fr.sector} · ${fr.ch} · ${ago2(fr.t)} (${age(Date.now()/1000-fr.t)} ago)`;$('imMain').alt=$('imCap').textContent;$('imFull').href=fr.full},500);
+function fetchImagery(refresh){fetch('/api/imagery').then(r=>r.json()).then(d=>{IM=d;renderImagery(refresh)}).catch(()=>{$('imCap').textContent='Could not load the imagery.'})}
+function renderImagery(refresh){const secs=(IM&&IM.sectors)||[];if(!secs.length){$('imCap').textContent='Nothing decoded in the last day.';imLoop.set([]);return}
+ const s=secs.find(x=>x.id===imSect)||secs[0];imSect=s.id;const c=s.channels.find(x=>x.id===imChan)||s.channels.find(x=>x.id==='ch13')||s.channels[0];imChan=c.id;
+ $('imCount').textContent=`· ${n(secs.reduce((a,x)=>a+x.channels.reduce((b,y)=>b+y.frames.length,0),0))} pictures in the last day`;
+ $('imSect').innerHTML=secs.map(x=>`<button data-is="${esc(x.id)}" aria-pressed="${x.id===imSect}">${esc(x.name)}</button>`).join('');
+ $('imChan').innerHTML=s.channels.map(x=>`<button data-ic="${esc(x.id)}" aria-pressed="${x.id===imChan}">${esc(x.name)}</button>`).join('');
+ $('imSect').querySelectorAll('[data-is]').forEach(b=>b.onclick=()=>{imSect=b.dataset.is;renderImagery()});
+ $('imChan').querySelectorAll('[data-ic]').forEach(b=>b.onclick=()=>{imChan=b.dataset.ic;renderImagery()});
+ $('imHelp').textContent=`${c.help} ${s.satellite}${c.every_min?`, a new picture about every ${c.every_min} min`:''}.`;
+ // at most 48 frames a loop: a long loop of a fast channel keeps every second or third
+ const t1=c.frames[c.frames.length-1][0],fr=c.frames.filter(f=>f[0]>=t1-imSpan*HOUR),step=Math.max(1,Math.ceil(fr.length/48)),pick=fr.filter((f,i)=>(fr.length-1-i)%step===0);
+ const key=imSect+imChan+imSpan+pick.map(f=>f[1]).join();if(refresh&&key===imKey)return;imKey=key;
+ imLoop.set(pick.map(f=>({src:'/thumb/'+encodeURI(f[1])+'?s=1080',full:'/img/'+encodeURI(f[1]),t:f[0],sat:s.satellite.split(',')[0],sector:s.name,ch:c.name})),refresh)}
+document.querySelectorAll('[data-ls]').forEach(b=>b.addEventListener('click',()=>{imSpan=+b.dataset.ls;document.querySelectorAll('[data-ls]').forEach(o=>o.classList.toggle('on',o===b));renderImagery()}));
+function imageryShown(){if(imStarted)return;imStarted=true;fetchImagery();setInterval(()=>{if(!$('weather').hidden)fetchImagery(true)},60000)}
+
+// ---------------------------------------------------------------- radar and charts (/api/radar, EMWIN tab)
+let RD=null,radRegion=null,radKey='',chSel='usa',chIdx=-1,chLen=0;
+const madeLine=(made,got,hrit)=>hrit?`sent ${esc(ago2(made))}`:`made ${esc(ago2(made))} (${esc(age(Date.now()/1000-made))} ago) · reached the dish ${esc(ago2(got))} ${latePill({filed:made,received:got})}`;
+const radLoop=new Loop($('radImg'),$('radScrub'),$('radPlay'),$('radPos'),fr=>{$('radCap').innerHTML=fr?madeLine(fr.made,fr.got,false):'No radar frames in the last two days.'},450);
+function fetchRadar(refresh){fetch('/api/radar').then(r=>r.json()).then(d=>{RD=d;renderRadar(refresh);renderCharts(refresh)}).catch(()=>{$('radCap').textContent='Could not load the radar.'})}
+function renderRadar(refresh){const regs=RD.radar||[],sel=$('radRegion');if(!regs.length){radLoop.set([]);return}
+ if(!radRegion||!regs.some(r=>r.id===radRegion))radRegion=(regs.find(r=>r.id==='RADSTHPL')||regs[0]).id;
+ const key=regs.map(r=>r.id).join();if(sel.dataset.key!==key){sel.dataset.key=key;sel.innerHTML=regs.map(r=>`<option value="${esc(r.id)}">${esc(r.name)}</option>`).join('')}sel.value=radRegion;
+ const r=regs.find(x=>x.id===radRegion),span=+$('radSpan').value,t1=r.frames[r.frames.length-1][1],fr=r.frames.filter(f=>f[1]>=t1-span*HOUR);
+ const k=radRegion+span+fr.map(f=>f[0]).join();if(refresh&&k===radKey)return;radKey=k;$('radImg').alt='Radar mosaic, '+r.name;
+ radLoop.set(fr.map(f=>({src:'/img/'+encodeURI(f[0]),made:f[1],got:f[2]})),refresh)}
+$('radRegion').onchange=()=>{radRegion=$('radRegion').value;renderRadar()};$('radSpan').onchange=()=>renderRadar();
+function renderCharts(refresh){const cs=RD.charts||[];if(!cs.length){$('chCap').textContent='No charts in the last two days.';return}
+ if(!cs.some(c=>c.id===chSel))chSel=cs[0].id;let html='',g='';
+ cs.forEach(c=>{if(c.group!==g){g=c.group;html+=`<span class="g">${esc(g)}</span>`}html+=`<button data-ch="${esc(c.id)}" aria-pressed="${c.id===chSel}">${esc(c.name)}</button>`});
+ $('chChips').innerHTML=html;$('chChips').querySelectorAll('[data-ch]').forEach(b=>b.onclick=()=>{chSel=b.dataset.ch;renderCharts()});
+ const c=cs.find(x=>x.id===chSel);if(!refresh||chIdx<0||chIdx>=chLen-1)chIdx=c.frames.length-1;chLen=c.frames.length;showChart()}
+function showChart(){const c=RD.charts.find(x=>x.id===chSel),f=c.frames[chIdx];$('chImg').src='/img/'+encodeURI(f[0]);$('chImg').alt=c.name;
+ $('chPos').textContent=`${chIdx+1} of ${c.frames.length}`;$('chPrev').disabled=chIdx<=0;$('chNext').disabled=chIdx>=c.frames.length-1;
+ $('chCap').innerHTML=`<b>${esc(c.name)}</b> · ${esc(c.by)} · ${madeLine(f[1],f[2],c.source==='hrit')}`}
+$('chPrev').onclick=()=>{if(chIdx>0){chIdx--;showChart()}};$('chNext').onclick=()=>{if(RD&&chIdx<chLen-1){chIdx++;showChart()}};
+// The operator's notes (written on the bot's admin portal, kept with the events): those up now,
+// above every tab.
+const upTo=t=>new Date(t*1000).toDateString()===new Date().toDateString()?clock(t):when(t);
+function renderNotes(d){$('opNotes').innerHTML=((d&&d.up)||[]).map(e=>`<div class="notice ${esc(e.level)}" role="status"><b>${esc(e.title)}</b>${e.detail?` <span class="det">${esc(e.detail)}</span>`:''}<div class="by">From the station's operator · ${esc(when(e.t))}${e.t_end?` · until ${esc(upTo(e.t_end))}`:''}</div></div>`).join('')}
+function fetchNotes(){fetch('/api/notes').then(r=>r.json()).then(renderNotes).catch(()=>{}).finally(()=>setTimeout(fetchNotes,60000))}
+showTab(location.hash.slice(1)||'overview');fetchHistory();fetchNotes();
 </script></body></html>

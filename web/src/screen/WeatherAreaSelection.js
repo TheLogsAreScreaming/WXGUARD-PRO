@@ -58,7 +58,7 @@ export const WeatherAreaSelection = Object.freeze({
   defaultsKey: 'weather.areaSelection',
 
   /**
-   * States one request may name (spec §8.2, revision 10). Past it the tap asks for the whole
+   * States one request may name (spec §14, revision 10). Past it the tap asks for the whole
    * country instead, **and the screen says so before the tap**: fifteen codes are the whole
    * 40-byte request budget, and silently dropping the sixteenth would draw a map missing a state
    * the user picked.
