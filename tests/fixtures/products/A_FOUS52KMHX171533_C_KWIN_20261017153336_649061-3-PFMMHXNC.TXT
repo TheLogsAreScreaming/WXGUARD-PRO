@@ -1,0 +1,735 @@
+FOUS52 KMHX 171533
+PFMMHX
+
+Point Forecast Matrices
+National Weather Service Newport/Morehead City NC
+1132 AM EDT Sat Oct 17 2026
+
+NCZ044-172000-
+Pitt Greenville Airport-Greenville NC
+35.63N  77.40W Elev. 26 ft
+1132 AM EDT Sat Oct 17 2026
+
+Date             Sat 10/17/26            Sun 10/18/26            Mon 10/19/26
+EDT 3hrly     05 08 11 14 17 20 23 02 05 08 11 14 17 20 23 02 05 08 11 14 17 20
+UTC 3hrly     09 12 15 18 21 00 03 06 09 12 15 18 21 00 03 06 09 12 15 18 21 00
+
+Max/Min                      59          44          63          49          64
+Temp                   52 51 48 48 47 46 45 55 61 62 56 53 51 51 52 59 63 63 56
+Dewpt                  51 48 44 39 37 37 38 42 46 45 47 46 46 48 49 50 51 50 51
+RH                     96 89 86 71 68 71 76 61 58 54 72 77 83 89 89 72 65 62 83
+Wind dir                N  N  N  N  N  N  N  N NE  N  N  N  N  N  N  N  N  N  N
+Wind spd               18 18 14 13 13 13 16 17 18 16 12 12 13 13 14 18 18 18 18
+Wind gust              29 31 24 21 23 23 25 26 28 26 20 18 20 20 21 26 28 28 29
+Clouds                 OV B2 B1 SC FW FW FW SC SC SC SC SC B1 B1 B1 B1 B2 B1 B1
+PoP 12hr                    100          10          10          20          30
+QPF 12hr                   0.37           0           0           0        0.08
+Rain                    D  C                                S  S  C  C  S  S  S
+Wind chill                            39 38                                    
+Min chill                                37                                    
+
+
+Date          Tue 10/20/26  Wed 10/21/26  Thu 10/22/26  Fri 10/23/26
+EDT 6hrly     02 08 14 20   02 08 14 20   02 08 14 20   02 08 14 20
+UTC 6hrly     06 12 18 00   06 12 18 00   06 12 18 00   06 12 18 00
+
+Min/Max          50    69      52    70      51    69      51    72
+Temp          53 52 67 62   55 53 68 61   55 53 67 62   55 52 70 63
+Dewpt         47 47 49 50   48 51 53 55   52 52 53 54   52 52 54 54
+PWind dir         N     N       N     N       N     N       N     N
+Wind char        BZ    BZ      BZ    BZ      BZ    BZ      GN    GN
+Avg clouds    B1 SC SC SC   SC FW SC SC   SC SC B1 B1   SC SC SC SC
+PoP 12hr         20    10      10    20      20    20      10    10
+Rain           S                   S       S  S                    
+Rain shwrs                                       S                 
+
+$$
+NCZ093-172000-
+Craven Regional Airport-New Bern NC
+35.06N  77.02W Elev. 18 ft
+1132 AM EDT Sat Oct 17 2026
+
+Date             Sat 10/17/26            Sun 10/18/26            Mon 10/19/26
+EDT 3hrly     05 08 11 14 17 20 23 02 05 08 11 14 17 20 23 02 05 08 11 14 17 20
+UTC 3hrly     09 12 15 18 21 00 03 06 09 12 15 18 21 00 03 06 09 12 15 18 21 00
+
+Max/Min                      62          46          63          52          65
+Temp                   56 53 51 50 49 48 48 57 61 62 58 56 55 55 55 62 64 63 59
+Dewpt                  55 52 48 44 42 41 43 50 53 52 51 51 52 52 53 57 58 56 54
+RH                     96 96 89 80 77 77 83 77 75 70 77 83 90 90 93 84 81 78 83
+Wind dir                N  N  N  N  N  N  N  N  N  N  N  N  N  N  N  N  N  N  N
+Wind spd               16 18 17 12 14 14 16 16 17 16 14 13 13 13 14 17 17 17 16
+Wind gust              28 31 27 21 23 23 24 25 27 26 23 20 20 21 21 31 33 32 28
+Clouds                 OV B2 B2 SC SC SC B1 SC B2 SC SC B1 B1 B1 B1 B1 B2 B2 B1
+PoP 12hr                    100          20          20          20          30
+QPF 12hr                   0.30        0.02        0.03        0.01        0.08
+Rain                    D  C  S                             S  S  C  C  C  C  S
+Coast Flood                   Y  Y  Y  Y  Y  Y  Y  Y  Y  Y  Y  Y  Y  Y  Y      
+
+
+Date          Tue 10/20/26  Wed 10/21/26  Thu 10/22/26  Fri 10/23/26
+EDT 6hrly     02 08 14 20   02 08 14 20   02 08 14 20   02 08 14 20
+UTC 6hrly     06 12 18 00   06 12 18 00   06 12 18 00   06 12 18 00Min/Max          51    69      53    71      54    70      52    72
+Temp          55 53 68 63   56 55 69 63   57 55 68 63   56 53 71 63
+Dewpt         51 49 56 53   50 52 56 57   54 54 55 56   54 53 56 56
+PWind dir         N     N       N     N       N     N       N     N
+Wind char        BZ    GN      GN    BZ      BZ    BZ      GN    GN
+Avg clouds    B1 SC SC SC   SC FW SC SC   SC B1 B1 B1   SC SC SC SC
+PoP 12hr         20    10      10    20      20    20      10    10
+Rain           S                   S       S  S                    
+Rain shwrs                                       S  S              
+
+$$
+NCZ095-172000-
+WFO Newport-Newport NC
+34.78N  76.86W Elev. 36 ft
+1132 AM EDT Sat Oct 17 2026
+
+Date             Sat 10/17/26            Sun 10/18/26            Mon 10/19/26
+EDT 3hrly     05 08 11 14 17 20 23 02 05 08 11 14 17 20 23 02 05 08 11 14 17 20
+UTC 3hrly     09 12 15 18 21 00 03 06 09 12 15 18 21 00 03 06 09 12 15 18 21 00
+
+Max/Min                      66          47          65          52          67
+Temp                   58 54 53 50 49 49 50 61 64 64 59 56 54 54 56 64 67 65 59
+Dewpt                  57 53 49 45 44 44 46 52 55 54 53 52 53 53 54 58 60 57 55
+RH                     96 96 86 83 83 83 86 72 73 70 80 86 96 96 93 81 78 75 87
+Wind dir                N  N  N  N  N  N  N  N  N  N  N  N  N  N  N  N  N  N  N
+Wind spd               18 21 18 16 17 17 17 18 19 18 17 17 16 16 17 18 19 18 18
+Wind gust              29 36 28 26 26 26 27 29 31 31 27 25 24 25 26 32 34 32 31
+Clouds                 OV OV B1 B1 SC SC B1 SC B1 B1 SC B1 B1 B2 B2 B1 B2 B2 B1
+PoP 12hr                    100          30          30          30          40
+QPF 12hr                   0.20        0.02        0.07        0.04        0.07
+Rain                    D  L  C                 C  S  S  S  C  C  C  C  C  C  S
+Coast Flood                               Y  Y  Y  Y  Y  Y  Y  Y  Y            
+Wind                    Y  Y  Y  Y  Y  Y  Y  Y  Y  Y  Y  Y  Y  Y  Y  Y  Y  Y   
+
+
+Date          Tue 10/20/26  Wed 10/21/26  Thu 10/22/26  Fri 10/23/26
+EDT 6hrly     02 08 14 20   02 08 14 20   02 08 14 20   02 08 14 20
+UTC 6hrly     06 12 18 00   06 12 18 00   06 12 18 00   06 12 18 00
+
+Min/Max          50    69      52    70      52    69      52    71
+Temp          54 53 68 63   55 54 70 63   56 54 68 62   54 54 71 63
+Dewpt         51 50 57 54   51 52 60 57   54 54 60 57   54 53 60 56
+PWind dir         N     N       N     N       N     N       N     N
+Wind char        BZ    BZ      GN    BZ      GN    BZ      GN    GN
+Avg clouds    B1 SC SC SC   SC FW SC SC   SC B1 B1 B1   SC SC SC SC
+PoP 12hr         20    10      10    20      20    20      20    10
+Rain           S                   S  S    S  S                    
+Rain shwrs                                       S  S       S      
+
+$$
+NCZ103-172000-
+Mitchell Airport-Cape Hatteras NC
+35.23N  75.62W Elev. 17 ft
+1132 AM EDT Sat Oct 17 2026
+
+Date             Sat 10/17/26            Sun 10/18/26            Mon 10/19/26
+EDT 3hrly     05 08 11 14 17 20 23 02 05 08 11 14 17 20 23 02 05 08 11 14 17 20
+UTC 3hrly     09 12 15 18 21 00 03 06 09 12 15 18 21 00 03 06 09 12 15 18 21 00
+
+Max/Min                      70          57          69          60          70
+Temp                   66 63 62 60 60 60 62 65 67 68 65 64 63 63 66 68 68 67 64
+Dewpt                  63 60 57 54 53 54 55 55 56 56 57 57 58 59 61 61 61 60 60
+RH                     90 90 84 81 78 81 78 70 68 65 75 78 84 87 84 78 78 78 87
+Wind dir                N  N  N  N  N  N NE  N  N NE NE NE NE  N  N  N  N  N  N
+Wind spd               36 40 36 35 36 35 37 34 35 36 36 35 33 33 33 27 29 29 35
+Wind gust              49 54 49 46 48 46 48 44 46 47 47 46 44 44 44 44 46 46 47
+Clouds                 OV OV OV B2 B2 B1 B1 B2 B2 B2 B2 B2 B2 B2 B2 B2 B2 B2 B2
+PoP 12hr                    100          70          50          6060
+QPF 12hr                   0.50        0.20        0.27        0.21        0.44
+Rain                    D  D  L  C  C  C  S  C  C  C  C  C  L  L  L  L  L  L  C
+Tstms                                                                          
+Coast Flood                W  W  W  W  W  W  W  W  W  W  W  W  W  W  W  W  W  W
+High Surf               Y  Y  Y  Y  Y  Y  Y  Y  Y  Y  Y  Y  Y  Y  Y  Y  Y  Y  Y
+Wind                    Y  Y  Y  Y  Y  Y  Y  Y  Y  Y  Y  Y  Y  Y  Y  Y  Y  Y   
+
+
+Date          Tue 10/20/26  Wed 10/21/26  Thu 10/22/26  Fri 10/23/26
+EDT 6hrly     02 08 14 20   02 08 14 20   02 08 14 20   02 08 14 20
+UTC 6hrly     06 12 18 00   06 12 18 00   06 12 18 00   06 12 18 00
+
+Min/Max          59    70      63    68      62    67      63    68
+Temp          64 63 68 66   65 65 67 66   64 64 66 65   64 65 67 66
+Dewpt         59 59 59 61   61 62 63 62   62 62 63 61   61 61 62 60
+PWind dir         N     N       N     N       N     N       N     N
+Wind char        VW    WY      WY    WY      VW    WY      WY    WY
+Avg clouds    B2 B2 B1 B1   B1 B1 B1 B1   B1 B1 B1 B1   B1 B1 B1 B1
+PoP 12hr         50    40      30    40      50    40      20    20
+Rain           C  C  C  C    C  C  C  C    C  C                    
+Rain shwrs                                       C  C    S  S  S  S
+
+$$
+NCZ095-172000-
+Smith Field-Beaufort NC
+34.73N  76.65W Elev. 11 ft
+1132 AM EDT Sat Oct 17 2026
+
+Date             Sat 10/17/26            Sun 10/18/26            Mon 10/19/26
+EDT 3hrly     05 08 11 14 17 20 23 02 05 08 11 14 17 20 23 02 05 08 11 14 17 20
+UTC 3hrly     09 12 15 18 21 00 03 06 09 12 15 18 21 00 03 06 09 12 15 18 21 00
+
+Max/Min                      68          52          66          56          68
+Temp                   61 57 56 54 53 54 55 63 66 65 62 60 58 58 59 66 68 66 61
+Dewpt                  59 55 52 49 48 50 51 53 54 54 55 55 55 57 57 58 58 56 56
+RH                     93 93 86 83 83 86 86 70 65 68 78 84 90 96 93 75 70 70 84
+Wind dir                N  N  N  N  N  N  N  N  N  N  N  N  N  N  N  N  N  N  N
+Wind spd               23 28 26 23 24 23 24 25 26 26 24 23 21 23 21 25 25 25 24
+Wind gust              34 40 36 32 33 33 33 36 37 37 33 32 31 32 31 36 37 35 34
+Clouds                 OV OV B2 B2 B1 B1 B1 B1 B1 B1 B1 B2 B1 B2 B2 B2 B2 B2 B2
+PoP 12hr                    100          40          30          30          40
+QPF 12hr                   0.35        0.05        0.11        0.06        0.08
+Rain                    D  D  C  S  S           C  S  S  S  C  C  C  C  C  C  S
+Coast Flood                Y  Y  Y  Y  Y  Y  Y  Y  Y  Y  Y  Y  Y  Y  Y  Y  Y   
+High Surf                           Y  Y  Y  Y  Y  Y  Y  Y  Y  Y  Y  Y  Y  Y   
+Wind                    Y  Y  Y  Y  Y  Y  Y  Y  Y  Y  Y  Y  Y  Y  Y  Y  Y  Y   
+
+
+Date          Tue 10/20/26  Wed 10/21/26  Thu 10/22/26  Fri 10/23/26
+EDT 6hrly     02 08 14 20   02 08 14 20   02 08 14 20   02 08 14 20
+UTC 6hrly     06 12 18 00   06 12 18 00   06 12 18 00   06 12 18 00
+
+Min/Max          54    70      57    70      57    69      56    71
+Temp          57 56 69 64   60 59 69 65   60 59 68 65   59 58 70 65
+Dewpt         54 53 56 56   54 55 61 59   57 56 60 58   56 56 60 57
+PWind dir         N     N       N     N       N     N       N     N
+Wind char        BZ    BZ      BZ    BZ      BZ    BZ      BZ    BZ
+Avg clouds    B2 B1 SC SC   SC SC SC SC   SC B1 B1 B1   B1 SC SC SC
+PoP 12hr         20    20      10    20      20    20      20    10
+Rain           S     S             S  S    S  S                    
+Rain shwrs                                       S  S    S  S      
+
+$$
+NCZ098-172000-
+New River MCAS-Jacksonville NC
+34.71N  77.43W Elev. 26 ft
+1132 AM EDT Sat Oct 17 2026
+
+Date             Sat 10/17/26            Sun 10/18/26            Mon 10/19/26
+EDT 3hrly     05 08 11 14 17 20 23 02 05 08 11 14 17 20 23 02 05 08 11 14 17 20
+UTC3hrly     09 12 15 18 21 00 03 06 09 12 15 18 21 00 03 06 09 12 15 18 21 00
+
+Max/Min                      63          45          64          51          66
+Temp                   56 53 51 50 49 47 47 55 62 63 58 55 54 53 54 61 64 64 59
+Dewpt                  55 51 47 44 41 40 42 49 53 53 52 51 51 51 52 57 58 57 55
+RH                     96 93 86 80 74 76 83 80 72 70 80 86 90 93 93 87 81 78 87
+Wind dir                N  N  N  N  N  N  N  N  N  N  N  N  N  N  N  N  N  N  N
+Wind spd               18 19 17 14 14 13 16 16 17 17 13 13 12 13 14 17 17 17 16
+Wind gust              28 31 26 23 23 21 24 26 28 27 23 20 19 20 23 29 33 29 31
+Clouds                 OV B2 B2 SC FW SC SC SC SC SC SC B1 B1 B1 B1 B1 B2 B1 B1
+PoP 12hr                    100          20          20          20          30
+QPF 12hr                   0.18        0.01        0.04        0.03        0.08
+Rain                    D  C  S                             S  S  C  C  C  C   
+
+
+Date          Tue 10/20/26  Wed 10/21/26  Thu 10/22/26  Fri 10/23/26
+EDT 6hrly     02 08 14 20   02 08 14 20   02 08 14 20   02 08 14 20
+UTC 6hrly     06 12 18 00   06 12 18 00   06 12 18 00   06 12 18 00
+
+Min/Max          51    69      52    71      52    70      51    72
+Temp          54 53 67 64   56 54 70 65   56 54 69 64   56 52 71 65
+Dewpt         50 49 55 53   50 51 58 57   54 53 57 57   54 52 58 56
+PWind dir         N     N       N     N       N     N       N     N
+Wind char        GN    GN      GN    GN      GN    GN      GN    GN
+Avg clouds    B1 SC SC SC   SC FW SC SC   SC SC SC SC   SC SC SC SC
+PoP 12hr         10    10       5    20      10    10      10     5
+Rain                               S                               
+
+$$
+NCZ091-172000-
+Stallings Airport-Kinston NC
+35.33N  77.63W Elev. 93 ft
+1132 AM EDT Sat Oct 17 2026
+
+Date             Sat 10/17/26            Sun 10/18/26            Mon 10/19/26
+EDT 3hrly     05 08 11 14 17 20 23 02 05 08 11 14 17 20 23 02 05 08 11 14 17 20
+UTC 3hrly     09 12 15 18 21 00 03 06 09 12 15 18 21 00 03 06 09 12 15 18 21 00
+
+Max/Min                      59          43          63          48          65
+Temp                   53 51 49 48 46 45 45 54 61 62 56 52 50 50 51 59 63 63 57
+Dewpt                  52 49 45 40 37 36 37 44 48 48 48 46 46 46 47 52 54 52 51
+RH                     96 93 86 74 71 70 73 69 62 60 74 80 86 86 86 78 72 67 80
+Wind dir                N  N  N  N  N  N  N  N NE NE  N  N  N  N  N  N  N  N  N
+Wind spd               19 19 14 13 14 16 17 18 19 17 13 13 13 14 14 19 19 17 18
+Wind gust              31 31 25 23 24 24 26 27 29 26 21 19 20 21 23 28 29 28 28
+Clouds                 OV B2 B1 SC FW FW FW SC B1 SC FW SC SC B1 B1 B1 B1 B1 B1
+PoP 12hr                    100          10           5          20          20
+QPF 12hr                   0.28           0           0           0        0.08
+Rain                    D  C                                S  S  S  S  S  S   
+Wind chill                         39 38 37                                    
+Min chill                          39    35                                    
+
+
+Date          Tue 10/20/26  Wed 10/21/26  Thu 10/22/26  Fri 10/23/26
+EDT 6hrly     02 08 14 20   02 08 14 20   02 08 14 20   02 08 14 20
+UTC 6hrly     06 12 18 00   06 12 18 00   06 12 18 00   06 12 18 00
+
+Min/Max          49    69      51    70      50    69      50    71
+Temp          52 51 68 62   54 52 69 62   54 52 67 62   54 51 70 63
+Dewpt         46 46 51 50   47 49 55 55   51 50 54 54   51 51 55 54
+PWind dir         N     N       N     N       N     N       N     N
+Wind char        BZ    BZ      BZ    BZ      BZ    BZ      GN    GN
+Avg clouds    SC SC SC SC   SC FW SC SC   SC SC B1 SC   SC SC SC SC
+PoP 12hr         10     5       5    20      10    10      10     5
+Rain                               S                               
+
+$$
+NCZ103-172000-Dare County Airport-Manteo NC
+35.92N  75.70W Elev. 14 ft
+1132 AM EDT Sat Oct 17 2026
+
+Date             Sat 10/17/26            Sun 10/18/26            Mon 10/19/26
+EDT 3hrly     05 08 11 14 17 20 23 02 05 08 11 14 17 20 23 02 05 08 11 14 17 20
+UTC 3hrly     09 12 15 18 21 00 03 06 09 12 15 18 21 00 03 06 09 12 15 18 21 00
+
+Max/Min                      66          56          66          59          67
+Temp                   61 60 58 58 58 58 59 64 65 65 63 62 61 61 63 66 66 66 63
+Dewpt                  58 56 53 50 50 51 52 53 54 54 55 56 56 57 59 59 60 59 58
+RH                     90 87 83 75 75 77 78 67 68 68 75 81 84 87 87 78 81 78 84
+Wind dir                N  N  N  N  N  N NE NE  N NE NE NE NE  N  N  N  N  N  N
+Wind spd               34 33 33 32 33 33 33 29 32 32 32 31 31 32 32 33 34 34 36
+Wind gust              47 47 44 41 42 41 42 40 42 42 41 40 40 41 41 46 47 47 49
+Clouds                 OV OV OV B1 B1 OV B1 B1 B2 B2 B2 B2 B2 B2 B2 B2 B2 B2 B2
+PoP 12hr                    100          50          30          50          50
+QPF 12hr                   0.51        0.11           0        0.09        0.27
+Rain                    D  D  C  S  S  C           S  C  C  C  C  C  C  C  C  C
+Coast Flood                Y  Y  Y  Y  Y  Y  Y  Y  Y  Y  Y  Y  Y  Y  Y  Y  Y  Y
+High Surf               Y  Y  Y  Y  Y  Y  Y  Y  Y  Y  Y  Y  Y  Y  Y  Y  Y  Y  Y
+Wind                    Y  Y  Y  Y  Y  Y  Y  Y  Y  Y  Y  Y  Y  Y  Y  Y  Y  Y   
+
+
+Date          Tue 10/20/26  Wed 10/21/26  Thu 10/22/26  Fri 10/23/26
+EDT 6hrly     02 08 14 20   02 08 14 20   02 08 14 20   02 08 14 20
+UTC 6hrly     06 12 18 00   06 12 18 00   06 12 18 00   06 12 18 00
+
+Min/Max          59    67      61    67      60    67      61    67
+Temp          62 61 66 65   64 63 66 65   63 63 65 64   63 63 67 65
+Dewpt         58 58 59 59   59 60 62 60   60 60 61 60   59 60 61 59
+PWind dir         N     N       N     N       N     N       N     N
+Wind char        VW    VW      VW    VW      VW    VW      WY    WY
+Avg clouds    B2 B2 B2 B2   B1 SC B1 B1   B1 B1 B2 B1   B1 B1 B1 B1
+PoP 12hr         40    30      30    40      40    40      20    20
+Rain           C  C  C  C    S  C  C  C    C  C                    
+Rain shwrs                                       C  C    S  S  S  S
+
+$$
+NCZ080-172000-
+Warren Airport-Washington NC
+35.57N  77.05W Elev. 38 ft
+1132 AM EDT Sat Oct 17 2026
+
+Date             Sat 10/17/26            Sun 10/18/26            Mon 10/19/26
+EDT 3hrly     05 08 11 14 17 20 23 02 05 08 11 14 17 20 23 02 05 08 11 14 17 20
+UTC 3hrly     09 12 15 18 21 00 03 06 09 12 15 18 21 00 03 06 09 12 15 18 21 00
+
+Max/Min                      59          46          62          52          64
+Temp                   53 52 50 48 47 46 46 57 61 62 56 54 54 53 53 61 64 63 57
+Dewpt                  52 49 45 40 39 39 41 45 47 47 48 48 49 49 50 52 52 51 52
+RH                     96 89 83 74 74 76 83 64 60 58 74 80 83 86 89 72 65 65 83
+Wind dir                N  N  N  N  N  N  N  N  N NE  N  N  N  N  N  N  N  N  N
+Wind spd               16 17 14 12 12 12 14 16 17 14 12 12 11 13 13 17 16 14 14
+Wind gust              27 28 24 19 20 20 23 24 26 24 20 18 18 20 20 27 27 27 28
+Clouds                 OV B2 B2 B1 SC SC SC B1 B1 SC SC B1 B1 B1 B1 B1 B2 B1 B1
+PoP 12hr                    100          20          20          20          30
+QPF 12hr                   0.34        0.01           0           0        0.09
+Rain                    D  L  S                             S  S  C  C  C  C  S
+
+
+Date          Tue 10/20/26  Wed 10/21/26  Thu 10/22/26  Fri 10/23/26
+EDT 6hrly     02 08 14 20   02 08 14 20   02 08 14 20   02 08 14 20
+UTC 6hrly     06 12 18 00   06 12 18 00   06 12 18 00   06 12 18 00
+
+Min/Max          51    68      53    70      53    68      52    72
+Temp          53 52 68 62   55 54 69 62   56 54 67 62   55 53 70 62
+Dewpt         48 48 51 51   49 5154 56   52 53 53 55   52 52 55 55
+PWind dir         N     N       N     N       N     N       N     N
+Wind char        GN    GN      GN    GN      GN    GN      LT    GN
+Avg clouds    B1 B1 SC SC   SC SC SC SC   SC B1 B1 B1   SC SC SC SC
+PoP 12hr         20    10      10    20      20    20      10    10
+Rain           S                   S       S  S                    
+Rain shwrs                                       S  S              
+
+$$
+NCZ090-172000-
+Duplin County Airport-Kenansville NC
+35.00N  77.97W Elev. 136 ft
+1132 AM EDT Sat Oct 17 2026
+
+Date             Sat 10/17/26            Sun 10/18/26            Mon 10/19/26
+EDT 3hrly     05 08 11 14 17 20 23 02 05 08 11 14 17 20 23 02 05 08 11 14 17 20
+UTC 3hrly     09 12 15 18 21 00 03 06 09 12 15 18 21 00 03 06 09 12 15 18 21 00
+
+Max/Min                      60          42          62          46          64
+Temp                   53 51 49 47 45 43 43 53 60 62 55 50 48 48 49 58 63 63 55
+Dewpt                  52 49 45 40 36 34 35 43 48 48 48 45 44 45 46 52 54 52 52
+RH                     96 93 86 76 70 70 73 69 64 60 77 83 86 89 89 80 72 67 90
+Wind dir                N  N  N  N  N  N  N  N NE NE  N  N  N  N  N  N  N  N  N
+Wind spd               17 19 14 12 14 14 16 17 18 18 13 12 12 13 13 17 16 14 14
+Wind gust              28 31 25 19 23 24 26 27 28 27 21 19 19 20 21 26 27 25 24
+Clouds                 OV B2 B1 FW FW FW FW SC SC SC FW SC SC SC SC B1 B1 B1 B1
+PoP 12hr                    100          10           5          20          20
+QPF 12hr                   0.16           0           0           0        0.05
+Rain                    D  C                                S  S  S  S  S  S   
+Wind chill                         38 35 35                                    
+Min chill                          38    34    39                              
+
+
+Date          Tue 10/20/26  Wed 10/21/26  Thu 10/22/26  Fri 10/23/26
+EDT 6hrly     02 08 14 20   02 08 14 20   02 08 14 20   02 08 14 20
+UTC 6hrly     06 12 18 00   06 12 18 00   06 12 18 00   06 12 18 00
+
+Min/Max          47    69      49    71      49    70      48    72
+Temp          50 49 67 61   52 51 69 61   52 50 68 61   52 50 71 62
+Dewpt         46 45 52 50   46 48 55 54   50 49 54 54   50 50 56 54
+PWind dir         N     N       N     N       N     N       N     N
+Wind char        GN    GN      GN    GN      GN    GN      LT    GN
+Avg clouds    SC SC SC SC   FW FW FW SC   SC SC SC SC   SC SC SC SC
+PoP 12hr         10     5       5    20      10    20      10     5
+Rain                               S                               
+Rain shwrs                                          S              
+
+$$
+NCZ081-172000-
+Fairfield RAWS
+35.54N  76.22W Elev. 5 ft
+1132 AM EDT Sat Oct 17 2026
+
+Date             Sat 10/17/26            Sun 10/18/26            Mon 10/19/26
+EDT 3hrly     05 08 11 14 17 20 23 02 05 08 11 14 17 20 23 02 05 08 11 14 17 20
+UTC 3hrly     09 12 15 18 21 00 03 06 09 12 15 18 21 00 03 06 09 12 15 18 21 00
+
+Max/Min                      65          50          65          53          66
+Temp                   58 54 53 53 53 52 54 62 63 64 60 58 56 57 59 65 66 64 60
+Dewpt                  55 52 49 47 46 47 50 52 53 53 53 54 53 54 56 59 59 57 56
+RH                     90 93 86 80 77 83 86 70 70 67 78 86 90 90 90 81 78 78 87
+Wind dir                N  N  N  N  N  N  N NE  N  N  N  N  N  N  N  N  N  N  N
+Wind spd               20 21 20 16 18 17 17 19 20 19 18 18 19 19 20 20 20 20 21
+Wind gust              34 36 33 26 28 27 28 31 33 32 28 27 29 29 31 33 34 35 34
+Clouds                 OV OV B2 B2 B1 B1 B1 B1 B2 B1 B1 B2 B2 B2 B2 B2 B2 B2 B2
+PoP 12hr                    100          40          30          30          50
+QPF 12hr                   0.39        0.04        0.01        0.04        0.16
+Rain                    D  D  C     S  S           S  S  S  C  C  C  C  C  C  C
+Wind                    Y  Y  Y  Y  Y  Y  Y  Y  Y  Y  Y  Y  Y  Y  Y  Y  Y  Y   
+
+
+Date          Tue 10/20/26  Wed 10/21/26  Thu 10/22/26  Fri 10/23/26
+EDT 6hrly     02 08 14 20   02 08 14 20   02 08 14 20   02 08 14 20
+UTC 6hrly     06 12 18 00   06 12 18 00   06 12 18 00   06 12 18 00
+
+Min/Max          53    68      54    69      54    68      54    71
+Temp          57 56 67 62   58 58 68 62   58 58 67 62   57 57 70 63
+Dewpt         54 54 57 55   54 56 60 58   56 57 59 58   56 56 59 57
+PWind dir         N     N       N     N       N     N       N     N
+Wind char        BZ    BZ      BZ    BZ      BZ    BZ      GN    GN
+Avg clouds    B2 B1 B1 B1   B1 SC SC B1   B1 B1 B1 B1   B1 B1 SC B1
+PoP 12hr         30    20      20    20      30    30      20    20
+Rain           C  S  S  S    S  S  S  S    C  C                    
+Rain shwrs                                       C  C    S  S  S  S
+
+$$
+NCZ093-172000-
+New Bern RAWS
+35.10N  77.11W Elev. 20 ft
+1132 AM EDT Sat Oct 17 2026
+
+Date             Sat 10/17/26            Sun 10/18/26            Mon 10/19/26
+EDT 3hrly     05 08 11 14 17 20 23 02 05 08 11 14 17 20 23 02 05 08 11 14 17 20
+UTC 3hrly     09 12 15 18 21 00 03 06 09 12 15 18 21 00 03 06 09 12 15 18 21 00
+
+Max/Min                      61          45          63          51          65
+Temp                   55 52 50 49 48 47 47 57 62 62 58 55 53 53 54 61 64 63 58
+Dewpt                  54 51 47 43 40 40 42 50 52 52 51 50 50 50 51 56 58 55 54
+RH                     96 96 89 80 74 76 83 77 70 70 77 83 89 89 90 84 81 75 86
+Wind dir                N  N  N  N  N  N  N  N  N  N  N  N  N  N  N  N  N  N  N
+Wind spd               16 18 14 12 13 13 13 14 17 14 13 12 12 13 14 17 17 17 16
+Wind gust              28 31 25 20 21 21 23 25 28 25 21 19 19 20 21 31 32 32 28
+Clouds                 OV B2 B2 SC FW SC SC B1 B2 SC SC B1 B1 B1 B1 B1 B2 B2 B1
+PoP 12hr                    100          20          20          20          30
+QPF 12hr                   0.28        0.02        0.02           0        0.08
+Rain                    D  C  S                             S  S  C  C  C  C  S
+Coast Flood                   Y  Y  Y  Y  Y  Y  Y  Y  Y  Y  Y  Y  Y  Y  Y      
+
+
+Date          Tue 10/20/26  Wed 10/21/26  Thu 10/22/26  Fri 10/23/26
+EDT 6hrly     02 08 14 20   02 08 14 20   02 08 14 20   02 08 14 20
+UTC 6hrly     06 12 18 00   06 12 18 00   06 12 18 00   06 12 18 00
+
+Min/Max          50    69      52    70      52    69      51    72
+Temp          54 52 68 63   56 54 69 63   56 54 68 62   55 53 71 63
+Dewpt         50 48 55 53   50 51 59 57   54 53 58 57   53 52 59 56
+PWind dir         N     N       N     N       N     N       N     N
+Wind char        BZ    GN      GN    BZ      GN    BZ      GN    GN
+Avg clouds    B1 SC SC SC   SC FW SC SC   SC SC B1 B1   SC SC SC SC
+PoP 12hr         20    10      10    20      20    20      10    10
+Rain           S                   S       S  S                    
+Rain shwrs                                       S  S              
+
+$$
+NCZ045-172000-
+Pocosin Lakes RAWS
+35.75N  76.51W Elev. 6 ft
+1132 AM EDT Sat Oct 17 2026
+
+Date             Sat 10/17/26            Sun 10/18/26            Mon 10/19/26
+EDT 3hrly     05 08 11 14 17 20 23 02 05 08 11 14 17 20 23 02 05 08 11 14 17 20
+UTC 3hrly     09 12 15 18 21 00 03 06 09 12 15 18 21 00 03 06 09 12 15 18 21 00
+
+Max/Min                      61          51          62          57          64
+Temp                   55 53 52 54 53 53 53 58 60 62 60 61 60 60 60 63 63 63 61
+Dewpt                  54 51 46 45 44 46 48 52 53 53 53 54 55 56 56 58 59 57 56
+RH                     96 93 80 71 71 77 83 80 78 72 78 78 84 87 87 84 87 81 84
+Wind dir                N  N  N  N  N  N  N NE  N NE  N  N  N  N  N  N  N  N  N
+Wind spd               23 21 20 17 18 18 18 19 20 20 18 18 18 19 19 20 20 20 19
+Wind gust              35 33 31 25 27 2727 29 32 32 27 26 26 27 27 32 33 33 32
+Clouds                 OV B2 B2 SC SC SC B1 B1 B1 B1 SC B2 B2 B2 B2 B2 B2 B2 B2
+PoP 12hr                    100          20          20          30          40
+QPF 12hr                   0.40        0.01           0           0        0.12
+Rain                    D  L  S                       S  S  C  C  C  C  C  C  S
+
+
+Date          Tue 10/20/26  Wed 10/21/26  Thu 10/22/26  Fri 10/23/26
+EDT 6hrly     02 08 14 20   02 08 14 20   02 08 14 20   02 08 14 20
+UTC 6hrly     06 12 18 00   06 12 18 00   06 12 18 00   06 12 18 00
+
+Min/Max          56    67      58    68      58    67      57    70
+Temp          59 58 66 65   61 59 67 66   61 59 65 65   60 57 69 66
+Dewpt         54 53 57 55   55 56 60 59   58 57 59 58   57 56 60 57
+PWind dir         N     N       N     N       N     N       N     N
+Wind char        BZ    GN      GN    BZ      BZ    GN      GN    GN
+Avg clouds    B2 B1 B1 SC   SC SC SC B1   B1 B1 B1 B1   B1 SC B1 SC
+PoP 12hr         20    20      20    20      20    20      20    10
+Rain           S     S  S    S     S  S    S  S                    
+Rain shwrs                                       S  S    S         
+
+$$
+NCZ098-172000-
+Sandy Run RAWS
+34.61N  77.49W Elev. 150 ft
+1132 AM EDT Sat Oct 17 2026
+
+Date             Sat 10/17/26            Sun 10/18/26            Mon 10/19/26
+EDT 3hrly     05 08 11 14 17 20 23 02 05 08 11 14 17 20 23 02 05 08 11 14 17 20
+UTC 3hrly     09 12 15 18 21 00 03 06 09 12 15 18 21 00 03 06 09 12 15 18 21 00
+
+Max/Min                      65          44          65          49          67
+Temp                   57 52 51 49 47 46 46 57 63 64 59 54 52 52 53 62 66 65 59
+Dewpt                  56 51 47 43 40 39 41 48 52 52 51 50 50 50 50 55 57 56 54
+RH                     96 96 86 80 76 76 83 72 67 65 75 86 93 93 89 78 73 73 83
+Wind dir                N  N  N  N  N  N  N  N  N  N  N  N  N  N  N  N  N  N  N
+Wind spd               14 17 16 13 13 12 14 14 16 16 13 13 12 13 14 14 16 14 14
+Wind gust              27 31 26 21 23 21 24 25 27 26 21 20 19 20 21 28 29 27 28
+Clouds                 OV B2 B2 SC FW FW SC SC SC SC SC B1 B1 B1 SC B1 B1 B1 B1
+PoP 12hr                    100          20          20          20          30
+QPF 12hr                   0.18        0.01        0.04        0.04        0.07
+Rain                    D  C  S                             S  S  C  C  C  C   
+Wind chill                               39                                    
+Min chill                                38                                    
+
+
+Date          Tue 10/20/26  Wed 10/21/26  Thu 10/22/26  Fri 10/23/26
+EDT 6hrly     02 08 14 20   02 08 14 20   02 08 14 20   02 08 14 20
+UTC 6hrly     06 12 18 00   06 12 18 00   06 12 18 00   06 12 18 00
+
+Min/Max          49    70      51    71      51    70      50    72
+Temp          53 51 68 64   56 53 70 64   56 53 68 64   55 52 71 64
+Dewpt         49 48 54 53   49 50 58 57   53 52 57 57   54 52 59 56
+PWind dir         N     N       N     N       N     N       N     N
+Wind char        GN    GN      GN    GN      GN    GN      LT    GN
+Avg clouds    B1 SC SC SC   SC FW SC SC   SC SC SC SC   SC SC SC SC
+PoP 12hr         10     5       5    20      10    10      10    10
+Rain                               S                               
+
+$$
+NCZ095-172000-
+Croatan RAWS
+34.76N  76.90W Elev. 69 ft
+1132 AM EDT Sat Oct 17 2026
+
+Date             Sat 10/17/26            Sun 10/18/26            Mon 10/19/26
+EDT 3hrly     05 08 11 14 17 20 23 02 05 08 11 14 17 20 23 02 05 08 11 14 17 20
+UTC 3hrly     09 12 15 18 21 00 03 06 09 12 15 18 21 00 03 06 09 12 15 18 21 00
+
+Max/Min                      66          47          65          52          67
+Temp                   58 54 53 50 49 49 50 61 64 64 59 57 55 54 56 65 67 65 59
+Dewpt                  57 53 49 46 44 45 46 51 53 53 53 53 53 53 54 57 57 55 55
+RH                     96 96 86 86 83 86 86 70 67 67 80 86 93 96 93 75 70 70 87
+Wind dir                N  N  N  N  N  N  N  N  N  N  N  N  N  N  N  N  N  N  N
+Wind spd               17 21 17 17 17 16 17 17 18 18 17 17 14 16 16 16 17 16 19
+Wind gust              31 36 29 27 27 27 28 29 32 31 28 26 25 26 26 29 31 29 31
+Clouds                 OV OV B2 B1 SC SC B1 SC B1 B1 SC B1 B1 B2 B1 B1 B2 B2 B1
+PoP 12hr                    100          30          30          20          40
+QPF 12hr                   0.22        0.02        0.07        0.04        0.07
+Rain                    D  L  C                 C  S  S  S  S  S  C  C  C  C  S
+Coast Flood                               Y  Y  Y  Y  Y  Y  Y  Y  Y            
+Wind                    Y  Y  Y  Y  Y  Y  Y  Y  Y  Y  Y  Y  Y  Y  Y  Y  Y  Y   
+
+
+Date          Tue 10/20/26  Wed 10/21/26  Thu 10/22/26  Fri 10/23/26
+EDT 6hrly     02 08 14 20   02 08 14 20   02 08 14 20   02 08 14 20
+UTC 6hrly     06 12 18 00   06 12 18 00   06 12 18 00   06 12 18 00
+
+Min/Max          51    69      53    70      53    69      53    71
+Temp          54 53 69 63   56 55 70 64   57 55 68 63   56 54 71 64
+Dewpt         51 50 55 55   52 53 61 58   55 54 60 58   54 53 60 57
+PWind dir         N     N       N     N       N     N       N     N
+Wind char        BZ    BZ      GN    BZ      BZ    BZ      GN    GN
+Avg clouds    B1 SC SC SC   SC FW SC SC   SC B1 B1 B1   SC SC SC SC
+PoP 12hr         20    10       5    20      20    20      20    10
+Rain           S                   S  S    S  S                    
+Rain shwrs                                       S  S       S      
+
+$$
+NCZ080-172000-
+Beaufort RAWS
+35.52N  76.93W Elev. 25 ft
+1132 AM EDT Sat Oct 17 2026
+
+Date             Sat 10/17/26            Sun 10/18/26            Mon 10/19/26
+EDT 3hrly     05 08 11 14 17 20 23 02 05 08 11 14 17 20 23 02 05 08 11 14 17 20
+UTC 3hrly     09 12 15 18 21 00 03 06 09 12 15 18 21 00 03 06 09 12 15 18 21 00
+
+Max/Min                      61          45          63          51          65
+Temp                   54 52 50 49 48 47 47 58 63 62 57 55 53 53 54 63 65 63 57
+Dewpt                  53 50 46 42 40 40 42 48 50 49 50 50 50 50 51 54 55 53 53
+RH                     96 93 86 77 74 76 83 69 62 62 77 83 89 89 90 72 70 70 86
+Wind dir                N  N  N  N  N  N  N  N  N  N  N  N  N  N  N  N  N  N  N
+Wind spd               14 16 14 12 12 12 14 16 17 14 13 12 12 13 14 16 14 14 14
+Wind gust              26 28 24 19 20 20 23 26 27 25 23 19 18 20 21 27 28 28 28
+Clouds                 OV B2 B2 SC SC SC SC B1 B1 SC SC B1 B1 B1 B1 B2 B2 B2 B1
+PoP 12hr                    100          20          20          20          30
+QPF 12hr                   0.35        0.01           0           0        0.10
+Rain                    D  L  S                             S  S  C  C  C  C  S
+
+
+Date          Tue 10/20/26  Wed 10/21/26  Thu 10/22/26  Fri 10/23/26
+EDT 6hrly     02 08 14 20   02 08 14 20   02 08 14 20   02 08 14 20
+UTC 6hrly     06 12 18 00   06 12 18 00   06 12 18 00   06 12 18 00
+
+Min/Max          51    70      52    71      53    69      52    73
+Temp          54 52 69 62   56 54 70 62   57 54 68 62   55 53 72 63
+Dewpt         50 48 53 52   50 51 57 57   54 53 56 56   53 53 57 56
+PWind dir         N     N       N     N       N     N       N     N
+Wind char        GN    GN      GN    GN      GN    GN      LT    GN
+Avg clouds    B1 B1 SC SC   SC SC SC SC   SC B1 B1 B1   SC SC SC SC
+PoP 12hr         20    10      10    20      20    20      10    10
+Rain           S                   S  S    S  S                    
+Rain shwrs                                       S  S              
+
+$$
+NCZ098-172000-
+Hofmann Forest RAWS
+34.83N  77.32W Elev. 42 ft
+1132 AM EDT Sat Oct 17 2026
+
+Date             Sat 10/17/26            Sun 10/18/26            Mon 10/19/26
+EDT 3hrly     05 08 11 1417 20 23 02 05 08 11 14 17 20 23 02 05 08 11 14 17 20
+UTC 3hrly     09 12 15 18 21 00 03 06 09 12 15 18 21 00 03 06 09 12 15 18 21 00
+
+Max/Min                      64          42          65          47          67
+Temp                   56 52 50 48 47 45 45 56 63 64 58 54 52 51 53 61 65 65 57
+Dewpt                  55 51 47 41 38 37 39 48 50 51 50 48 47 47 49 54 56 55 53
+RH                     96 96 89 77 71 73 79 74 62 63 75 80 83 86 86 78 73 70 86
+Wind dir                N  N  N  N  N  N  N  N  N  N  N  N  N  N  N  N  N  N  N
+Wind spd               13 16 14 12 12 12 13 13 14 13 12 12 11 11 12  9  9  9 13
+Wind gust              24 28 25 19 20 19 21 23 24 24 19 18 17 17 18 19 20 21 20
+Clouds                 OV B2 B2 B1 FW SC SC SC SC B1 SC B1 B1 B1 B1 B1 B2 B2 B1
+PoP 12hr                    100          20          20          20          30
+QPF 12hr                   0.20        0.02        0.03           0        0.08
+Rain                    D  C  S                             S  S  C  C  C  C  S
+Wind chill                            39                                       
+Min chill                                37                                    
+
+
+Date          Tue 10/20/26  Wed 10/21/26  Thu 10/22/26  Fri 10/23/26
+EDT 6hrly     02 08 14 20   02 08 14 20   02 08 14 20   02 08 14 20
+UTC 6hrly     06 12 18 00   06 12 18 00   06 12 18 00   06 12 18 00
+
+Min/Max          47    70      48    72      48    70      48    72
+Temp          53 50 68 63   55 53 70 64   56 53 68 63   55 51 71 64
+Dewpt         47 46 53 53   47 48 57 56   50 50 56 56   50 49 57 56
+PWind dir         N     N       N     N       N     N       N     N
+Wind char        GN    GN      GN    GN      GN    GN      GN    GN
+Avg clouds    B1 SC SC SC   SC FW SC SC   SC SC B1 SC   SC SC SC SC
+PoP 12hr         20    10       5    20      10    10      10    10
+Rain           S                   S                               
+
+$$
+NCZ047-172000-
+Dare Bomb Range RAWS
+35.76N  75.85W Elev. 3 ft
+1132 AM EDT Sat Oct 17 2026
+
+Date             Sat 10/17/26            Sun 10/18/26            Mon 10/19/26
+EDT 3hrly     05 08 11 14 17 20 23 02 05 08 11 14 17 20 23 02 05 08 11 14 17 20
+UTC 3hrly     09 12 15 18 21 00 03 06 09 12 15 18 21 00 03 06 09 12 15 18 21 00
+
+Max/Min                      67          48          67          51          69
+Temp                   58 56 55 52 52 51 53 63 65 66 59 55 55 55 58 66 67 67 59
+Dewpt                  56 53 50 47 46 46 49 53 53 54 54 52 52 54 56 60 60 59 58
+RH                     93 90 83 83 80 83 86 70 65 65 83 90 90 96 93 81 78 75 96
+Wind dir                N  N  N  N  N  N  N NE  N  N NE NE NE  N  N  N  N  N  N
+Wind spd               20 23 21 17 18 19 19 19 20 20 20 20 21 21 21 23 24 24 24
+Wind gust              34 37 34 27 28 29 31 31 34 33 32 31 32 32 33 36 37 37 40
+Clouds                 OV OV OV B2 B2 B1 B2 B1 B2 B2 B2 B2 B2 B2 B2 B2 OV B2 B2
+PoP 12hr                    100          50          30          40          50
+QPF 12hr                   0.52        0.10        0.02        0.06        0.26
+Rain                    D  D  C  S  S  C           S  C  C  C  C  C  C  C  C  C
+Wind                    Y  Y  Y  Y  Y  Y  Y  Y  Y  Y  Y  Y  Y  Y  Y  Y  Y  Y   
+
+
+Date          Tue 10/20/26  Wed 10/21/26  Thu 10/22/26  Fri 10/23/26
+EDT 6hrly     02 08 14 20   02 08 14 20   02 08 14 20   02 08 14 20
+UTC 6hrly     06 12 18 00   06 12 18 00   06 12 18 00   06 12 18 00
+
+Min/Max          51    70      52    70      51    69      51    70
+Temp          55 55 68 62   56 57 68 62   56 56 68 62   54 55 70 62
+Dewpt         54 55 58 57   55 56 61 59   56 56 60 59   54 55 60 57
+PWind dir         N     N       N     N       N     N       N     N
+Wind char        BZ    BZ      BZ    BZ      BZ    BZ      BZ    BZ
+Avg clouds    B2 B2 B2 B1   B1 SC B1 B1   B1 B2 B2 B2   B1 B1 B1 B1
+PoP 12hr         40    30      2030      40    40      20    20
+Rain           C  C  C  C    S  S  C  C    C  C                    
+Rain shwrs                                       C  C    S  S  S  S
+
+$$
+NCZ205-172000-
+Buxton RAWS
+35.24N  75.53W Elev. 18 ft
+1132 AM EDT Sat Oct 17 2026
+
+Date             Sat 10/17/26            Sun 10/18/26            Mon 10/19/26
+EDT 3hrly     05 08 11 14 17 20 23 02 05 08 11 14 17 20 23 02 05 08 11 14 17 20
+UTC 3hrly     09 12 15 18 21 00 03 06 09 12 15 18 21 00 03 06 09 12 15 18 21 00
+
+Max/Min                      70          56          69          59          70
+Temp                   65 63 62 58 57 58 60 67 68 68 63 62 61 61 63 69 70 68 63
+Dewpt                  63 60 57 52 51 52 55 56 57 57 56 57 57 58 60 62 62 60 59
+RH                     93 90 84 80 80 80 84 68 68 68 78 84 87 90 90 78 76 76 87
+Wind dir                N  N  N  N  N  N NE  N NE NE NE NE  N  N  N  N  N  N  N
+Wind spd               34 39 35 34 35 34 36 34 34 35 35 35 33 34 33 29 31 31 33
+Wind gust              49 55 50 47 47 46 48 44 46 47 47 47 44 44 44 42 42 43 43
+Clouds                 OV OV OV B2 OV B2 B2 B2 B2 B2 B2 B2 B2 B2 B2 B2 B2 B2 B2
+PoP 12hr                    100          70          50          60          60
+QPF 12hr                   0.50        0.23        0.28        0.27        0.48
+Rain                    D  D  L  C  C  C  S  C  C  C  C  C  L  L  L  L  L  L  C
+Tstms                                                                          
+Coast Flood                W  W  W  W  W  W  W  W  W  W  W  W  W  W  W  W  W  W
+High Surf               Y  Y  Y  Y  Y  Y  Y  Y  Y  Y  Y  Y  Y  Y  Y  Y  Y  Y  Y
+Wind                    Y  Y  Y  Y  Y  Y  Y  Y  Y  Y  Y  Y  Y  Y  Y  Y  Y  Y   
+
+
+Date          Tue 10/20/26  Wed 10/21/26  Thu 10/22/26  Fri 10/23/26
+EDT 6hrly     02 08 14 20   02 08 14 20   02 08 14 20   02 08 14 20
+UTC 6hrly     06 12 18 00   06 12 18 00   06 12 18 00   06 12 18 00
+
+Min/Max          59    70      61    69      61    68      61    69
+Temp          61 61 69 65   63 63 69 65   63 63 67 65   63 63 68 65
+Dewpt         58 59 60 60   60 61 62 61   61 61 62 60   60 60 61 59
+PWind dir         N     N       N     N       N     N       N     N
+Wind char        WY    WY      WY    WY      WY    WY      BZ    BZ
+Avg clouds    B2 B2 B2 B1   B1 B1 B1 B1   B1 B1 B1 B1   B1 B1 B1 B1
+PoP 12hr         50    40      30    40      50    40      20    20
+Rain           C  C  C  C    C  C  C  C    C  C                    
+Rain shwrs                                       C  C    S  S  S  S
+
+$$

@@ -110,7 +110,7 @@ projection on its own, exported for tests that have no canvas.
 
 **A layer built ahead.** `cellLayer(rectangles, { unknown })` builds the same paths without a map,
 and `setCellLayer(layer)` shows one (null for none) without rebuilding or re-framing anything. The
-radar screen's loop (revision 13) builds each frame's layer once and steps through them; a drawing
+radar screen's loop builds each frame's layer once and steps through them; a drawing
 handed to `applyDrawing` with a `cellLayer` key has it pushed on every paint, outside the
 fingerprint, so a step never moves the camera.
 

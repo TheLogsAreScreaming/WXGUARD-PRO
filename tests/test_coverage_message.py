@@ -1,5 +1,5 @@
 """Coverage (type 8): the bot states its own area instead of letting an app
-guess it (docs/MeshWX_v5_Spec.md 7A).
+guess it (docs/MeshWX_v5_Spec.md §10).
 
 The guess this replaces put a false line on a real phone: "WX-AUS may not
 carry alerts for Travis County (NWS Austin/San Antonio)" — the bot's own home
@@ -44,7 +44,7 @@ def _tx() -> int:
     return b.tables.states.index("TX")
 
 
-# -- The wire (spec 7A) ------------------------------------------------------
+# -- The wire (spec 10) ------------------------------------------------------
 
 
 def test_coverage_round_trips_centre_radius_offices_and_runs():
@@ -200,7 +200,7 @@ def test_a_bot_with_no_centre_and_no_zones_sends_nothing():
 
 
 def test_no_area_filter_is_an_answer_not_an_empty_message():
-    """Zero offices and zero runs mean the bot filters nothing (spec 7A)."""
+    """Zero offices and zero runs mean the bot filters nothing (spec 10)."""
     d = v5.decode(b.coverage_message(1, BOT, Coverage.empty(), AUSTIN, 120))
     assert d["offices"] == [] and d["areas"] == []
     assert d["radius_km"] == 0 and not d["zones_cut"] and not d["offices_cut"]
@@ -317,7 +317,7 @@ async def test_cov_words_and_the_places_that_start_with_them():
 
 
 def test_cov_says_the_area_the_offices_the_stations_and_the_alert_list():
-    from meshcore_weather.main import HELP_TEXT, HELP_TEXT_DM, WeatherBot
+    from meshcore_weather.main import HELP_TEXT, WeatherBot
     bot = WeatherBot()
     bot._coverage_cache = _wx_aus()
     reply = bot._process_command("cov", "")
@@ -326,7 +326,7 @@ def test_cov_says_the_area_the_offices_the_stations_and_the_alert_list():
         "offices EWX, FWD, HGX, SJT; up to 12 stations hourly; alert list every 3 h"
     )
     assert len(reply) <= render_text.MAX_DM               # one message, no paging needed
-    assert "| cov |" in HELP_TEXT_DM and len(HELP_TEXT) <= render_text.MAX_DM
+    assert ", cov," in HELP_TEXT and len(HELP_TEXT) <= render_text.MAX_DM
 
 
 def test_a_bot_with_no_area_filter_says_so_in_words(monkeypatch):

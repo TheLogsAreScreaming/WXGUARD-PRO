@@ -18,7 +18,7 @@ import pytest
 from meshcore_weather.config import settings
 from meshcore_weather.core import services
 from meshcore_weather.geodata import resolver, zip_code
-from meshcore_weather.main import HELP_TEXT, HELP_TEXT_DM, WeatherBot
+from meshcore_weather.main import HELP_TEXT, WeatherBot
 from meshcore_weather.parser.weather import WeatherStore
 from meshcore_weather.protocol import v5
 from meshcore_weather.protocol import v5_builders as b
@@ -197,9 +197,13 @@ def test_zip_commands_by_text_end_to_end(bot, monkeypatch):
     assert _say(bot, "forecast zzqqx", "G") == "Unknown location: zzqqx"
 
 
-def test_help_mentions_zip_within_the_channel_budget():
-    assert "ZIP" in HELP_TEXT_DM and len(HELP_TEXT_DM) <= 147
+def test_help_mentions_zip_within_the_channel_budget(monkeypatch):
+    from meshcore_weather.main import help_text
     assert "ZIP" in HELP_TEXT and len(HELP_TEXT) <= 147
+    monkeypatch.setattr(settings, "sdr_dashboard_public_url", "https://goes.digitaino.com/")
+    assert help_text() == HELP_TEXT + ". goes.digitaino.com" and len(help_text().encode()) <= 147
+    monkeypatch.setattr(settings, "sdr_dashboard_public_url", "https://a-public-page-address-far-too-long-for-the-line.example.org")
+    assert help_text() == HELP_TEXT                       # an address that does not fit is left out
 
 
 # -- App requests -----------------------------------------------------------------

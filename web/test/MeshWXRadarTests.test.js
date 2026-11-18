@@ -1,7 +1,7 @@
 // Port of MC1Services/Tests/MeshWXTests/MeshWXRadarTests.swift, and of the bot's own
 // tests/test_radar.py (the lattice and codec halves of it; the GIF reading is the bot's).
 //
-// Radar, type 11, spec §7D, revision 11. The lattice cases below are the reference's
+// Radar, type 11, spec §13, revision 11. The lattice cases below are the reference's
 // parametrised list value for value: two clients that round a tie differently ask for two
 // different tiles, and the channel pays for both.
 
@@ -113,7 +113,7 @@ describe('MeshWXRadarTile', () => {
   });
 
   /**
-   * Row 0 is the northern row and column 0 the western one (spec §7D), which is the picture's
+   * Row 0 is the northern row and column 0 the western one (spec §13), which is the picture's
    * order and the opposite of latitude's.
    */
   test('cellsAreNumberedFromTheNorthWestCorner', () => {
@@ -174,7 +174,7 @@ describe('MeshWXRadarTile', () => {
 });
 
 describe('MeshWXRadar codec', () => {
-  /** Spec §7D: an all-dry tile is three bits, so a clear picture is thirteen bytes. */
+  /** Spec §13: an all-dry tile is three bits, so a clear picture is thirteen bytes. */
   test('aDryTileIsOneByteOfCells', () => {
     const data = MeshWXEncoder.radar({
       seq: 7,
@@ -321,7 +321,7 @@ describe('MeshWXRadar codec', () => {
   });
 
   /**
-   * Spec §7D: "A decoder rejects a packet whose bits run out before the tree is complete; bits
+   * Spec §13: "A decoder rejects a packet whose bits run out before the tree is complete; bits
    * left over after it are padding." The two halves of one rule, and the reason for it is that a
    * half-read tree leaves the rest of the grid at level 0 — which reads as clear weather.
    */

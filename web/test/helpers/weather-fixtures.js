@@ -159,7 +159,7 @@ export function forecast({
 }
 
 /**
- * `wasCut` puts the chunk into the revision 7 form (spec §8.1): flags nibble bit 0, which the
+ * `wasCut` puts the chunk into the revision 7 form (spec §8): flags nibble bit 0, which the
  * bot sets on every chunk of a reply whose tail it had to drop.
  */
 export function text({
@@ -180,7 +180,7 @@ export function text({
 }
 
 /**
- * One packet of an area sweep (spec §7C).
+ * One packet of an area sweep (spec §12).
  *
  * `scope` is revision 10's: the state indices packet 0 names. Passing any makes the packet a
  * scoped one; a packet past 0 of a scoped sweep is `{ isScoped: true }` with no scope, which is
@@ -227,7 +227,7 @@ export const texasSweepEntry = Object.freeze({ event: 3, state: 42, county: fals
 export const oklahomaSweepEntry = Object.freeze({ event: 24, state: 35, county: true, start: 1, run: 4 })
 
 /**
- * WX-AUS's real statement (spec §7A, the vector `coverage_wx_aus`): 120 km around Austin, the
+ * WX-AUS's real statement (spec §10, the vector `coverage_wx_aus`): 120 km around Austin, the
  * offices EWX/FWD/HGX/SJT, and its 36 zones as five runs, neither list cut.
  */
 export const austinCoverage = Object.freeze({
@@ -248,14 +248,14 @@ export const austinCoverage = Object.freeze({
 })
 
 export function coverage({ seq, coverage: body = austinCoverage, bot: from = botID } = {}) {
-  // Flags nibble: bit 0 the zones were cut, bit 1 the offices were (spec §7A).
+  // Flags nibble: bit 0 the zones were cut, bit 1 the offices were (spec §10).
   const flags = (body.zones_cut ? 1 : 0) | (body.offices_cut ? 2 : 0)
   return { ...header({ seq, type: 8, name: 'coverage', flags, bot: from }), ...body }
 }
 
 /**
  * A grid for a radar tile: `size` rows of `size` dry cells, with `cells` (`[row, col, level]`)
- * set. North row first, west column first, as the decoded message carries them (spec §7D).
+ * set. North row first, west column first, as the decoded message carries them (spec §13).
  */
 export function radarRows({ size = 32, cells = [] } = {}) {
   const grid = Array.from({ length: size }, () => new Array(size).fill(0))
@@ -264,7 +264,7 @@ export function radarRows({ size = 32, cells = [] } = {}) {
 }
 
 /**
- * One radar tile (type 11, spec §7D, revision 11).
+ * One radar tile (type 11, spec §13, revision 11).
  *
  * `bounds` is the four-element wire array and makes the packet partial; a 16-row grid makes it
  * coarse. Both are read off the body rather than passed as flags, exactly as the codec does.
@@ -310,7 +310,7 @@ export function notAvailable({ seq, letter, reason, bot: from = botID }) {
 }
 
 /**
- * Another phone's `>` request, flooded on the channel (spec §7B). Not this phone's: the sender
+ * Another phone's `>` request, flooded on the channel (spec §11). Not this phone's: the sender
  * prefix and the seq are somebody else's, which is the whole point of the fixture.
  */
 export function request({
@@ -357,7 +357,7 @@ export class FakeWeatherTransport {
   constructor({ channelRequestsSupported = true } = {}) {
     this.channelRequestsSupported = channelRequestsSupported
     this.sent = []
-    /** The Request datagrams the service flooded on `#meshwx`, in order (spec §7B). */
+    /** The Request datagrams the service flooded on `#meshwx`, in order (spec §11). */
     this.channelSent = []
     /** The routes the service asked the radio to forget, in order: one per flood attempt. */
     this.resets = []

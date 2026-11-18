@@ -291,7 +291,7 @@
   .segmented__option { transition: none; }
 }
 
-/* ---------- The radar screen (revision 11 §3) ---------- */
+/* ---------- The radar screen (docs/MESHWX_UI.md §18.2) ---------- */
 
 /* Square, because every tile is: a letterbox would leave the picture floating in a band of
    basemap. Capped so there is always something below it to scroll the page by — the map takes

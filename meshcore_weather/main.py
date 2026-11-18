@@ -27,13 +27,27 @@ RADIO_RETRY_SECONDS = 60
 # "@lat,lon <command>": a DM that carries the sender's position
 LOC_PREFIX = re.compile(r"^@(-?\d+\.?\d*),(-?\d+\.?\d*)\s+(.*)")
 
-# One message, under the channel budget, no newlines (phones wrap it).
-# A DM already is the private reply, so it does not say "DM me".
-HELP_TEXT_DM = (
-    "Weather bot: wx/forecast/warn/radar <city ST|ZIP> | warn/storm/rain <ST> | "
-    "metar <ICAO|ZIP> | space | sat | cov | more"
-)
-HELP_TEXT = HELP_TEXT_DM + ". DM me for private replies"
+# One message, under the channel budget (147 bytes for "WX-AUS"), no
+# newlines (phones wrap it), the same on the channel and in a DM. It ends with
+# the public page's address (help_text): the channel's line used to end "DM me
+# for private replies", and there is room for one of the two; the owner chose
+# the address (2026-10-19).
+HELP_TEXT = ("Weather bot: wx/forecast/warn/radar <city ST|ZIP>, warn/storm/rain <ST>, "
+             "metar <ICAO|ZIP>, space, sat, status, cov, more")
+
+
+def public_site() -> str | None:
+    """The public page's address as it goes over the mesh ("goes.digitaino.com"),
+    or None when the bot has none (MCW_SDR_DASHBOARD_PUBLIC_URL)."""
+    site = re.sub(r"^https?://", "", (settings.sdr_dashboard_public_url or "").strip()).rstrip("/")
+    return site or None
+
+
+def help_text() -> str:
+    """The help line, with the public page's address when it fits."""
+    site = public_site()
+    line = f"{HELP_TEXT}. {site}" if site else HELP_TEXT
+    return line if len(line.encode()) <= MAX_DM else HELP_TEXT
 
 # What a restart says while its products are still loading (see _load_backlog).
 NOT_READY_TEXT = "Starting up: my weather products are still loading. Ask again in a minute."
@@ -192,9 +206,17 @@ class WeatherBot:
         # against it, and it is seconds, not minutes. In a thread so the
         # loop keeps running while the JSON is read.
         await loop.run_in_executor(None, resolver.load)   # also sets home from MCW_HOME_CITIES
+        await loop.run_in_executor(None, self._log_configuration)
         if settings.emwin_source == "sdr":
             from meshcore_weather.sdr_monitor import SdrMonitor
-            self._sdr_monitor = SdrMonitor()
+            status = None
+            if settings.status_channel:
+                from meshcore_weather.status_channel import StatusReporter
+                status = StatusReporter(send=self._post_status,
+                                        ready=lambda: getattr(self.radio, "status_channel_idx", None) is not None,
+                                        state_file=settings.data_dir / "status_state.json")
+                logger.info("  Status channel: %s", settings.status_channel)
+            self._sdr_monitor = SdrMonitor(status=status, feed=self.emwin)
             self._sdr_monitor.start()
         self.radio.on_channel_message(self._handle_channel_message)
         self.radio.on_channel_request(self._handle_channel_request)
@@ -214,7 +236,10 @@ class WeatherBot:
 
         # The radio may not be plugged in yet (a Pi whose Heltec arrives
         # later, a USB cable pulled). Keep serving the store, portal and
-        # CLI, and keep trying the radio until it answers.
+        # CLI, and keep trying the radio until it answers. The node's last
+        # advert before this restart comes along, so a restart does not
+        # flood a new one when that one is recent.
+        self.radio.restored_advert = self._saved_advert()
         try:
             await self.radio.start()
         except Exception as e:
@@ -254,6 +279,33 @@ class WeatherBot:
         else:
             logger.info("Weather bot is running without a radio (store, portal and CLI only)")
 
+    def _log_configuration(self) -> None:
+        """The start-up lines a new operator needs: the coverage and home
+        point (protocol/coverage.py logs them, errors loudly), the time
+        zone, and any setting refused while it was read. `--check` says the
+        same before the bot ever starts."""
+        from meshcore_weather.config import fill_timezone
+        from meshcore_weather.protocol.coverage import Coverage
+        for problem in settings.rejected:
+            logger.error("%s", problem)
+        tz, how = fill_timezone()
+        if tz:
+            logger.info("  Time zone: %s (%s)", tz, how)
+        else:
+            logger.warning("  Time zone: none (%s); text replies give UTC times. Set MCW_TIMEZONE", how)
+        try:
+            self._coverage_cache = Coverage.from_config()
+        except Exception:
+            logger.exception("Coverage could not be built; scheduled warnings, digest and observations send nothing")
+
+    @staticmethod
+    def _saved_advert() -> dict | None:
+        try:
+            from meshcore_weather.schedule.scheduler import load_advert_record
+        except ImportError:
+            return None
+        return load_advert_record()
+
     async def _after_radio_connected(self) -> None:
         """Start the data-channel broadcaster once a radio with a data channel
         is up. It answers `>` requests straight away; `ready` keeps its
@@ -263,6 +315,14 @@ class WeatherBot:
             self._broadcaster = AppResponder(self.store, self.radio, ready=self._store_ready,
                                              render_text=self._process_command)
             await self._broadcaster.start()
+
+    async def _post_status(self, text: str) -> bool:
+        """One status line on the status channel (status_channel.py). Never
+        the request channel: without a slot of its own nothing is sent."""
+        idx = getattr(self.radio, "status_channel_idx", None)
+        if idx is None or idx in (self.radio.channel_idx, self.radio.data_channel_idx):
+            return False
+        return await self.radio.send_channel_message(idx, text)
 
     async def _handle_radio_lost(self, reason: str) -> None:
         """The radio reports its link is gone: reconnect in the background
@@ -288,7 +348,16 @@ class WeatherBot:
             except Exception:
                 pass
             self._broadcaster = None
+        old = self.radio
         self.radio = MeshcoreRadio()
+        # A reconnect is not news to the mesh: the old link's last advert
+        # (same key) stands, as it does across a restart.
+        last = getattr(old, "last_advert_at", 0.0)
+        key = getattr(old, "public_key", "") if isinstance(getattr(old, "public_key", ""), str) else ""
+        if isinstance(last, (int, float)) and last > 0 and key:
+            self.radio.restored_advert = {"at": float(last), "key": key}
+        else:
+            self.radio.restored_advert = getattr(old, "restored_advert", None)
         self.radio.on_channel_message(self._handle_channel_message)
         self.radio.on_channel_request(self._handle_channel_request)
         self.radio.on_dm(self._handle_dm)
@@ -583,7 +652,7 @@ class WeatherBot:
         if not forced and await self.radio.advert_if_stale():
             logger.info("Adverted so %s can DM us next time", sender)
 
-    # -- Request datagrams (spec 7B) -----------------------------------------
+    # -- Request datagrams (spec 11) -----------------------------------------
     #
     # Since revision 6 an app's `>` request normally arrives as a GRP_DATA
     # datagram flooded on #meshwx, not as a DM: a flood needs no route, and a
@@ -619,7 +688,7 @@ class WeatherBot:
 
     async def _handle_channel_request(self, request, hops: int | None = None,
                                       snr: float | None = None) -> None:
-        """An app's Request datagram on our own channel (spec 7B). `request`
+        """An app's Request datagram on our own channel (spec 11). `request`
         is a decoded `v5.Request`; the radio has already checked its shape."""
         from meshcore_weather.protocol import v5
 
@@ -635,7 +704,7 @@ class WeatherBot:
         prefix = self._normalize_key(request.sender_prefix)
         sender_name = self._name_for_key(prefix) or f"app:{prefix}"
         now = self._clock()
-        # An app sends the same bytes again when no answer arrives (spec 13).
+        # An app sends the same bytes again when no answer arrives (spec 19).
         # Copies are recognised on the same record a DM copy is, so a phone
         # that falls back to a DM does not get the answer twice.
         async with self._dm_requests.lock(prefix):
@@ -745,7 +814,7 @@ class WeatherBot:
                               sender_ts: int | None, now: float, transport: str = "dm",
                               answer=None) -> None:
         """A copy of a request already on record. `transport` and `answer` are
-        for the Request datagram (spec 7B), which shares every rule here and
+        for the Request datagram (spec 11), which shares every rule here and
         only differs in how the answer is built: `answer(dreq)` builds it, and
         a datagram answer is never a queued reply that could be redelivered."""
         gap = now - dreq.first_at
@@ -805,7 +874,7 @@ class WeatherBot:
                 self._user_locations[prefix] = (lat, lon)
                 logger.info("Cached location for %s: %.4f, %.4f", sender_name, lat, lon)
 
-        # Every DM meets the people's limiter, `>` app requests included (spec 8.2).
+        # Every DM meets the people's limiter, `>` app requests included (spec 14).
         command, location = await self._parse(text)
         traffic_log.update(req, command=command, location=location)
 
@@ -867,7 +936,7 @@ class WeatherBot:
     async def _not_ready_reply(self, dreq, prefix: str, sender_name: str, text: str,
                                req: dict | None, arrived: float) -> None:
         """The answer while the backlog is still loading: for an app, Not
-        available reason 0 ("no data yet", spec 8.3); for a person, one line
+        available reason 0 ("no data yet", spec 9); for a person, one line
         saying so. Neither spends the sender's hourly budget, and the request
         is left unanswered, so a copy of it gets the real reply once the
         products are in."""
@@ -912,7 +981,7 @@ class WeatherBot:
 
     async def _handle_app_request(self, text: str, sender_name: str, sender_key: str, transport: str,
                                   hops: int | None, req: dict | None = None, dreq=None) -> None:
-        """A `>` request from an app (docs/MeshWX_v5_Spec.md 8.2). `dreq`: the
+        """A `>` request from an app (docs/MeshWX_v5_Spec.md §14). `dreq`: the
         DM request it arrived as, so its copies know when the answer went out."""
         if req is None:
             req = traffic_log.record("data_request", sender=sender_name, key=sender_key if transport == "dm" else None,
@@ -934,7 +1003,7 @@ class WeatherBot:
         outcome = await self._broadcaster.handle_request(text, sender_key, ev=rev, not_before=not_before)
         logger.info("App request from %s: %s -> %s", sender_name, text[:40], outcome)
         # "already resent": a `>part` whose every packet went out again in the
-        # last 30 seconds (spec 7C.2). Nothing was sent, so the row is the
+        # last 30 seconds (spec 14.5). Nothing was sent, so the row is the
         # dropped it is, and a copy of the request is answered afresh: by then
         # the floor may have opened.
         if outcome in ("rate limited", "hourly budget spent", "already resent"):
@@ -1174,7 +1243,7 @@ class WeatherBot:
             session["next"] += 1
             session["ts"] = now
             return page, session["next"] < len(session["pages"])
-        response = HELP_TEXT_DM if dm and command == "help" else self._process_command(command, location)
+        response = self._process_command(command, location)
         if not response:
             return None, False
         pages = self._start_session(sender_key, (command + " " + location).strip(), response)
@@ -1235,7 +1304,7 @@ class WeatherBot:
         if command == "more":
             reply = DmReply(key=pubkey_prefix, kind="page", build=lambda r: self._dm_more(person, r), prepare=prepare)
         else:
-            response = HELP_TEXT_DM if command == "help" else self._process_command(command, location)
+            response = self._process_command(command, location)
             if not response:
                 traffic_log.record("dropped", reason="nothing to say", req=req, sender=sender_name, key=pubkey_prefix)
                 if dreq is not None:
@@ -1391,7 +1460,7 @@ class WeatherBot:
         return render_text.summary(loc, ob, ws, fc)
 
     def _radar_reply(self, location: str) -> str:
-        """radar [place]: the newest radar picture in words (spec 7D). The
+        """radar [place]: the newest radar picture in words (spec 13). The
         bot's home when no place is given."""
         from datetime import datetime, timezone
         from meshcore_weather.core import render_text
@@ -1455,8 +1524,36 @@ class WeatherBot:
             return 180
         return job.interval_minutes if job.enabled else 0
 
+    def _status_reply(self) -> str:
+        """`status`: the operator's notices, written on wx-admin and shown on the
+        public page (the receiver monitor fetches them from the dashboard). The
+        first headline and the page's address come first, so page 1 alone says
+        what is wrong and where to read more (a note's details ran to six pages
+        on 2026-10-19); the details follow, after "; ", on "more". With none
+        up, the feed in a few words."""
+        site = public_site()
+        monitor = self._sdr_monitor
+        now = time.time()
+        notes = [n for n in (getattr(monitor, "notes", None) or []) if not n.get("t_end") or n["t_end"] > now]
+        if notes:
+            parts = []
+            for i, n in enumerate(notes):
+                head = f"Notice: {n['title'].rstrip('.')}." + (f" {site}" if i == 0 and site else "")
+                parts.append(head + (f"; {n['detail']}" if n.get("detail") else ""))
+            return "; ".join(parts)
+        fill, lag = getattr(self.emwin, "fill", None), getattr(self.emwin, "feed_lag_min", None)
+        since = fill.active_since if fill is not None else None
+        if since is not None:
+            feed = f"filling in from NWS since {since:%H:%MZ}"
+        elif lag is not None and lag >= 30:
+            feed = f"EMWIN ~{lag} min late"
+        else:
+            feed = "EMWIN on time"
+        text = ("No notices from the operator. " if monitor is not None else "") + feed[0].upper() + feed[1:] + "."
+        return f"{text} {site}" if site else text
+
     def _coverage_reply(self) -> str:
-        """The `cov` reply: the facts the Coverage message carries (spec 7A),
+        """The `cov` reply: the facts the Coverage message carries (spec 10),
         in words."""
         from meshcore_weather.core import render_text
         from meshcore_weather.protocol import v5_builders as b
@@ -1466,18 +1563,27 @@ class WeatherBot:
 
     def _process_command(self, command: str, location: str) -> str | None:
         if command == "help":
-            return HELP_TEXT
+            return help_text()
+
+        if command == "status":
+            return self._status_reply()
 
         if command == "sat":
             if self._sdr_monitor is None:
                 return "No satellite receiver on this bot: its EMWIN comes over the internet"
-            line = self._sdr_monitor.report(emwin_mtime=getattr(self.emwin, "newest_mtime", None))
-            since = getattr(self.emwin, "fallback_since", None)
-            if since is not None:
-                # The dish is quiet and the bot is on NOAA's internet feed:
-                # the one thing a person asking `sat` most needs to know.
-                line += f". Internet backup on since {since.strftime('%H:%MZ')}"
-            return line
+            facts = {"emwin_mtime": getattr(self.emwin, "newest_mtime", None),
+                     "lag_min": getattr(self.emwin, "feed_lag_min", None)}
+            line = self._sdr_monitor.report(**facts)
+            fill = getattr(self.emwin, "fill", None)
+            since = fill.active_since if fill is not None else None
+            # The dish is quiet or EMWIN late, and the bot is filling in from
+            # NWS over the internet: the one thing a person asking `sat` most
+            # needs to know.
+            tail = f". Internet filling in since {since:%H:%MZ}" if since is not None else ""
+            if len(line + tail) > self.page_budget():
+                # One message, not a "more": the packet count is what goes.
+                line = self._sdr_monitor.report(**facts, brief=True)
+            return line + tail
 
         if command == "cov":
             return self._coverage_reply()
@@ -1576,6 +1682,11 @@ def _signalled(bot: WeatherBot, sig: signal.Signals) -> None:
 
 
 def main():
+    # `meshcore-weather --check`: validate the configuration and exit, never
+    # transmitting (cli_check.py). Exit code 1 when anything is an error.
+    if "--check" in sys.argv[1:]:
+        from meshcore_weather.cli_check import main as check_main
+        return check_main([a for a in sys.argv[1:] if a != "--check"])
     logging.basicConfig(
         level=getattr(logging, settings.log_level.upper()),
         format="%(asctime)s [%(levelname)s] %(name)s: %(message)s",

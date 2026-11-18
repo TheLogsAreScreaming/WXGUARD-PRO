@@ -1,0 +1,48 @@
+WGUS74 KLUB 142224
+FFSLUB
+
+Flash Flood Statement
+National Weather Service Lubbock TX
+524 PM CDT Wed Oct 14 2026
+
+TXC107-125-169-263-150015-
+/O.CON.KLUB.FF.W.0071.000000T0000Z-261015T0015Z/
+/00000.0.ER.000000T0000Z.000000T0000Z.000000T0000Z.OO/
+Crosby TX-Dickens TX-Garza TX-Kent TX-
+524 PM CDT Wed Oct 14 2026
+
+...FLASH FLOOD WARNING REMAINS IN EFFECT UNTIL 715 PM CDT THIS
+EVENING FOR SOUTHEASTERN CROSBY, SOUTHWESTERN DICKENS, NORTHEASTERN
+GARZA AND NORTHWESTERN KENT COUNTIES...
+
+At 524 PM CDT, Doppler radar indicated thunderstorms producing heavy
+rain across the warned area. Between 2 and 4 inches of rain have
+fallen. Additional rainfall amounts of 1 to 2 inches are possible in
+the warned area. Flash flooding is ongoing or expected to begin
+shortly.
+
+HAZARD...Flash flooding caused by thunderstorms.
+
+SOURCE...Radar indicated.
+
+IMPACT...Flash flooding of small creeks and streams, urban areas,
+         highways, streets and underpasses as well as other poor
+         drainage and low-lying areas.
+
+Some locations that will experience flash flooding include...
+  White River Lake and Kalgary.
+
+PRECAUTIONARY/PREPAREDNESS ACTIONS...
+
+Turn around, don't drown when encountering flooded roads. Most flood
+deaths occur in vehicles.
+
+&&
+
+LAT...LON 3328 10132 3359 10132 3360 10101 3326 10101
+
+FLASH FLOOD...RADAR INDICATED
+
+$$
+
+DWK

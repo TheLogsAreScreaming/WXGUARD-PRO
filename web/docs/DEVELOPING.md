@@ -125,7 +125,7 @@ calling it "USA/Canada" would hide the failure the screen exists to show.
 
 ## Radar
 
-A place page's Radar card (revision 11, `../../DigitainoMesh/docs/MESHWX_REV11.md` §3) draws one
+A place page's Radar card (the screen spec's §18.1, `docs/MESHWX_UI.md` in the app repository) draws one
 radar tile: a 2° square of the earth as a 32 × 32 grid of cells, each the strongest echo in it,
 cut from the Weather Service mosaics the bot's dish already receives. One tile is one packet, it
 is only ever sent when somebody asks, and the tiles sit on a fixed lattice so a picture the radio
@@ -136,14 +136,12 @@ alerts over them as outlines so neither hides the other, a Light / Moderate / He
 Local / Regional / Wide control that asks for the same place at zoom 0, 1 or 2. Cells a partial
 picture does not reach are hatched and never drawn as dry ground.
 
-Revision 13 (`../../DigitainoMesh/docs/MESHWX_REV13.md`) adds the last hour to that screen.
-Under the map, for whatever width is on screen, the loop: Play / Pause from two frames (0.8 s each,
+The screen also plays the last hour (the screen spec's §18.5). Under the map, for whatever width is on screen, the loop: Play / Pause from two frames (0.8 s each,
 the newest 2 s, never by itself), "Ask for the last hour" (`>radar … loop HHMM …`, up to five
 packets) while it has fewer than five. `radarTiles` holds frames, one per square and picture. The
 screen's decisions are in `radarScreenModel` (`src/ui/radio/WeatherRadarView.js`), tested in
-`test/RadarScreenView.test.js`. A detail level (zoom −1, wire type 12) was built in the first
-version of revision 13 and removed before release; a state that version saved loads with its
-detail tiles left behind.
+`test/RadarScreenView.test.js`. A saved state that holds tiles off the wire lattice (zoom −1)
+loads with them left behind.
 
 `?link=demo` replays three real Austin tiles from the squall line of 20 September 2026 — the
 echoes sit in the north-west of the Local tile, which is where Dallas is — and `?open=radar`

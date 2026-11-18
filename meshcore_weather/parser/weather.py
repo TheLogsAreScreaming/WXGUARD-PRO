@@ -24,20 +24,50 @@ from meshcore_weather.protocol import v5
 
 logger = logging.getLogger(__name__)
 
-#: EMWIN source name -> v5 source constant (spec 2.2.1, revision 7).
+#: EMWIN source name -> v5 source constant (spec 2.3, revision 7).
 _V5_SOURCE = {"sdr": v5.SOURCE_GOES, "internet": v5.SOURCE_INTERNET}
 
-def _expand_zone_ranges(text: str) -> set[str]:
-    """Expand NWS zone range notation like 'TXZ021>044' into individual zones.
+# One token of a UGC line, between the dashes: "TXZ171", "TXZ171>173", or a
+# bare "183>194" that takes its state and kind from the token before it.
+_UGC_TOKEN_RE = re.compile(r"(?:([A-Z]{2}[ZC]))?(\d{3})(?:>(\d{3}))?")
+# The line ends with the expiry, "-170100-": six digits that are a time, not
+# two zones.
+_UGC_EXPIRY_RE = re.compile(r"\d{6}")
 
-    Searches the first 25 lines of text for zone codes and ranges.
+
+def _expand_zone_ranges(text: str) -> set[str]:
+    """Expand NWS UGC notation like 'TXZ021>044' into individual zones.
+
+    Searches the first 25 lines of text for zone and county codes. A UGC line
+    names the state and kind once and then runs on in bare numbers and
+    ranges ("TXZ171>173-183>194-202>209-217>225-228-170100-"), so the prefix
+    carries from token to token until a new one is named or the line ends in
+    its expiry. Only the first range used to be expanded, which left Travis
+    County (TXZ192, inside "183>194") out of every compact wind advisory.
     """
     zones: set[str] = set()
+    prefix: str | None = None
     for line in text.splitlines()[:25]:
         s = line.strip()
-        # Match explicit zones and ranges: "TXZ021>044" or "TXZ192"
-        for m in re.finditer(r"([A-Z]{2}Z)(\d{3})(?:>(\d{3}))?", s):
-            prefix = m.group(1)
+        if not s:
+            prefix = None
+            continue
+        # A line wrapped after a dash continues the one before it, so the
+        # prefix is kept; anything that is not a UGC token ends the run.
+        for token in s.split("-"):
+            if not token:
+                continue
+            if _UGC_EXPIRY_RE.fullmatch(token):
+                prefix = None
+                break
+            m = _UGC_TOKEN_RE.fullmatch(token)
+            if not m:
+                prefix = None
+                continue
+            if m.group(1):
+                prefix = m.group(1)
+            if prefix is None:
+                continue
             start = int(m.group(2))
             end = int(m.group(3)) if m.group(3) else start
             for n in range(start, end + 1):
@@ -99,6 +129,11 @@ def parse_vtec(text: str) -> dict | None:
 #                                                          ^^^^^^^^
 EMWIN_ID_RE = re.compile(r"-([A-Z0-9]{8})\.TXT$", re.IGNORECASE)
 
+# The first line of a METAR in a collective: a four-character station (digits
+# allowed: KT82, K11R), an optional COR, then the DDHHMMZ time group. The same
+# shape encoders.metar_observed_at reads the time from.
+_METAR_LINE_RE = re.compile(r"^[A-Z0-9]{4}\s+(?:COR\s+)?\d{6}Z")
+
 # Timestamp from EMWIN filename (5th underscore-delimited field)
 EMWIN_TS_RE = re.compile(r"_(\d{14})_")
 
@@ -115,7 +150,7 @@ class EMWINProduct:
     timestamp: datetime
     raw_text: str
     # How the bot got this product: "sdr" off its own GOES dish, "internet"
-    # from NOAA, "" when the source did not say (spec 2.2.1, revision 7).
+    # from NOAA, "" when the source did not say (spec 2.3, revision 7).
     source: str = ""
 
 
@@ -199,7 +234,7 @@ class WeatherStore:
             source=str(raw.get("source") or ""),
         )
 
-    # -- Where the products came from (spec 2.2.1, revision 7) --
+    # -- Where the products came from (spec 2.3, revision 7) --
 
     @staticmethod
     def product_source(prod) -> int:
@@ -360,20 +395,44 @@ class WeatherStore:
 
 
     def _find_metar_raw(self, station: str) -> tuple[str, datetime] | None:
-        """Find the newest raw METAR string for a specific station."""
+        """Find the newest raw METAR string for a specific station.
+
+        A collective wraps a long report at about 69 columns and indents the
+        rest ("K2G4 170055Z ... OVC060" / "     10/09 A2995 RMK AO2="), so a
+        report is every line from the station's up to the one ending in "=",
+        joined; the first line alone has no temperature in some 400 reports a
+        day. Stations with digits (KT82, K11R, K3T5) and corrected reports
+        ("KAUS COR 170153Z") are reports too, the same shapes encoders.py
+        reads a time from.
+        """
         if not station:
             return None
-        best: tuple[str, datetime] | None = None
+        head = station + " "
         for prod in sorted(self._products.values(), key=lambda p: p.timestamp, reverse=True):
             if prod.product_type != "SAH" and "METAR" not in prod.raw_text[:200]:
                 continue
-            for line in prod.raw_text.splitlines():
+            lines = prod.raw_text.splitlines()
+            for i, line in enumerate(lines):
                 stripped = line.strip()
-                if stripped.startswith(station) and re.match(r"^[A-Z]{4}\s+\d{6}Z", stripped):
-                    if best is None or prod.timestamp > best[1]:
-                        best = (stripped, prod.timestamp)
-                    break
-        return best
+                if not stripped.startswith(head) or not _METAR_LINE_RE.match(stripped):
+                    continue
+                report = stripped
+                # The feed's "\r\r\n" line ends leave a blank line between
+                # every two lines, so blanks are skipped; a line that is not
+                # indented is the next station.
+                for nxt in lines[i + 1:]:
+                    if report.endswith("="):
+                        break
+                    if not nxt.strip():
+                        continue
+                    if not nxt[:1].isspace():
+                        break
+                    report += " " + nxt.strip()
+                # Products are walked newest first, so the first one holding
+                # the station is its newest: no need to read the rest (the
+                # NWS METAR feed's files hold thousands of reports each).
+                return report.rstrip("="), prod.timestamp
+        return None
 
 
     def _parse_zfp_zone(self, text: str, zone: str) -> str:

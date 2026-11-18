@@ -20,15 +20,47 @@ PRODUCT_TYPES = {
     "observations",   # one batched packet of the coverage stations' current conditions
     "forecast",       # 7-day point forecast for a place or PFM point
     "coverage",       # what this bot covers: centre, radius, NWS offices, zone runs
+    "radar",          # the radar tile over the coverage, while there is precipitation in it
 }
 
 # Location types: how the job's `location_id` is read.
 LOCATION_TYPES = {
-    "coverage",    # the operator's coverage area (warnings, digest, observations, forecast at the home point)
+    "coverage",    # the operator's coverage area (warnings, digest, observations, forecast at the home point, radar)
     "city",        # a place name resolved by the bot, e.g. "Austin TX" (forecast)
     "pfm_point",   # index into client_data/pfm_points.json (forecast)
     "station",     # 4-letter ICAO (observations, one station)
 }
+
+
+# The five broadcasts every MeshWX app expects (spec §15). An operator can turn
+# one off or change how often it runs, never delete it or make it send
+# something else: an app relies on each of them.
+BUILTIN_IDS = ("warnings", "digest", "observations", "forecast", "coverage")
+
+# How often each product may run, in minutes: the choices the portal offers,
+# and the one a new job starts with. Warnings are sent when they change; their
+# interval is how often the bot looks, so it stays short.
+INTERVAL_CHOICES = {
+    "warnings": (1, 2, 5),
+    "digest": (60, 120, 180, 360, 720),
+    "observations": (30, 60, 120, 180),
+    "forecast": (180, 360, 720, 1440),
+    "coverage": (60, 180, 360, 720, 1440),
+    # A new radar picture comes every 15 minutes: at most one picture per interval.
+    "radar": (15, 30, 60),
+}
+DEFAULT_INTERVAL = {"warnings": 2, "digest": 180, "observations": 60, "forecast": 360, "coverage": 180,
+                    "radar": 15}
+
+# Radar's `min_level`: the weakest precipitation that counts (spec 13.1 levels).
+RADAR_LEVELS = {1: "Any precipitation", 2: "Moderate or heavier precipitation", 3: "Heavy precipitation"}
+
+
+def is_builtin(job: "BroadcastJob") -> bool:
+    """One of the five built-in broadcasts. The home forecast counts however
+    its id was written (a bot bootstrapped before 2026-10-17 named it after
+    its city)."""
+    return job.id in BUILTIN_IDS or (job.product == "forecast" and job.location_id.strip().lower() == "home")
 
 
 _ID_PATTERN = re.compile(r"^[a-z0-9_-]+$")
@@ -54,6 +86,9 @@ class BroadcastJob(BaseModel):
         ..., gt=0, description="How often this job runs, in minutes"
     )
     enabled: bool = Field(True, description="If False, scheduler skips this job")
+    # Radar only. None: any precipitation, within the coverage radius.
+    min_level: int | None = Field(None, ge=1, le=3, description="Radar: weakest level that counts, 1-3")
+    within_km: int | None = Field(None, gt=0, le=1000, description="Radar: how far from home, in km")
 
     @field_validator("id")
     @classmethod

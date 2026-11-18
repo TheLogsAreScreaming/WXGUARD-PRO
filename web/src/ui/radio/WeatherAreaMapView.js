@@ -38,7 +38,7 @@ import { WeatherAreaPickerScreen } from './WeatherAreaPickerView.js'
 // MARK: - Level
 
 /**
- * How much of the weather the next map should carry (spec §7C). *What* it covers is the area
+ * How much of the weather the next map should carry (spec §12). *What* it covers is the area
  * selection; this is only how far down the severity list the bot should go.
  *
  * Not what a held part covers — a part says that itself (`Part.includesAdvisories`), and the two
@@ -92,7 +92,7 @@ export const WeatherAreaMapCopy = Object.freeze({
     }
     const codes = WeatherAreaMapCopy.scopeCodes(part, { states })
     // Scoped, and the packet carrying the scope never arrived. Its entries are real and are
-    // drawn; which states it was asked for is not in what came (spec revision 10, §1.2).
+    // drawn; which states it was asked for is not in what came (spec §12.3).
     if (codes == null || codes.length === 0) return t('weather.areaMap.partStatesUnknown')
     return WeatherAreaMapCopy.stateNames(codes)
   },
@@ -127,7 +127,7 @@ export const WeatherAreaMapCopy = Object.freeze({
 
   /**
    * "Map as of 8:02 PM · 3 h old" for the newest part: the one line the alerts list's map row
-   * has room for. The build time is the radio's own (spec §7C), never when this phone happened
+   * has room for. The build time is the radio's own (spec §12), never when this phone happened
    * to hear the packets.
    */
   pictureLine(picture, words) {
@@ -418,8 +418,9 @@ export function WeatherAreaMapScreen({ app, page }) {
             askable
               ? Line(WeatherAreaMapCopy.cost(model?.areaSweepCost?.({ pageID, includesAdvisories }) ?? 0))
               : null,
-            AskButton({ app, page, title: WeatherAreaMapCopy.askTitle(selection), request, showsFootnotes: true }),
-            picture.parts.length > 0 && askable ? Line(t('weather.areaMap.tapHint', page?.sourceName ?? '')) : null)),
+            // No tap hint under the ask: there is no shaded area here to tap. It lives on the map
+            // itself, the one place a tap does something (docs/MESHWX_UI.md §3.1 U-54).
+            AskButton({ app, page, title: WeatherAreaMapCopy.askTitle(selection), request, showsFootnotes: true }))),
 
         Card({ key: 'source' },
           h('div', { class: 'status-line' },
@@ -532,7 +533,7 @@ export function WeatherAreaListScreen({ app, page, group }) {
               app, page, area: { ugc: code, event: group.event, part: group.partOf?.(code) ?? 0 },
             })),
           }))),
-        h('p', { class: 'list__note' }, t('weather.areaMap.tapHint', page?.sourceName ?? '')),
+        // No tap hint in the footer: a list has no shaded area to tap (§3.1 U-54).
         PendingBar({ app, requestsOnScreen: [] }),
       )
     },

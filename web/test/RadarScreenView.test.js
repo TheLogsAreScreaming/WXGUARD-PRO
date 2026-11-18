@@ -1,4 +1,4 @@
-// The radar screen's own decisions (revision 13 §3), without a DOM.
+// The radar screen's own decisions (docs/MESHWX_UI.md §18.5), without a DOM.
 //
 // `WeatherRadarView` is a view and has no Swift test to port; the rules it adds on top of the
 // screen layer — the width control, the loop row, which frame is on screen and how long it stays

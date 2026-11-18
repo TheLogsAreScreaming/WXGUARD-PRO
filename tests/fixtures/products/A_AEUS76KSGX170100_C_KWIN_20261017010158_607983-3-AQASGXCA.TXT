@@ -1,0 +1,55 @@
+AEUS76 KSGX 170100
+AQASGX
+
+Air Quality Alert Message
+Relayed by National Weather Service San Diego, CA
+600 PM PDT Fri Oct 16 2026
+
+CAZ552-554-180100-
+Orange County Coastal Areas-Orange County Inland Areas-
+Including the cities of Huntington Beach, Costa Mesa, Newport Beach,
+Laguna Beach, San Clemente, Santa Ana, Anaheim, Garden Grove, 
+Irvine, Orange, Fullerton, and Mission Viejo
+600 PM PDT Fri Oct 16 2026
+
+...AIR QUALITY ALERT FOR HARMFUL FINE PARTICLE POLLUTION LEVELS DUE 
+TO WILDFIRE SMOKE...
+
+* WHAT...The South Coast AQMD has issued an air quality alert due to
+increased fine particle pollution from wildfire smoke.
+Visit https://www.aqmd.gov/alertinfo to check current and forecasted
+air quality levels.
+
+* WHERE...in the areas of San Clemente, Dana Point, San Juan
+  Capistrano, and Laguna Niguel. Levels of particle pollution can 
+  vary by time and location depending on fire activity and local 
+  weather conditions.
+
+* WHEN...from 4 PM Friday to 10 AM Saturday. 
+
+* IMPACTS...Particles in wildfire smoke can get deep into the lungs 
+and cause serious health problems such as heart attacks, strokes, 
+asthma attacks, and difficulty breathing. Everyone can be affected, 
+but people with lung or heart disease, older adults, people who are 
+pregnant, children, and those who spend a lot of time outdoors are 
+at greater risk.
+
+PRECAUTIONARY/PREPAREDNESS ACTIONS... 
+
+To protect your health, if you smell or see smoke:  
+
+    * Remain indoors with windows and doors closed  
+    * Avoid intense outdoor physical activity  
+    * Run your air conditioner and/or an air purifier  
+    * If you must be outdoors, keep the time brief and wear a well-
+      fitting N-95 mask 
+    * Do not use whole house fans or swamp coolers that bring in 
+      outside air if you have other methods to stay cool 
+    * Avoid other sources of pollution such as fireplaces, candles, 
+      incense, grilling, and gasoline-powered lawn and garden 
+      equipment
+
+For the latest air quality forecasts and information, visit the 
+website at aqmd.gov.
+
+$$

@@ -106,7 +106,7 @@ export const WeatherAlertNotificationRules = Object.freeze({
   postRetention: 6 * 60 * 60,
 
   /**
-   * `wx-4C7A-SV.W.EWX.42@zip:78701`: the bot, the identity as the bot itself spells it (spec §8.2),
+   * `wx-4C7A-SV.W.EWX.42@zip:78701`: the bot, the identity as the bot itself spells it (spec §14),
    * and the place it was posted for — one notification per warning per watched place. The bot is
    * the one that delivered the copy first; another bot's copy of the same warning updates this
    * identifier instead of posting its own.

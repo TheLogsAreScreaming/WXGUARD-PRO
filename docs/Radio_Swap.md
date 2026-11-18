@@ -25,13 +25,14 @@ The bot therefore keeps a **node profile** in `data/node_profile.json`
 | contacts (people only, newest 200) | contact table | `add_contact` each |
 
 Channels are not in the profile: the bot creates `#meshwx` on any node
-that lacks it, and MeshCore derives a hashtag channel's key from its name,
+that lacks it (and the status channel, `MCW_STATUS_CHANNEL`, when one is
+set), and MeshCore derives a hashtag channel's key from its name,
 so the new radio gets the identical key on its own.
 
 When a radio answers on the port with a key that is not the profile's,
 nothing is written to it. The bot connects, holds its adverts (so phones
 do not learn a stranger's key under the bot's name) and shows the radio
-under Radio › Hardware as "Different radio" with two choices:
+under Radio › Hardware and swap as "Different radio" with two choices:
 
 - **Adopt**: write the profile onto it (key, name, position, LoRa
   settings, TX power, path hash size, contacts), reboot it, reconnect and check that the
@@ -41,7 +42,7 @@ under Radio › Hardware as "Different radio" with two choices:
   identity and save it as the profile. People re-add the bot from its
   next advert.
 
-`MCW_RADIO_ADOPT` (System › Settings, "Replacement radio"):
+`MCW_RADIO_ADOPT` (Settings › Radio link, "Replacement radio"):
 
 - `manual` (default): ask first, as above.
 - `auto`: adopt on the first connect without asking. Two failed attempts

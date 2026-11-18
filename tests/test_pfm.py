@@ -425,3 +425,26 @@ def test_date_row_glued_to_previous_row_is_repaired():
         p = [x for x in pts if x.name.startswith("Austin Camp Mabry")][0]
         return [(d.local_date.isoformat(), d.high_f, d.low_f) for d in downsample_to_daily(p)][:6]
     assert mabry(glued) == mabry(raw)
+
+
+def test_min_max_row_glued_to_the_utc_header_is_repaired():
+    """JKL PFM over the satellite, 2026-10-17 (and 45 of 1,722 PFMs in three
+    days, SJT and MAF among them): the 6-hourly Min/Max row arrived glued to
+    the UTC header ("...06 12 18 00Min/Max   34   67 ..."), which read as a
+    UTC hour of 34 and lost the whole point. Real file, Jenny Wiley State
+    Park (KYZ110)."""
+    from pathlib import Path
+    from datetime import date
+    from meshcore_weather.parser.pfm import parse_pfm, downsample_to_daily
+    raw = (Path(__file__).parent / "fixtures" / "products"
+           / "A_FOUS53KJKL171157_C_KWIN_20261017115708_639675-3-PFMJKLKY.TXT").read_bytes().decode("utf-8", "replace")
+    assert "18 00Min/Max" in raw
+    pts = parse_pfm(raw)
+    assert len(pts) == 71                               # every point in the product, not 70
+    jenny = [p for p in pts if p.zone == "KYZ110"][0]
+    assert jenny.name.startswith("JENNY WILEY STATE PARK")
+    six = [s for s in jenny.slots if s.interval_hours == 6]
+    assert [s.minmax_f for s in six if s.minmax_f is not None] == [34, 67, 41, 69, 43, 70, 45, 70]
+    days = [(d.local_date, d.high_f, d.low_f) for d in downsample_to_daily(jenny)]
+    assert days[3] == (date(2026, 10, 20), 67, 41)        # from the repaired 6-hourly table
+    assert days[0] == (date(2026, 10, 17), 54, 35)        # the 3-hourly table was never in doubt

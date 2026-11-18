@@ -48,7 +48,7 @@ export function NarrativeBody(assembly, { key = 'narrative' } = {}) {
 
 /**
  * The Weather Service products a bot sends on request, keyed by the text subject the wire
- * carries (spec §8.1), which is what a screen is opened with.
+ * carries (spec §8), which is what a screen is opened with.
  */
 export const WeatherReportProduct = Object.freeze({
   bySubject: Object.freeze({
@@ -174,7 +174,7 @@ export function WeatherReportScreen({ app, page, subject }) {
             : null,
           h('div', { class: 'ask-block' },
             // A hole in the reply on screen, and a way to fill it: the bot keeps the bytes of its
-            // last eight answers for ten minutes (spec §7C, revision 10), so a chunk the air ate
+            // last eight answers for ten minutes (spec §12, revision 10), so a chunk the air ate
             // costs one packet instead of the whole report. Above the ordinary ask because it is
             // the cheaper of the two and answers the same question.
             PartsOffer({ app, page, assembly: choice?.item?.assembly ?? null }),
@@ -190,7 +190,7 @@ export function WeatherReportScreen({ app, page, subject }) {
           },
           NarrativeBody(choice.item.assembly),
           // Where the bot got the product, and whether it had to drop its tail (spec §2.2 and
-          // §8.1, revision 7). Provenance, not a warning: a radio that has said neither leaves
+          // §8, revision 7). Provenance, not a warning: a radio that has said neither leaves
           // the card exactly as it was.
           Line(words.reportFootnote(choice.item.assembly.source, choice.item.assembly.wasCut), { key: 'footnote' }))
           : Card({ key: 'empty' }, Line(t('weather.reports.nothingYet'))),

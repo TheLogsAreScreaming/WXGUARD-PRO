@@ -7,9 +7,9 @@ call each other correctly without either author reading the other's code. When
 a rule below is awkward, follow it anyway and leave a note; do not invent a
 local convention.
 
-Source of truth, in this order: the wire spec (`docs/MeshWX_v5_Spec.md`), the
-test vectors (`docs/meshwx_v5_vectors.json`), the iOS screen spec
-(`DigitainoMesh/docs/MESHWX_UI.md`, `docs/MESHWX.md`), then the Swift source.
+Source of truth, in this order: the wire spec (`docs/MeshWX_v5_Spec.md`, whose Part 2 is the
+client rules both clients follow), the test vectors (`docs/meshwx_v5_vectors.json`), the iOS
+screen spec (`DigitainoMesh/docs/MESHWX_UI.md`, `docs/MESHWX.md`), then the Swift source.
 
 ## 1. Runtime
 

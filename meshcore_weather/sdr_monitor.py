@@ -1,5 +1,6 @@
 """Turn the goestools dashboard's numbers into log lines for the console,
-and into the `sat` reply.
+into the `sat` reply, and (with MCW_STATUS_CHANNEL set) into the status
+channel's lines, which every poll hands to status_channel.StatusReporter.
 
 Polls the dashboard every few seconds and logs (under the "satellite"
 category) only what an operator would want to see scroll by: lock gained or
@@ -26,13 +27,19 @@ from meshcore_weather.config import settings
 logger = logging.getLogger("meshcore_weather.sdr")
 
 POLL_S = 10
+NOTES_S = 60          # the operator's notices (the dashboard's /api/notes), for `status`
 STALE_S = 120          # an older sample is not "now"
 WINDOW_S = 60
 
 
 class SdrMonitor:
-    def __init__(self, url: str | None = None):
+    def __init__(self, url: str | None = None, status=None, feed=None):
         self.url = (url or settings.sdr_dashboard_url).rstrip("/")
+        # The status channel (status_channel.StatusReporter) is told what every
+        # poll found, with the EMWIN source for the backup and lag conditions.
+        # Without one nothing goes on the air from here.
+        self.status = status
+        self.feed = feed
         self._task: asyncio.Task | None = None
         self._locked: bool | None = None
         self._services: dict = {}
@@ -42,6 +49,8 @@ class SdrMonitor:
         self._minute_start: float | None = None
         self.last_state: dict | None = None
         self.last_at: float | None = None
+        self.notes: list[dict] = []        # the operator's notices up, as the dashboard last said
+        self._notes_at = 0.0
 
     def start(self) -> None:
         self._task = asyncio.create_task(self._loop())
@@ -62,10 +71,13 @@ class SdrMonitor:
 
     async def poll(self, client: httpx.AsyncClient) -> None:
         """One dashboard sample: the loop's tick, or the CLI's on demand."""
+        now = time.time()
+        state = None
         try:
             r = await client.get(self.url + "/api/state")
             r.raise_for_status()
-            self.observe(r.json())
+            state = r.json()
+            self.observe(state, now)
             if self._reachable is False:
                 logger.info("receiver dashboard reachable again at %s", self.url)
             self._reachable = True
@@ -73,6 +85,19 @@ class SdrMonitor:
             if self._reachable is not False:
                 logger.warning("receiver dashboard unreachable (%s): %s", self.url, e)
             self._reachable = False
+        if self._reachable and now - self._notes_at >= NOTES_S:
+            self._notes_at = now
+            try:
+                r = await client.get(self.url + "/api/notes")
+                r.raise_for_status()
+                self.notes = list(r.json().get("up") or [])
+            except Exception as e:      # an older dashboard has none; the last ones known stand
+                logger.debug("receiver dashboard notes: %s", e)
+        if self.status is not None:
+            try:
+                await self.status.tick(now, state, self._reachable is True, self.feed)
+            except Exception:
+                logger.exception("status channel")
 
     def observe(self, state: dict, now: float | None = None) -> None:
         """Feed one dashboard sample; emits log lines on changes."""
@@ -107,9 +132,10 @@ class SdrMonitor:
             self._minute_vit = []
             self._minute_start = now
 
-    def report(self, now: float | None = None, emwin_mtime: float | None = None) -> str:
+    def report(self, now: float | None = None, emwin_mtime: float | None = None,
+               lag_min: int | None = None, brief: bool = False) -> str:
         """The `sat` line from the last sample. No I/O."""
-        return receiver_line(self.last_state, self.last_at, now or time.time(), emwin_mtime)
+        return receiver_line(self.last_state, self.last_at, now or time.time(), emwin_mtime, lag_min, brief)
 
 
 def quality(vit: int, drop_pct: float) -> str:
@@ -135,19 +161,32 @@ def _ago(s: float) -> str:
     return f"{h}h{m:02d}m" if h < 48 else f"{h // 24}d{h % 24}h"
 
 
+def _behind(minutes: int) -> str:
+    return f"{minutes}m" if minutes < 120 else f"{round(minutes / 60)}h"
+
+
 def receiver_line(state: dict | None, sampled_at: float | None, now: float,
-                  emwin_mtime: float | None = None) -> str:
+                  emwin_mtime: float | None = None, lag_min: int | None = None,
+                  brief: bool = False) -> str:
     """Lock, signal over the last minute, age of the newest EMWIN file.
     `emwin_mtime` is the bot's own newest file; the sample's counts only while
-    the sample is fresh. A stale sample says so, never passes as current."""
+    the sample is fresh. A stale sample says so, never passes as current.
+    `lag_min` is how far behind the uplink is running (SDRSource.feed_lag_min):
+    a fresh file is no comfort when every product in it is hours old.
+    `brief` leaves out the packet count, for a reply that must fit one message."""
     state = state or {}
     fresh = sampled_at is not None and now - sampled_at <= STALE_S
     off = sampled_at - float(state.get("t") or sampled_at) if fresh else 0.0   # dashboard clock -> ours
     newest = [emwin_mtime] if emwin_mtime else []
-    latest = (state.get("status") or {}).get("latest_emwin") or []
+    # The dashboard tags what the internet backup wrote "net"; only the
+    # dish's own files ("sat", or untagged from an older dashboard) count.
+    latest = [e for e in (state.get("status") or {}).get("latest_emwin") or []
+              if (e.get("src") or "sat") == "sat"]
     if fresh and latest and latest[0].get("mtime"):
         newest.append(latest[0]["mtime"] + off)
     emwin = f"newest EMWIN {_ago(now - max(newest))} ago" if newest else "no EMWIN file yet"
+    if lag_min is not None and lag_min >= 30:
+        emwin += f", products ~{_behind(lag_min)} behind"
 
     if sampled_at is None:
         return f"GOES receiver not reporting (no dashboard reading), {emwin}"
@@ -179,7 +218,8 @@ def receiver_line(state: dict | None, sampled_at: float | None, now: float,
         parts.append("no packets last min")
     else:
         parts.append(f"signal {quality(vit, 100 * drops / frames)} (vit {vit})")
-        parts.append(f"dropped {drops} of {frames} packets last min")
+        if not brief:
+            parts.append(f"dropped {drops} of {frames} packets last min")
     proc = services.get("goesproc")
     if proc and proc != "active":
         parts.append(f"goesproc {proc}")

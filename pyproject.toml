@@ -18,6 +18,11 @@ dependencies = [
     # pyIEM is the canonical NWS text product parser (VTEC, UGC, polygons).
     # We use it with legacy_dict UGCProvider for offline operation — no DB.
     "pyIEM>=1.26",
+    # pyIEM imports psycopg, which needs libpq. The binary wheel carries its
+    # own (linux aarch64 and x86_64, macOS arm64), so a bare-metal install
+    # needs no `apt install libpq5`. No wheel exists for 32-bit ARM: run a
+    # 64-bit OS.
+    "psycopg[binary]>=3.1",
     # pytz + tzdata are required for pyIEM's timezone resolution on slim
     # Docker images. Without them, every NWS product from a timezone that
     # uses legacy aliases (US/Central, US/Eastern, etc.) fails to parse
@@ -75,3 +80,6 @@ line-length = 100
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 asyncio_mode = "auto"
+# pytest-asyncio 1.4.1 warns at every run while this is unset. There are no
+# async fixtures, so the scope changes nothing today.
+asyncio_default_fixture_loop_scope = "function"

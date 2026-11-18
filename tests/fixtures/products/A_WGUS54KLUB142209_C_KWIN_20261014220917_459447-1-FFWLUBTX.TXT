@@ -1,0 +1,53 @@
+WGUS54 KLUB 142209
+FFWLUB
+TXC107-125-169-263-150015-
+/O.NEW.KLUB.FF.W.0071.261014T2209Z-261015T0015Z/
+/00000.0.ER.000000T0000Z.000000T0000Z.000000T0000Z.OO/
+
+BULLETIN - EAS ACTIVATION REQUESTED
+Flash Flood Warning
+National Weather Service Lubbock TX
+Issued by National Weather Service Amarillo TX
+509 PM CDT Wed Oct 14 2026
+
+The National Weather Service in Lubbock has issued a
+
+* Flash Flood Warning for...
+  Southeastern Crosby County in northwestern Texas...
+  Southwestern Dickens County in northwestern Texas...
+  Northeastern Garza County in northwestern Texas...
+  Northwestern Kent County in northwestern Texas...
+
+* Until 715 PM CDT.
+
+* At 509 PM CDT, Doppler radar indicated thunderstorms producing
+  heavy rain across the warned area. Between 1 and 3 inches of rain
+  have fallen. Additional rainfall amounts of 1 to 2 inches are
+  possible in the warned area. Flash flooding is ongoing or expected
+  to begin shortly.
+
+  HAZARD...Flash flooding caused by thunderstorms.
+
+  SOURCE...Radar indicated.
+
+  IMPACT...Flash flooding of small creeks and streams, urban areas,
+           highways, streets and underpasses as well as other poor
+           drainage and low-lying areas.
+
+* Some locations that will experience flash flooding include...
+  White River Lake and Kalgary.
+
+PRECAUTIONARY/PREPAREDNESS ACTIONS...
+
+Turn around, don't drown when encountering flooded roads. Most flood
+deaths occur in vehicles.
+
+&&
+
+LAT...LON 3328 10132 3359 10132 3360 10101 3326 10101
+
+FLASH FLOOD...RADAR INDICATED
+
+$$
+
+SAS

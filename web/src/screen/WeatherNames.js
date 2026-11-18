@@ -26,7 +26,7 @@ function words(text) {
  *
  * The tables are NOAA's: station names in capitals with aviation abbreviations
  * ("DRAUGHON-MILLER CNTRL TX RGNL ARPT"), forecast points with a county and state stuck on the end
- * ("Austin Camp Mabry-Travis TX"), census places in capitals. Places follow spec §9.1
+ * ("Austin Camp Mabry-Travis TX"), census places in capitals. Places follow spec §16.2
  * (`MeshWXPlaceNames`), the weather bot's rule; station names add state codes and abbreviations.
  */
 export const WeatherNames = Object.freeze({
@@ -43,7 +43,7 @@ export const WeatherNames = Object.freeze({
     return MeshWXPlaceNames.titleCased(raw, { keepingUpper: STATE_CODES, expanding })
   },
 
-  /** A `places.json` name as shown (spec §9.1): "ADJUNTAS ZONA URBANA" → "Adjuntas". */
+  /** A `places.json` name as shown (spec §16.2): "ADJUNTAS ZONA URBANA" → "Adjuntas". */
   placeName(raw) {
     return MeshWXPlaceNames.placeName(raw)
   },
@@ -123,7 +123,7 @@ export const WeatherNames = Object.freeze({
   },
 
   /**
-   * "ROUND ROCK", "TX" → "Round Rock, TX" (spec §9.1), or — with `near` and `tables` — the label
+   * "ROUND ROCK", "TX" → "Round Rock, TX" (spec §16.2), or — with `near` and `tables` — the label
    * for a coordinate: the nearest place of any size worth naming within 25 km.
    *
    * The two Swift overloads `placeLabel(name:state:)` and `placeLabel(near:tables:)` are one

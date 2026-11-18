@@ -43,7 +43,7 @@ BASEMAP = REPO / "web" / "assets" / "basemap.json"
 BANNER_PX = 24
 LEGEND_PX = 22
 
-# Wire order (spec 7D `product`, protocol.json v5.radar.products).  Append only.
+# Wire order (spec 13 `product`, protocol.json v5.radar.products).  Append only.
 # name, rough centre lon/lat and the range of longitude span to search.
 PRODUCTS = {
     "RADREFUS": ("United States", -96, 37, (45, 75)),

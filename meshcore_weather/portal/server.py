@@ -3,7 +3,10 @@
 Runs alongside the bot as an asyncio task. This is the ADMIN portal
 (radio, receiver, text-bot console, schedule, settings, logs); the goestools
 dashboard on its own port is the public, read-only page. The portal itself
-has no login: keep it on the LAN or put access control at the edge.
+has no login: it binds 127.0.0.1 by default (reach it over an SSH tunnel),
+and it answers only requests whose Host header is a name it was told about
+(localhost, 127.0.0.1, [::1], MCW_PORTAL_ALLOWED_HOSTS), so a web page that
+re-points its own DNS name at 127.0.0.1 (DNS rebinding) cannot drive it.
 """
 
 import asyncio
@@ -18,8 +21,10 @@ from fastapi import FastAPI, Request
 from fastapi.responses import Response
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
+from starlette.middleware.trustedhost import TrustedHostMiddleware
+from starlette.responses import PlainTextResponse
 
-from meshcore_weather.config import settings
+from meshcore_weather.config import portal_allowed_hosts, settings
 from meshcore_weather.portal import logbuf
 
 logger = logging.getLogger(__name__)
@@ -43,11 +48,49 @@ def asset_version() -> str:
     return digest.hexdigest()[:12]
 
 
-def create_app(bot: Any) -> FastAPI:
+def host_of(header: str) -> str:
+    """The host part of a Host header, lower case: 'localhost:8081' ->
+    'localhost', '[::1]:8081' -> '[::1]'. Starlette's own check splits on the
+    first colon and so never matches an IPv6 literal."""
+    header = (header or "").strip().lower()
+    if header.startswith("["):
+        end = header.find("]")
+        return header[:end + 1] if end > 0 else header
+    if header.count(":") > 1:             # a bare IPv6 address, no port
+        return header
+    return header.split(":", 1)[0]
+
+
+class HostCheck(TrustedHostMiddleware):
+    """TrustedHostMiddleware with IPv6 literals understood: a request whose
+    Host is not in the list gets 400 before any route sees it."""
+
+    async def __call__(self, scope, receive, send) -> None:
+        if self.allow_any or scope["type"] not in ("http", "websocket"):
+            await self.app(scope, receive, send)
+            return
+        host = ""
+        for name, value in scope.get("headers") or []:
+            if name == b"host":
+                host = host_of(value.decode("latin-1"))
+                break
+        for pattern in self.allowed_hosts:
+            if host == pattern or (pattern.startswith("*.") and host.endswith(pattern[1:])):
+                await self.app(scope, receive, send)
+                return
+        logger.warning("Portal: refused a request for Host %r (MCW_PORTAL_ALLOWED_HOSTS)", host[:80])
+        await PlainTextResponse("Invalid host header", status_code=400)(scope, receive, send)
+
+
+def create_app(bot: Any, allowed_hosts: list[str] | None = None) -> FastAPI:
     """Create a FastAPI app wired to a running bot instance.
 
     The bot exposes store, radio, emwin, and _broadcaster attributes
     that the routes read from (and occasionally trigger actions on).
+
+    `allowed_hosts`: the Host header values to answer (PortalServer passes
+    config.portal_allowed_hosts()). None leaves the Host unchecked, for an
+    app built in-process by a test client; the server never builds one so.
     """
     app = FastAPI(
         title="Meshcore Weather Portal",
@@ -59,6 +102,9 @@ def create_app(bot: Any) -> FastAPI:
     templates.env.globals["asset_version"] = asset_version()
     app.state.bot = bot
     app.state.templates = templates
+
+    if allowed_hosts is not None:
+        app.add_middleware(HostCheck, allowed_hosts=list(allowed_hosts), www_redirect=False)
 
     # Any state-changing request must carry a header that a cross-site page
     # cannot set without a CORS preflight (which we never answer). This is
@@ -116,9 +162,13 @@ class PortalServer:
         self._server: uvicorn.Server | None = None
         self._task: asyncio.Task | None = None
 
+    def build_app(self) -> FastAPI:
+        """The app the server runs: always with the Host check."""
+        return create_app(self.bot, allowed_hosts=portal_allowed_hosts())
+
     async def start(self) -> None:
         logbuf.install()
-        app = create_app(self.bot)
+        app = self.build_app()
         config = uvicorn.Config(
             app,
             host=settings.portal_host,
@@ -130,10 +180,17 @@ class PortalServer:
         self._server = _Server(config)
         self._task = asyncio.create_task(self._server.serve())
         logger.info(
-            "Portal running at http://%s:%d",
+            "Portal running at http://%s:%d (answers Host: %s)",
             settings.portal_host,
             settings.portal_port,
+            ", ".join(portal_allowed_hosts()),
         )
+        # In a container 0.0.0.0 is the only way in; docker-compose publishes it on 127.0.0.1.
+        if settings.portal_host.strip() in ("0.0.0.0", "::", "[::]") and not Path("/.dockerenv").exists():
+            logger.warning("Portal listens on every interface and has no login: anyone who can reach port %d "
+                           "can drive the radio. Prefer MCW_PORTAL_HOST=127.0.0.1 and an SSH tunnel (in Docker, "
+                           "publish the port on 127.0.0.1); a LAN name or address must also be in "
+                           "MCW_PORTAL_ALLOWED_HOSTS", settings.portal_port)
 
     async def stop(self) -> None:
         if self._server:

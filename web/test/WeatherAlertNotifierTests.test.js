@@ -27,6 +27,7 @@ import {
   WeatherBotState,
   WeatherLastPositionStore,
   WeatherSavedPlacesStore,
+  WeatherStateReducer,
   WeatherStoredWarning,
   identityKey,
   weatherAlertSubscriptions
@@ -302,7 +303,7 @@ describe('Weather alert notifier', () => {
   })
 
   // Revision 12: a warning that has not started says so, from its start until its end, and a
-  // notification never counts down (docs/MESHWX_REV12.md §2).
+  // notification never counts down (docs/MESHWX_UI.md §3.1 U-49).
   it('a warning that has not started is posted from its start until its end', async () => {
     const h = makeHarness({ watch: watchOf([here()]) })
     await deliver(
@@ -533,6 +534,52 @@ describe('Weather alert notifier', () => {
       isBacklog: false
     })
     assert.equal(h.poster.removed.length, 1)
+  })
+
+  // Spec §5, 17 October 2026, end to end through the reducer: WX-AUS answered somebody's
+  // `>w TXC201` for a watched Houston place, and its next digest — which lists only its own area —
+  // used to end the warning and take the notification down with it.
+  it("a list from a bot whose area does not reach the warning leaves its notification standing", async () => {
+    const houston = savedPlace({ label: 'Houston, TX', latitude: 29.76, longitude: -95.37, isWatched: true })
+    const h = makeHarness({ watch: watchOf([houston]) })
+    const square = [[29.81, -95.42], [29.81, -95.32], [29.71, -95.32], [29.71, -95.42]]
+    const message = { ...warning({ vtec: 'SV.W', polygon: square }), office: 51 }
+    let state = WeatherStateReducer.apply(F.coverage({ seq: 1 }), { to: WeatherBotState.make({ botID: F.botID }), receivedAt: h.clock.now }).state
+    state = WeatherStateReducer.apply(message, { to: state, receivedAt: h.clock.now }).state
+    h.states.value[String(F.botID)] = state
+    await h.notifier.apply({
+      botID: F.botID,
+      changes: [{ kind: 'warningStored', value: { event: message.event, office: 51, etn: message.etn }, replacedExisting: false }],
+      isBacklog: false
+    })
+    assert.equal(h.poster.posted.length, 1)
+
+    await h.clock.advance(10 * 60)
+    const applied = WeatherStateReducer.apply(
+      F.digest({ seq: 3, nowMinutes: F.t0Minutes + 10, entries: [] }), { to: state, receivedAt: h.clock.now }
+    )
+    h.states.value[String(F.botID)] = applied.state
+    await h.notifier.apply({ botID: F.botID, changes: applied.changes, isBacklog: false })
+    assert.deepStrictEqual(h.poster.removed, [])
+  })
+
+  it("one bot's list leaves a notification another bot's copy still holds", async () => {
+    const otherBot = 0x1234
+    const h = makeHarness({ watch: watchOf([here()]) })
+    const message = warning({ vtec: 'SV.W' })
+    await deliver(message, h)
+    await deliver(message, h, { botID: otherBot })
+    const identity = { event: message.event, office: message.office, etn: message.etn }
+    const dropped = async (botID) => {
+      delete h.states.value[String(botID)].warnings[identityKey(identity)]
+      await h.notifier.apply({
+        botID, changes: [{ kind: 'digestApplied', missing: [], removed: [identity] }], isBacklog: false
+      })
+    }
+    await dropped(F.botID)
+    assert.deepStrictEqual(h.poster.removed, [], 'the other bot still holds it')
+    await dropped(otherBot)
+    assert.equal(h.poster.removed.length, 1, 'no bot holds it now')
   })
 
   it('a warning only listed in the digest, never received, notifies nothing', async () => {

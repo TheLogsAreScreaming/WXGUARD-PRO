@@ -24,7 +24,7 @@ export function AlertRow({ app, page, item, location = null, onclick = null, key
   const qualifier = words.alertQualifier(item, page?.placeName ?? null)
   const tags = words.tagLine(item.warning)
   const isActive = item.kind?.kind === 'active'
-  // When it applies (spec §10.2, revision 12): a watch that has not begun says so rather than
+  // When it applies (spec §18.2, revision 12): a watch that has not begun says so rather than
   // counting down to an expiry two days out.
   const until = isActive
     ? words.alertWindow({ beginsAt: item.beginsAt ?? null, expiresAt: WeatherAlertItem.expiresAt(item) })

@@ -31,8 +31,8 @@ const other = {
 }
 
 /**
- * The fake radio cannot flood a Request datagram here (spec §7B), so every request in this
- * suite goes out as the DM of §8.2 and the assertions on `transport.sent` still read the send
+ * The fake radio cannot flood a Request datagram here (spec §11), so every request in this
+ * suite goes out as the DM of §14 and the assertions on `transport.sent` still read the send
  * they were written for. The channel path has its own section in `WeatherServiceTests`.
  */
 async function makeHarness() {
@@ -194,6 +194,54 @@ describe('WeatherService answers', () => {
     )
   })
 
+  // `>w <area>` is keyed by the code asked (spec §14): one county's answer is not another's.
+  it('a warning answers a request for the areas it names, and not for any other', async () => {
+    const h = await makeHarness()
+    // The suite's warning names Travis County, TXC453.
+    await h.service.ingest(F.warning({ seq: 1, identity: F.svw42 }))
+    assert.equal(
+      await h.service.send(WeatherRequest.warningsTouching({ ugc: 'TXC453' }), { to: F.bot }), null
+    )
+    assert.equal(
+      await h.service.send(WeatherRequest.warningsTouching({ ugc: 'txc453' }), { to: F.bot }), null
+    )
+    assert.notEqual(
+      await h.service.send(WeatherRequest.warningsTouching({ ugc: 'TXC201' }), { to: F.bot }), null,
+      "a warning for Travis County says nothing about Harris County's"
+    )
+  })
+
+  // The bot may cut a warning's area list to fit it in a packet (spec §3), so the answer to this
+  // phone's own `>w <area>` need not name the area; it still answers it.
+  it('the answer to this phone\'s own area request fills that area, whatever its list names', async () => {
+    const h = await makeHarness()
+    await h.service.send(WeatherRequest.warningsTouching({ ugc: 'TXC209' }), { to: F.bot })
+    await h.clock.advance(2)
+    await h.service.ingest(F.warning({ seq: 1, identity: F.svw43, areas: [] }))
+    assert.equal(F.settlements(h.events).length, 1)
+    await h.clock.advance(30)
+    assert.equal(
+      await h.service.send(WeatherRequest.warningsTouching({ ugc: 'TXC209' }), { to: F.bot }), null
+    )
+  })
+
+  // Spec §5, 17 October 2026: the list speaks for the bot's own area, and with the bot's
+  // complete statement held that is the area its answer to `>w <area>` stands for.
+  it("with the bot's area stated, its list answers area requests inside it and not outside", async () => {
+    const h = await makeHarness()
+    await h.service.ingest(F.coverage({ seq: 1 }))
+    await h.service.ingest(F.digest({ seq: 2, entries: [] }))
+    for (const ugc of ['TXZ192', 'TXC453']) {
+      assert.equal(
+        await h.service.send(WeatherRequest.warningsTouching({ ugc }), { to: F.bot }), null, ugc
+      )
+    }
+    assert.notEqual(
+      await h.service.send(WeatherRequest.warningsTouching({ ugc: 'TXC201' }), { to: F.bot }), null,
+      "Houston is not in WX-AUS's area, so WX-AUS's list is no answer about it"
+    )
+  })
+
   // The list itself is what shows a warning never arrived; asking again is the repair.
   it("warnings requests are sent while the bot's list names a warning this phone lacks", async () => {
     const h = await makeHarness()
@@ -236,7 +284,7 @@ describe('WeatherService answers', () => {
 
   // MARK: - Coverage
 
-  // Spec §7A, §8.2: `>cov` asks a bot what it carries. The statement carries no time of its
+  // Spec §10, §14: `>cov` asks a bot what it carries. The statement carries no time of its
   // own, so the five-minute rule runs from receipt and the answer names nothing it is "as of".
   it('a statement answers the request that asked for it, and fills its slot', async () => {
     const h = await makeHarness()
@@ -277,7 +325,7 @@ describe('WeatherService answers', () => {
     assert.notEqual(await h.service.send(WeatherRequest.forecast({ point: 102 }), { to: F.bot }), null)
   })
 
-  // MARK: - Area sweep (spec §7C)
+  // MARK: - Area sweep (spec §12)
 
   // `>wmap` is answered by the sweep's **first** packet — the other seven are already on the
   // air — and the slot it fills is what stops the next phone spending eight more.
@@ -381,7 +429,7 @@ describe('WeatherService answers', () => {
   })
 
   /**
-   * Spec §7C, revision 10: "A `>part` request is never refused by the app's five-minute 'already
+   * Spec §12, revision 10: "A `>part` request is never refused by the app's five-minute 'already
    * answered' rule." The rule exists so the channel is not asked to rebuild an answer it just
    * sent, and the whole point of `>part` is that this phone did not get it.
    */
@@ -494,7 +542,7 @@ describe('WeatherService answers', () => {
     assert.equal(state.unbundledForecasts['?'].requestedHere, false)
   })
 
-  // Spec §7C: a sweep is cut where the sending bot's own feed runs out.
+  // Spec §12: a sweep is cut where the sending bot's own feed runs out.
   it("another bot's sweep does not answer this bot's map request", async () => {
     const h = await makeHarness()
     await h.service.ingest(F.areaSweep({
@@ -505,7 +553,7 @@ describe('WeatherService answers', () => {
     )
   })
 
-  // MARK: - Radar (spec §7D, revision 11)
+  // MARK: - Radar (spec §13, revision 11)
 
   /**
    * "A Radar message for that tile from the bot asked settles the request whatever its `taken`."
@@ -554,7 +602,7 @@ describe('WeatherService answers', () => {
   })
 
   /**
-   * Spec §7D: the refusal comes back under `x`, not `r`. With both sharing a letter a phone
+   * Spec §13: the refusal comes back under `x`, not `r`. With both sharing a letter a phone
    * waiting for a radar tile and one waiting for rainfall totals would take each other's.
    */
   it('a refusal under x settles the radar request and nothing else', async () => {
@@ -573,7 +621,7 @@ describe('WeatherService answers', () => {
   })
 
   /**
-   * The three reasons a radar refusal carries reach the caller as they arrived (design §3), so a
+   * The three reasons a radar refusal carries reach the caller as they arrived (docs/MESHWX_UI.md §18.3), so a
    * screen can tell "no recent picture for this area", "does not receive radar pictures" and
    * "sent this picture a few minutes ago" apart. The app reads none of them as the others: the
    * second is about the bot for good, and the other two are about this minute.

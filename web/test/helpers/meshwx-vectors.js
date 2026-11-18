@@ -26,7 +26,7 @@ export const vectors = JSON.parse(await readFile(fileURLToPath(VECTOR_FILE), 'ut
 export const fileCount = vectors.length;
 
 /**
- * `request_digest`, the revision 6 Request vector (spec §7B): `>d` to bot `0x041D` from the
+ * `request_digest`, the revision 6 Request vector (spec §11): `>d` to bot `0x041D` from the
  * sender `01 02 03 04 05 06` at `ts` 1789660000 with `seq` 1 — sixteen bytes.
  */
 export const requestDigestHex = '011d0490010203040506600bac6a3e64';

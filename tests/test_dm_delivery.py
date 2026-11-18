@@ -282,7 +282,7 @@ def test_contacts_never_wait_on_each_other_and_one_contacts_replies_keep_their_o
              (9, lambda: w.bot._handle_channel_message("1", "Tommy", "help", 0))], until=120)
     a, b = w.radio.txs(AK), w.radio.txs(BK)
     assert len(b) == 1 and b[0][6] == pytest.approx(5)      # B is answered while A's reply is being tried
-    assert [e[2][:5] for e in a] == ["wx au", "wx au", "metar", "metar", "Weath", "Weath"]
+    assert [e[2][:5] for e in a] == ["wx au", "wx au", "metar", "metar", "help:", "help:"]
     assert [e[6] for e in a] == pytest.approx([2, 8, 14, 20, 26, 32])   # each starts when the one before failed
 
 

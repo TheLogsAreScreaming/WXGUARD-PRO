@@ -59,7 +59,9 @@ _MAX_COLOUR_DISTANCE = 40.0
 #: a different map: the calibration no longer applies.
 _MIN_LINE_MATCH = 0.7
 
-_KWIN_RE = re.compile(r"_C_KWIN_(\d{14})_")
+# The stamp after the center tag: KWIN (EMWIN) or NWSR (the internet fill's
+# copy from radar.weather.gov, stamped with the picture's Last-Modified).
+_KWIN_RE = re.compile(r"_C_(?:KWIN|NWSR)_(\d{14})_")
 _WMO_RE = re.compile(r"^Z_\w{6}\w{4}(\d{2})(\d{2})(\d{2})_")
 
 

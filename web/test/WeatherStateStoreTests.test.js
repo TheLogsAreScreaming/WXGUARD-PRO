@@ -115,7 +115,7 @@ describe('Weather state store', () => {
     assert.equal(decoded.warnings[identityKey(warning)].beginsAt, begins)
   })
 
-  // Spec §7A. A blob written before the bot could state its coverage is still the last picture
+  // Spec §10. A blob written before the bot could state its coverage is still the last picture
   // it sent: the field decodes as absent, which falls back to the station footprint.
   it('a coverage statement round-trips, and a blob from before it decodes with it absent', () => {
     const state = WeatherBotState.make({ botID: 7 })
@@ -134,7 +134,7 @@ describe('Weather state store', () => {
 })
 
 describe('Weather digest margin', () => {
-  // The bot keeps no answer cache (spec §8.2, revision 2): a list is built when it is sent, so
+  // The bot keeps no answer cache (spec §14, revision 2): a list is built when it is sent, so
   // the margin only absorbs the phone's and the bot's clocks disagreeing and the minute `now` is
   // truncated to.
   it('a list built within two minutes of a gap leaves the gap open', () => {

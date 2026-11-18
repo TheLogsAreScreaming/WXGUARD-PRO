@@ -1,4 +1,4 @@
-"""Place labels (spec section 9.1): one rule for every place and town name a
+"""Place labels (spec section 16.2): one rule for every place and town name a
 reply shows, the rule apps implement, so a ZIP or a town reads the same texted
 to the bot as shown in the app."""
 

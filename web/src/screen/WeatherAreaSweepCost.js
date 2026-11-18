@@ -34,7 +34,7 @@ export const WeatherAreaSweepCost = Object.freeze({
    * - **The whole country**: the last national sweep at this level, which is the only honest
    *   figure there is, else 5 (8 with advisories).
    * - **A few states**: `ceil((entries in those states + states) / 36)`, at least 1. The scope
-   *   entries count toward the 36 a bot puts in a packet (spec §7C), which is why the state count
+   *   entries count toward the 36 a bot puts in a packet (spec §12), which is why the state count
    *   is in the numerator — fifteen states cost almost half a packet before any weather does.
    * - **A few states with nothing national held**: one packet per four states, at least one.
    *

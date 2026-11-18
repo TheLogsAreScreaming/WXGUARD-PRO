@@ -3,7 +3,7 @@
 EMWIN carries a national radar picture and fourteen regional ones as GIFs, a
 new one of each every 15 minutes.  `picture` turns one into precipitation
 levels, `tiles` cuts the 32 x 32 tile a phone asked for out of it, and
-`source` finds the newest picture on disk.  Spec section 7D (revision 11).
+`source` finds the newest picture on disk.  Spec section 13 (revision 11).
 
 Nothing here runs until somebody asks: a request decodes one GIF, which is
 cached until a newer one arrives.

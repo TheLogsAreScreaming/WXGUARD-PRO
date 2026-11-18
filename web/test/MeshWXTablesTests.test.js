@@ -1,6 +1,6 @@
 // Port of MC1Services/Tests/MeshWXTests/MeshWXTablesTests.swift
 //
-// The preload bundle (spec §9) and the search rules (spec §11).
+// The preload bundle (spec §16) and the search rules (spec §21).
 //
 // The expected values are read off the kit's own `client_data` files, not off this
 // implementation: if a future bundle renumbers something, these fail loudly instead of agreeing
@@ -19,7 +19,7 @@ describe('MeshWX tables', () => {
 
   test('bundleLoads', () => {
     assert.equal(tables.protocolVersion, 17, 'protocol.json version is 17 for v5.0 revision 13');
-    assert.equal(tables.offices.length, 127, '125 WFOs, then NHC and WNS (spec rev 3 §9)');
+    assert.equal(tables.offices.length, 127, '125 WFOs, then NHC and WNS (spec §16)');
     assert.equal(tables.stations.length, 2237);
     assert.equal(tables.states.length, 78);
     assert.equal(tables.points.length, 1958); // 1873 until revision 10 appended the nine offices the first build missed
@@ -139,7 +139,7 @@ describe('MeshWX tables', () => {
   });
 
   test('placeSearchRanksByDistanceThenPopulation', () => {
-    // Spec §11's own example: Round Rock exists in TX and AZ. Asked from Austin, the one 20
+    // Spec §21's own example: Round Rock exists in TX and AZ. Asked from Austin, the one 20
     // miles up the road has to come first, even though ranking by population alone would also
     // get it right — so the AZ one must be present to prove the search is not just filtering by
     // state.
@@ -189,7 +189,7 @@ describe('MeshWX tables', () => {
   });
 
   /**
-   * Spec §7D, revision 11: the bundle is what says which mosaic a `product` index names and
+   * Spec §13, revision 11: the bundle is what says which mosaic a `product` index names and
    * where the three levels start, because a bot one revision ahead may change either.
    */
   test('theRadarBlockNamesTheProductsAndTheLevels', () => {

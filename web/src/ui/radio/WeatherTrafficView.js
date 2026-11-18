@@ -176,7 +176,7 @@ function signalToNoise(snr) {
 }
 
 /**
- * How far it travelled. `0xFF` is the firmware's flood sentinel, not 255 hops (spec §7B), and a
+ * How far it travelled. `0xFF` is the firmware's flood sentinel, not 255 hops (spec §11), and a
  * flooded datagram is what every request and every broadcast answer is.
  *
  * The rest of the byte is not a count either: bits 7-6 are the hash-size mode and bits 5-0 the

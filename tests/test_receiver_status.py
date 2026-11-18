@@ -82,9 +82,44 @@ async def test_sat_words_help_and_places_that_start_with_them():
         assert await parse_intent(text) == {"command": "sat", "location": ""}
     assert await parse_intent("satellite beach fl") == {"command": "wx", "location": "satellite beach fl"}
     assert await parse_intent("signal mountain tn") == {"command": "wx", "location": "signal mountain tn"}
-    assert "| sat |" in HELP_TEXT and len(HELP_TEXT) <= 147
+    assert ", sat," in HELP_TEXT and len(HELP_TEXT) <= 147
     assert WeatherBot()._process_command("sat", "") == \
         "No satellite receiver on this bot: its EMWIN comes over the internet"
+
+
+@pytest.mark.asyncio
+async def test_status_gives_the_operators_notices_from_the_dashboard_and_the_public_page(monkeypatch):
+    import httpx
+    from meshcore_weather.config import settings
+    for text in ("status", "Status?", "notices", "NOTICE"):
+        assert await parse_intent(text) == {"command": "status", "location": ""}
+    assert await parse_intent("status tx") == {"command": "wx", "location": "status tx"}
+    from meshcore_weather.nlp import is_conversation
+    assert not is_conversation("status", resolve=lambda q: None, states={"TX"})     # a request on the channel too
+    assert ", status," in HELP_TEXT
+    monkeypatch.setattr(settings, "sdr_dashboard_public_url", "https://goes.digitaino.com")
+    notes = [{"id": 2, "t": 1, "t_end": None, "title": "EMWIN is running about two hours late",
+              "detail": "NOAA is working on the link to the uplink site."},
+             {"id": 1, "t": 1, "t_end": 2, "title": "Long over", "detail": ""}]
+
+    def dashboard(request):
+        return httpx.Response(200, json=_sample() if request.url.path == "/api/state" else {"up": notes})
+
+    m = SdrMonitor("http://dash.test")
+    async with httpx.AsyncClient(transport=httpx.MockTransport(dashboard)) as client:
+        await m.poll(client)
+    bot = WeatherBot()
+    bot._sdr_monitor = m
+    assert bot._process_command("status", "") == ("Notice: EMWIN is running about two hours late. goes.digitaino.com; "
+                                                  "NOAA is working on the link to the uplink site.")   # the ended one is left out
+    # A long note: page 1 alone is the headline and where to read more.
+    m.notes = [dict(notes[0], title="Weather data is late because of a NOAA problem, not our station", detail="x " * 300)]
+    first, more = bot.reply_chunk("status", "", "k")
+    assert first.startswith("Notice: Weather data is late because of a NOAA problem, not our station. goes.digitaino.com (1/")
+    assert more
+    m.notes = []
+    assert bot._process_command("status", "") == "No notices from the operator. EMWIN on time. goes.digitaino.com"
+    assert bot._process_command("help", "").endswith(", more. goes.digitaino.com")
 
 
 def test_sdr_source_remembers_its_newest_file(tmp_path):

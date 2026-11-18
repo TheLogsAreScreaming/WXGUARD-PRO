@@ -55,7 +55,7 @@ export class MeshWXDecodeError extends Error {
   }
 
   /**
-   * A Radar tile's quadtree ran out of bits before the grid was complete (spec §7D).
+   * A Radar tile's quadtree ran out of bits before the grid was complete (spec §13).
    *
    * A half-read tree leaves the rest of the grid at level 0 — which on a radar picture reads as
    * "no rain here", the one wrong answer that looks exactly like a right one. `bits` is how far
@@ -66,7 +66,7 @@ export class MeshWXDecodeError extends Error {
   }
 
   /**
-   * A partial Radar tile named rows or columns its own grid does not have (spec §7D).
+   * A partial Radar tile named rows or columns its own grid does not have (spec §13).
    *
    * The one place this decoder refuses a body it could read the bytes of. It has to: every cell
    * outside `bounds` is *unknown*, and bounds that do not describe a run of this grid's rows
@@ -80,7 +80,7 @@ export class MeshWXDecodeError extends Error {
 
 // MARK: - Primitives
 //
-// Little-endian everywhere (spec §2.4), two's complement for signed. Hand-rolled rather than
+// Little-endian everywhere (spec §1.3), two's complement for signed. Hand-rolled rather than
 // DataView because these run on arbitrary offsets into a received buffer and the byte order
 // must be the wire's, not the CPU's.
 
@@ -281,7 +281,7 @@ function decodeCancel(bytes, header) {
     event: bytes[4],
     office: bytes[5],
     etn: u16(bytes, 6),
-    // The whole nibble is the reason; a Cancel never carries a data source (spec §2.2.1).
+    // The whole nibble is the reason; a Cancel never carries a data source (spec §2.3).
     reason: header.flags,
   };
 }
@@ -422,7 +422,7 @@ function decodeForecast(bytes, header) {
   };
 }
 
-// MARK: - Text (type 6, spec §8.1)
+// MARK: - Text (type 6, spec §8)
 
 function decodeText(bytes, header) {
   need(bytes, MeshWXWire.textFixedSize, 'text');
@@ -433,14 +433,14 @@ function decodeText(bytes, header) {
     idx: bytes[6],
     total: bytes[7],
     text: utf8(bytes.subarray(MeshWXWire.textFixedSize)),
-    // Revision 7 (spec §8.1): the bot ran out of packets and dropped the tail. A decoder
+    // Revision 7 (spec §8): the bot ran out of packets and dropped the tail. A decoder
     // written before the flag reads the same chunk it always did, one bit poorer.
     cut: (header.flags & MeshWXWire.flagTextCut) !== 0,
     source: source(header),
   };
 }
 
-// MARK: - Not available (type 7, spec §8.3)
+// MARK: - Not available (type 7, spec §9)
 
 function decodeNotAvailable(bytes, header) {
   need(bytes, MeshWXWire.notAvailableSize, 'not_available');
@@ -452,7 +452,7 @@ function decodeNotAvailable(bytes, header) {
   };
 }
 
-// MARK: - Coverage (type 8, spec §7A)
+// MARK: - Coverage (type 8, spec §10)
 
 function decodeCoverage(bytes, header) {
   need(bytes, MeshWXWire.coverageFixedSize, 'coverage');
@@ -475,7 +475,7 @@ function decodeCoverage(bytes, header) {
   };
 }
 
-// MARK: - Request (type 9, spec §7B)
+// MARK: - Request (type 9, spec §11)
 
 /**
  * Another phone's `>` request, heard because requests are flooded on the channel now.
@@ -499,7 +499,7 @@ function decodeRequest(bytes, header) {
   };
 }
 
-// MARK: - Area sweep (type 10, spec §7C)
+// MARK: - Area sweep (type 10, spec §12)
 
 /**
  * The entries run to the end of the packet: there is no count byte, because a count would cost
@@ -509,7 +509,7 @@ function decodeRequest(bytes, header) {
  * tolerates trailing bytes. A sweep is a picture of the country and a bot a version ahead
  * appending a field to the end must not cost this phone the thirty-seven entries it can read.
  *
- * Revision 10 adds the scope (spec §7C). Two things come out of the same bytes:
+ * Revision 10 adds the scope (spec §12). Two things come out of the same bytes:
  *
  * - `scoped`, from bit 7 of the `total` byte. It is on **every** packet, so a phone that lost
  *   packet 0 still knows it is not looking at the country — which is the whole reason the flag
@@ -517,7 +517,7 @@ function decodeRequest(bytes, header) {
  * - `scope`, the state indices the leading `event = 0` entries name. They are lifted out of
  *   `entries` here and put back, first, by the encoder, so `entries` is **alert entries only**
  *   and nothing downstream has to remember that event 0 is not an event. Only the leading run is
- *   lifted: the bot sorts them before every alert entry (§7C), and stopping at the first alert
+ *   lifted: the bot sorts them before every alert entry (§12), and stopping at the first alert
  *   entry is what makes the re-encode byte-identical for any input, well formed or not.
  */
 function decodeAreaSweep(bytes, header) {
@@ -569,7 +569,7 @@ function decodeAreaSweep(bytes, header) {
   };
 }
 
-// MARK: - Radar (type 11, spec §7D)
+// MARK: - Radar (type 11, spec §13)
 
 /**
  * The cells, as a quadtree read most significant bit first.
@@ -622,7 +622,7 @@ function decodeRadarCells(bytes, offset, size) {
 }
 
 /**
- * One tile of a radar picture (spec §7D, revision 11).
+ * One tile of a radar picture (spec §13, revision 11).
  *
  * The flags nibble carries both shape bits: coarse says the grid is 16 × 16 rather than 32 × 32
  * — the bot's answer to a picture too busy for one packet, never a second packet — and partial

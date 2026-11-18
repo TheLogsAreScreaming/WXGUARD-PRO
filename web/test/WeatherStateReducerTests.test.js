@@ -1,7 +1,7 @@
 // Port of MC1ServicesTests/Weather/WeatherStateReducerTests.swift (docs/PORTING.md).
 //
-// Every rule in spec §2.3 (duplicates, gaps), §3–§5 (warnings, cancel, digest), §6–§7
-// (newest wins) and §8.1 (text reassembly), one test each.
+// Every rule in spec §2.4 (duplicates, gaps), §3–§5 (warnings, cancel, digest), §6–§7
+// (newest wins) and §8 (text reassembly), one test each.
 
 import assert from 'node:assert/strict'
 import { describe, it } from 'node:test'
@@ -99,7 +99,7 @@ describe('WeatherStateReducer', () => {
     assert.equal(stored.receivedAt, F.t0 + 60_000)
   })
 
-  // Spec §3 and §10.5: a warning says when NWS issued it, and that is not when the packet
+  // Spec §3 and §18.1: a warning says when NWS issued it, and that is not when the packet
   // arrived. A replacement carries its own; one that carries none — an older bot — leaves the
   // known time alone, since an identity's issuance never moves.
   it("a warning's issue time is stored, replaced, and never erased by a message without one", () => {
@@ -340,10 +340,10 @@ describe('WeatherStateReducer', () => {
       F.observations({ seq: 1, timestampMinutes: F.t0Minutes, stations: [[202, 88], [860, 84]] }),
       F.t0
     )
-    // A single-station answer for KAUS from a newer batch.
+    // A single-station answer for KAUS from a newer batch, heard when it was made.
     let changes = bot.apply(
       F.observations({ seq: 2, timestampMinutes: F.t0Minutes + 30, stations: [[202, 90]] }),
-      F.t0
+      F.t0 + minutes(30)
     )
     assert.deepStrictEqual(changes, [WeatherStateChange.observationsStored({ stations: [202] })])
     assert.equal(bot.state.observations['202'].observation.temp_f, 90)
@@ -352,7 +352,7 @@ describe('WeatherStateReducer', () => {
     // A cached re-send of the first batch, older than what is held for 202.
     changes = bot.apply(
       F.observations({ seq: 3, timestampMinutes: F.t0Minutes, stations: [[202, 88], [976, 70]] }),
-      F.t0
+      F.t0 + minutes(31)
     )
     assert.deepStrictEqual(changes, [WeatherStateChange.observationsStored({ stations: [976] })])
     assert.equal(bot.state.observations['202'].observation.temp_f, 90)
@@ -636,7 +636,7 @@ describe('WeatherStateReducer', () => {
   })
 })
 
-// Spec §7A: the bot's own statement of what it carries, which has no time of its own.
+// Spec §10: the bot's own statement of what it carries, which has no time of its own.
 describe('WeatherStateReducer coverage', () => {
   it('a statement is stored with when it arrived', () => {
     const bot = new Bot()
@@ -1036,7 +1036,7 @@ describe('WeatherStateReducer ordering', () => {
     strip('observations', 'batchSize')
     strip('forecasts', 'requestedHere')
     strip('texts', 'request')
-    // Revision 7 (spec §2.2, §8.1): a blob written before the app could read either of these
+    // Revision 7 (spec §2.2, §8): a blob written before the app could read either of these
     // decodes as "the radio didn't say", not as a failure to load.
     for (const collection of ['warnings', 'observations', 'forecasts', 'texts']) {
       strip(collection, 'source')
@@ -1165,7 +1165,7 @@ describe('Weather retention', () => {
   })
 })
 
-// Spec §7C: the national area sweep — packets assembled by `group` the way Text chunks are, but
+// Spec §12: the national area sweep — packets assembled by `group` the way Text chunks are, but
 // only ever one sweep held, because two sweeps are two pictures of the same country.
 describe('WeatherStateReducer area sweep', () => {
   /** The newest sweep held: revision 9's `state.areaSweep`, which is now the head of a list. */
@@ -1359,7 +1359,7 @@ describe('WeatherStateReducer area sweep', () => {
   })
 })
 
-// MARK: - Scoped sweeps (spec §7C, revision 10)
+// MARK: - Scoped sweeps (spec §12, revision 10)
 
 describe('WeatherStateReducer scoped area sweeps', () => {
   const held = (bot) => bot.state.areaSweeps[0] ?? null
@@ -1577,7 +1577,7 @@ describe('WeatherStateReducer scoped area sweeps', () => {
   })
 })
 
-// MARK: - Radar tiles (spec §7D, revision 11)
+// MARK: - Radar tiles (spec §13, revision 11)
 
 describe('WeatherStateReducer radar tiles', () => {
   const dallas = { south: 32, west: -98, zoom: 0 }
@@ -1763,8 +1763,8 @@ describe('WeatherStateReducer radar tiles', () => {
 
   /**
    * "A state saved by that build on the owner's phone may hold zoom −1 tiles with half-degree
-   * edges, and it must still load. Such tiles are dropped when the state is read" (revision 13
-   * §2). Every other frame reads exactly as it was written, in its order.
+   * edges, and it must still load. Such tiles are dropped when the state is read"
+   * (docs/MESHWX_UI.md §3.1 U-61). Every other frame reads exactly as it was written, in its order.
    */
   it('a state saved with detail tiles loads, and leaves them behind', () => {
     const saved = {
@@ -1866,5 +1866,358 @@ describe('WeatherStateReducer radar tiles', () => {
     delete before.radarTiles
     const read = WeatherBotState.decode(JSON.parse(JSON.stringify(before)))
     assert.deepStrictEqual(read.radarTiles, [])
+  })
+})
+
+// MARK: - Times ahead of the phone's clock (spec §17.5, 17 October 2026)
+//
+// Every bot is two self-asserted bytes on the wire (spec §2.2), so anyone on the channel can send
+// a message in a bot's name. A time ahead of the phone's clock is never one a bot sends honestly,
+// and kept it would stand as the newest of its kind over everything real.
+
+describe('WeatherStateReducer: times ahead of the clock', () => {
+  const horizonMinutes = WeatherStateReducer.warningHorizon / 60
+
+  // The adversarial review's reproduction: one forged digest stamped `0xFFFFFF00` with no
+  // entries ended every warning held and turned every later digest away as older.
+  it('a digest built in the future is refused, ends nothing and wedges nothing', () => {
+    const bot = new Bot()
+    bot.apply(F.warning({ seq: 1, identity: F.svw42 }), F.t0)
+    bot.apply(F.warning({ seq: 2, identity: F.wsw7, expiresMinutes: F.t0Minutes + 600 }), F.t0)
+    const forged = bot.apply(F.digest({ seq: 3, nowMinutes: 0xffffff00, entries: [] }), F.t0 + minutes(1))
+    assert.deepStrictEqual(forged, [WeatherStateChange.futureTimeRejected({ minutes: 0xffffff00 })])
+    assert.equal(Object.keys(bot.state.warnings).length, 2, 'nothing ended')
+    assert.equal(bot.state.digest, null, 'not held as the newest list')
+
+    const real = bot.apply(
+      F.digest({ seq: 4, nowMinutes: F.t0Minutes + 5, entries: [[F.svw42, 40], [F.svw43, 30]] }),
+      F.t0 + minutes(5)
+    )
+    assert.deepStrictEqual(real, [WeatherStateChange.digestApplied({ missing: [F.svw43], removed: [F.wsw7] })])
+    assert.equal(bot.state.digest.digest.now_min, F.t0Minutes + 5)
+  })
+
+  it('a digest up to fifteen minutes ahead is a clock that runs fast, and still a digest', () => {
+    const bot = new Bot()
+    let changes = bot.apply(F.digest({ seq: 1, nowMinutes: F.t0Minutes + 15, entries: [] }), F.t0)
+    assert.deepStrictEqual(changes, [WeatherStateChange.digestApplied({ missing: [], removed: [] })])
+    changes = bot.apply(F.digest({ seq: 2, nowMinutes: F.t0Minutes + 31, entries: [] }), F.t0 + minutes(15))
+    assert.deepStrictEqual(changes, [WeatherStateChange.futureTimeRejected({ minutes: F.t0Minutes + 31 })])
+    assert.equal(bot.state.digest.digest.now_min, F.t0Minutes + 15)
+  })
+
+  it('a batch from the future is refused and never stands over the real readings', () => {
+    const bot = new Bot()
+    let changes = bot.apply(
+      F.observations({ seq: 1, timestampMinutes: F.t0Minutes + 600, stations: [[202, 120], [860, 120]] }),
+      F.t0
+    )
+    assert.deepStrictEqual(changes, [WeatherStateChange.futureTimeRejected({ minutes: F.t0Minutes + 600 })])
+    assert.deepStrictEqual(bot.state.observations, {})
+
+    changes = bot.apply(
+      F.observations({ seq: 2, timestampMinutes: F.t0Minutes, stations: [[202, 88], [860, 84]] }), F.t0
+    )
+    assert.deepStrictEqual(changes, [WeatherStateChange.observationsStored({ stations: [202, 860] })])
+    assert.equal(bot.state.observations['202'].observation.temp_f, 88)
+    assert.equal(bot.state.observations['202'].lastBatchMinutes, F.t0Minutes)
+  })
+
+  it('a forecast issued in the future is refused, and the real one is kept', () => {
+    const bot = new Bot()
+    let changes = bot.apply(F.forecast({ seq: 1, point: 102, issuedMinutes: F.t0Minutes + 600 }), F.t0)
+    assert.deepStrictEqual(changes, [WeatherStateChange.futureTimeRejected({ minutes: F.t0Minutes + 600 })])
+    assert.deepStrictEqual(bot.state.forecasts, {})
+    changes = bot.apply(F.forecast({ seq: 2, point: 102, issuedMinutes: F.t0Minutes - 30 }), F.t0)
+    assert.deepStrictEqual(changes, [WeatherStateChange.forecastStored({ point: 102 })])
+  })
+
+  it('a sweep built in the future is refused, so it cannot retire the real one', () => {
+    const bot = new Bot()
+    bot.apply(F.areaSweep({ seq: 1, group: 1, index: 0, total: 1, entries: [F.texasSweepEntry] }), F.t0)
+    const changes = bot.apply(
+      F.areaSweep({ seq: 2, builtMinutes: F.t0Minutes + 600, group: 2, index: 0, total: 1, entries: [] }),
+      F.t0
+    )
+    assert.deepStrictEqual(changes, [WeatherStateChange.futureTimeRejected({ minutes: F.t0Minutes + 600 })])
+    assert.deepStrictEqual(bot.state.areaSweeps.map((sweep) => sweep.group), [1])
+  })
+
+  // `retainRadarTiles` reads the bot's clock off the newest picture held, so one picture from the
+  // future would have dropped every real one as more than three hours behind it.
+  it('a radar picture taken in the future is refused, and the real pictures stay', () => {
+    const bot = new Bot()
+    bot.apply(F.radar({ seq: 1, takenMinutes: F.t0Minutes - 10 }), F.t0)
+    const changes = bot.apply(F.radar({ seq: 2, takenMinutes: F.t0Minutes + 600, west: -97 }), F.t0)
+    assert.deepStrictEqual(changes, [WeatherStateChange.futureTimeRejected({ minutes: F.t0Minutes + 600 })])
+    assert.deepStrictEqual(bot.state.radarTiles.map((stored) => stored.radar.taken_min), [F.t0Minutes - 10])
+  })
+
+  // Dropping the warning would lose a warning; dropping the time loses only a line of copy.
+  it('a warning issued in the future is kept, without its issue time or its start', () => {
+    const bot = new Bot()
+    const changes = bot.apply(
+      F.warning({
+        seq: 1,
+        expiresMinutes: F.t0Minutes + 900,
+        issuedMinutes: F.t0Minutes + 600,
+        beginsMinutes: F.t0Minutes + 700
+      }),
+      F.t0
+    )
+    assert.deepStrictEqual(changes, [
+      WeatherStateChange.futureTimeRejected({ minutes: F.t0Minutes + 600 }),
+      WeatherStateChange.warningStored(F.svw42, { replacedExisting: false })
+    ])
+    const stored = held(bot.state, F.svw42)
+    assert.equal(stored.issuedAt, null)
+    assert.equal(stored.beginsAt, null)
+    assert.equal(stored.warning.issued_min, null)
+    assert.equal(stored.warning.begins_min, null)
+    assert.equal(stored.warning.expires_min, F.t0Minutes + 900)
+  })
+
+  it('a forged issue time never erases the one already known', () => {
+    const bot = new Bot()
+    bot.apply(F.warning({ seq: 1, issuedMinutes: F.t0Minutes - 21 }), F.t0)
+    bot.apply(F.warning({ seq: 2, issuedMinutes: F.t0Minutes + 600, expiresMinutes: F.t0Minutes + 900 }), F.t0)
+    assert.equal(held(bot.state, F.svw42).issuedAt, dateFromUnixMinutes(F.t0Minutes - 21))
+  })
+
+  it('an expiry past the horizon is clamped to it, and a watch that starts later keeps its start', () => {
+    const bot = new Bot()
+    // Forty days out: inside what the wire's two issue-time bytes can say, past any real product.
+    bot.apply(F.warning({ seq: 1, expiresMinutes: F.t0Minutes + 40 * 1440, issuedMinutes: F.t0Minutes - 5 }), F.t0)
+    let stored = held(bot.state, F.svw42)
+    assert.equal(stored.warning.expires_min, F.t0Minutes + horizonMinutes)
+    assert.equal(stored.issuedAt, dateFromUnixMinutes(F.t0Minutes - 5), 'a real issue time survives the clamp')
+    // The far end of the wire: no issue time, an expiry thousands of years away.
+    bot.apply(F.warning({ seq: 2, identity: F.svw43, expiresMinutes: 0xffffffff }), F.t0)
+    stored = held(bot.state, F.svw43)
+    assert.equal(stored.warning.expires_min, F.t0Minutes + horizonMinutes)
+    assert.equal(
+      WeatherStoredWarning.isExpired(stored, { at: F.t0 + minutes(horizonMinutes) }), true,
+      'it ends at the horizon instead of in the year 10,000'
+    )
+
+    // A watch issued this morning for the day after tomorrow: in the future by design (spec §3).
+    bot.apply(
+      F.warning({
+        seq: 3,
+        identity: F.wsw7,
+        issuedMinutes: F.t0Minutes - 60,
+        beginsMinutes: F.t0Minutes + 2 * 1440,
+        expiresMinutes: F.t0Minutes + 3 * 1440
+      }),
+      F.t0
+    )
+    stored = held(bot.state, F.wsw7)
+    assert.equal(stored.beginsAt, dateFromUnixMinutes(F.t0Minutes + 2 * 1440))
+    assert.equal(stored.warning.expires_min, F.t0Minutes + 3 * 1440)
+  })
+
+  // Spec §3: a product in force until further notice is sent with an expiry the bot invents 12 h
+  // ahead, under its original issue time. A cap counted from the issue time would end it.
+  it('until further notice still works: an old issue time with an invented expiry is not capped', () => {
+    const bot = new Bot()
+    const issued = F.t0Minutes - 20 * 1440
+    bot.apply(F.warning({ seq: 1, issuedMinutes: issued, expiresMinutes: F.t0Minutes + 12 * 60 }), F.t0)
+    const stored = held(bot.state, F.svw42)
+    assert.equal(stored.warning.expires_min, F.t0Minutes + 12 * 60)
+    assert.equal(stored.issuedAt, dateFromUnixMinutes(issued))
+  })
+
+  it("a digest's expiry is clamped to the same horizon", () => {
+    const bot = new Bot()
+    bot.apply(F.warning({ seq: 1, expiresMinutes: F.t0Minutes + 45 }), F.t0)
+    bot.apply(F.digest({ seq: 2, nowMinutes: F.t0Minutes + 10, entries: [[F.svw42, 0xffff]] }), F.t0 + minutes(10))
+    assert.equal(held(bot.state, F.svw42).warning.expires_min, F.t0Minutes + 10 + horizonMinutes)
+  })
+
+  it('state saved with times from the future is cleaned when it is read back', () => {
+    const bot = new Bot()
+    bot.apply(F.warning({ seq: 1, identity: F.svw42, issuedMinutes: F.t0Minutes - 21 }), F.t0)
+    bot.apply(F.observations({ seq: 2, stations: [[202, 88], [860, 84]] }), F.t0)
+    bot.apply(F.forecast({ seq: 3, point: 102 }), F.t0)
+    bot.apply(F.radar({ seq: 4 }), F.t0)
+    const clean = bot.state
+    // What a phone that heard the forgeries before this rule would have saved.
+    const poisoned = {
+      ...clean,
+      digest: WeatherStoredDigest.make({ digest: F.digest({ seq: 5, nowMinutes: 0xffffff00 }), receivedAt: F.t0 }),
+      missingFromDigest: [F.svw43],
+      warnings: {
+        ...clean.warnings,
+        [identityKey(F.wsw7)]: WeatherStoredWarning.make({
+          warning: F.warning({ seq: 6, identity: F.wsw7, expiresMinutes: 0xffffffff, issuedMinutes: 0xfffffff0 }),
+          receivedAt: F.t0,
+          issuedAt: dateFromUnixMinutes(0xfffffff0)
+        })
+      },
+      observations: {
+        ...clean.observations,
+        999: WeatherStoredObservation.make({
+          observation: F.observations({ seq: 7, stations: [[999, 120]] }).stations[0],
+          timestampMinutes: F.t0Minutes + 600,
+          receivedAt: F.t0
+        }),
+        202: { ...clean.observations['202'], lastBatchMinutes: F.t0Minutes + 600 }
+      },
+      forecasts: {
+        ...clean.forecasts,
+        103: WeatherStoredForecast.make({
+          forecast: F.forecast({ seq: 8, point: 103, issuedMinutes: F.t0Minutes + 600 }),
+          receivedAt: F.t0,
+          requestLabel: null,
+          requestedHere: false
+        })
+      },
+      areaSweeps: [{ ...WeatherAreaSweepAssembly.make({
+        builtMinutes: F.t0Minutes + 600, group: 9, total: 1, firstReceivedAt: F.t0, lastReceivedAt: F.t0,
+        isScoped: false, scope: []
+      }) }],
+      radarTiles: [
+        ...clean.radarTiles,
+        WeatherStoredRadarTile.make({
+          tile: MeshWXRadar.tile(F.radar({ seq: 9, west: -97 })),
+          radar: F.radar({ seq: 9, west: -97, takenMinutes: F.t0Minutes + 600 }),
+          receivedAt: F.t0
+        })
+      ]
+    }
+    const read = WeatherStateReducer.dropFutureTimes(poisoned, { now: F.t0 + minutes(1) })
+    assert.equal(read.digest, null)
+    assert.deepStrictEqual(read.missingFromDigest, [])
+    assert.deepStrictEqual(Object.keys(read.observations).sort(), ['202', '860'])
+    assert.equal(read.observations['202'].lastBatchMinutes, null)
+    assert.equal(read.observations['860'], clean.observations['860'])
+    assert.deepStrictEqual(Object.keys(read.forecasts), ['102'])
+    assert.deepStrictEqual(read.areaSweeps, [])
+    assert.deepStrictEqual(read.radarTiles, clean.radarTiles)
+    assert.equal(read.warnings[identityKey(F.svw42)], clean.warnings[identityKey(F.svw42)], 'a clean warning is untouched')
+    const capped = read.warnings[identityKey(F.wsw7)]
+    assert.equal(capped.warning.expires_min, F.t0Minutes + 1 + horizonMinutes)
+    assert.equal(capped.issuedAt, null)
+    assert.equal(capped.warning.issued_min, null)
+
+    // Clean state comes back as the same object: nothing to write.
+    assert.equal(WeatherStateReducer.dropFutureTimes(clean, { now: F.t0 }), clean)
+  })
+})
+
+// MARK: - What a digest speaks for (spec §5, 17 October 2026)
+//
+// A bot answers a place-named `>w` nationwide (spec §14), but its digest lists only what is
+// active in its own coverage. WX-AUS's next digest used to end a Houston warning the phone had
+// fetched from it for a saved place.
+
+describe('WeatherStateReducer: a digest ends only what the bot covers', () => {
+  /** Harris County, TX (Houston), about 230 km east of WX-AUS's centre. */
+  const houston = { event: 3, office: 51, etn: 77 }
+  const houstonPolygon = [[29.9, -95.6], [29.95, -95.2], [29.6, -95.3]]
+  const harris = { state: 42, county: true, start: 201, run: 1 }
+  const travis = { state: 42, county: true, start: 453, run: 1 }
+  /** The bundle's centres for the counties these tests name. */
+  const centres = {
+    '42:C:453': { latitude: 30.3344, longitude: -97.781 },
+    '42:C:201': { latitude: 29.8327, longitude: -95.3854 },
+    '42:C:477': { latitude: 30.2216, longitude: -96.4288 }
+  }
+  const areaCentre = ({ state, county, number }) => centres[`${state}:${county ? 'C' : 'Z'}:${number}`] ?? null
+  const tornadoWatch = (etn) => ({ event: 1, office: 35, etn })
+
+  class CoveredBot extends Bot {
+    constructor(coverage = F.austinCoverage) {
+      super()
+      if (coverage != null) this.apply(F.coverage({ seq: 1, coverage }), F.t0)
+    }
+
+    apply(message, receivedAt) {
+      const result = WeatherStateReducer.apply(message, { to: this.state, receivedAt, areaCentre })
+      this.state = result.state
+      return result.changes
+    }
+  }
+
+  it("a Houston warning fetched from WX-AUS survives WX-AUS's digest; Austin's does not", () => {
+    const bot = new CoveredBot()
+    bot.apply(F.warning({ seq: 2, identity: houston, polygon: houstonPolygon, areas: [harris] }), F.t0)
+    bot.apply(F.warning({ seq: 3, identity: F.svw42 }), F.t0)
+    const changes = bot.apply(F.digest({ seq: 4, nowMinutes: F.t0Minutes + 10, entries: [] }), F.t0 + minutes(10))
+    assert.deepStrictEqual(changes, [WeatherStateChange.digestApplied({ missing: [], removed: [F.svw42] })])
+    assert.notEqual(held(bot.state, houston), undefined, 'outside the bot\'s area: the list says nothing about it')
+    // It still ends by its own expiry, or by a cancel.
+    assert.deepStrictEqual(
+      bot.apply(F.cancel({ seq: 5, identity: houston }), F.t0 + minutes(11)),
+      [WeatherStateChange.warningRemoved(houston, { reason: 1 })]
+    )
+  })
+
+  it('a zone product ends only inside the stated runs', () => {
+    const bot = new CoveredBot()
+    const inside = { event: 24, office: 35, etn: 1 }
+    const outside = { event: 24, office: 51, etn: 2 }
+    bot.apply(F.warning({
+      seq: 2, identity: inside, polygon: null, areas: [{ state: 42, county: false, start: 192, run: 1 }]
+    }), F.t0)
+    bot.apply(F.warning({
+      seq: 3, identity: outside, polygon: null, areas: [{ state: 42, county: false, start: 213, run: 1 }]
+    }), F.t0)
+    const changes = bot.apply(F.digest({ seq: 4, nowMinutes: F.t0Minutes + 10, entries: [] }), F.t0 + minutes(10))
+    assert.deepStrictEqual(changes, [WeatherStateChange.digestApplied({ missing: [], removed: [inside] })])
+  })
+
+  // A tornado watch names counties and has no polygon (spec §14): the bot covers every county
+  // its circle reaches, and the phone judges one by the county's centre.
+  it('a county watch ends when its county reaches the stated circle', () => {
+    const bot = new CoveredBot()
+    bot.apply(F.warning({ seq: 2, identity: tornadoWatch(1), polygon: null, areas: [travis] }), F.t0)
+    bot.apply(F.warning({ seq: 3, identity: tornadoWatch(2), polygon: null, areas: [harris] }), F.t0)
+    // Washington County: its centre 126 km out, inside the circle's reach.
+    bot.apply(F.warning({
+      seq: 4, identity: tornadoWatch(3), polygon: null, areas: [{ state: 42, county: true, start: 477, run: 1 }]
+    }), F.t0)
+    const changes = bot.apply(F.digest({ seq: 5, nowMinutes: F.t0Minutes + 10, entries: [] }), F.t0 + minutes(10))
+    assert.deepStrictEqual(
+      changes, [WeatherStateChange.digestApplied({ missing: [], removed: [tornadoWatch(1), tornadoWatch(3)] })]
+    )
+  })
+
+  it('a cut statement, or none at all, leaves the digest speaking for everything', () => {
+    for (const coverage of [null, { ...F.austinCoverage, zones_cut: true }, { ...F.austinCoverage, offices_cut: true }]) {
+      const bot = new CoveredBot(coverage)
+      bot.apply(F.warning({ seq: 2, identity: houston, polygon: houstonPolygon, areas: [harris] }), F.t0)
+      const changes = bot.apply(F.digest({ seq: 3, nowMinutes: F.t0Minutes + 10, entries: [] }), F.t0 + minutes(10))
+      assert.deepStrictEqual(changes, [WeatherStateChange.digestApplied({ missing: [], removed: [houston] })])
+    }
+  })
+
+  it('a statement with no area filter speaks for the whole country', () => {
+    const everything = { ...F.austinCoverage, lat: 0, lon: 0, radius_km: 0, offices: [], areas: [] }
+    const bot = new CoveredBot(everything)
+    bot.apply(F.warning({ seq: 2, identity: houston, polygon: houstonPolygon, areas: [harris] }), F.t0)
+    const changes = bot.apply(F.digest({ seq: 3, nowMinutes: F.t0Minutes + 10, entries: [] }), F.t0 + minutes(10))
+    assert.deepStrictEqual(changes, [WeatherStateChange.digestApplied({ missing: [], removed: [houston] })])
+  })
+
+  it('a statement with no circle reaches as far as the areas it names', () => {
+    // An area of Travis County alone, stated as its county with no centre.
+    const travisOnly = { ...F.austinCoverage, lat: 0, lon: 0, radius_km: 0, offices: [35], areas: [travis] }
+    const bot = new CoveredBot(travisOnly)
+    const nearAustin = { event: 3, office: 35, etn: 50 }
+    bot.apply(F.warning({ seq: 2, identity: nearAustin, areas: [] }), F.t0)
+    bot.apply(F.warning({ seq: 3, identity: houston, polygon: houstonPolygon, areas: [harris] }), F.t0)
+    const changes = bot.apply(F.digest({ seq: 4, nowMinutes: F.t0Minutes + 10, entries: [] }), F.t0 + minutes(10))
+    assert.deepStrictEqual(changes, [WeatherStateChange.digestApplied({ missing: [], removed: [nearAustin] })])
+  })
+
+  it('an upgrade marker outside the bot\'s area is not the list\'s to settle', () => {
+    const bot = new CoveredBot()
+    bot.apply(F.warning({ seq: 2, identity: houston, polygon: houstonPolygon, areas: [harris] }), F.t0)
+    bot.apply(F.warning({ seq: 3, identity: F.svw42 }), F.t0)
+    bot.apply(F.cancel({ seq: 4, identity: houston, reason: 2 }), F.t0)
+    bot.apply(F.cancel({ seq: 5, identity: F.svw42, reason: 2 }), F.t0)
+    bot.apply(F.digest({ seq: 6, nowMinutes: F.t0Minutes + 10, entries: [] }), F.t0 + minutes(10))
+    assert.deepStrictEqual(Object.keys(bot.state.pendingUpgrades), [identityKey(houston)])
   })
 })

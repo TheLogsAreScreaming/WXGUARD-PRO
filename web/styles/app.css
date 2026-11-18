@@ -251,6 +251,7 @@ button.row:focus-visible { outline-offset: -2px; border-radius: 0; }
   border: 0; border-radius: 12px; background: none; color: var(--text-2); font-size: var(--text-callout); cursor: pointer;
 }
 .hero__station:hover { background: var(--surface-hover); }
+.hero__station--stale { color: var(--stale); }
 .hero__ask { max-width: 30em; font-size: var(--text-body); color: var(--text); padding: 18px 8px 6px; }
 .hero__caption { font-size: var(--text-foot); color: var(--text-2); }
 .hero__note { font-size: var(--text-foot); color: var(--stale); }

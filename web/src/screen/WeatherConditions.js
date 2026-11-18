@@ -23,14 +23,16 @@ const LABELLED_READING_KILOMETRES = 40
  *
  * A temperature on the page is a claim about the weather *here*. The owner's threshold decides
  * when that claim can be made: the reading the phone holds must be within `goodReadingKilometres`
- * of the place and not stale.
+ * of the place and no more than twelve hours old. One over two hours old (`isStale`) is still
+ * shown, labelled with its age: "No current conditions" while the phone held a reading from five
+ * hours ago told the reader less than the phone knew (owner decision 2026-10-16).
  *
  * Past that, up to `labelledReadingKilometres`, a fresh reading is still shown, **attributed to
  * its station** — "Nearest report: San Marcos, 26 km away" — rather than passed off as the town's
  * (owner decision 2026-09-18, docs/MESHWX_UI.md §3.1 U-2a). Wimberley's nearest station is 25.5 km
  * off: under a hard 25 km cliff its page asked, the answer arrived, and the page threw it away.
- * Further than that, or three hours old, a reading answers a different question and the page shows
- * the ask instead, naming the station a refresh would spend airtime on — or, when no station is
+ * Further than that, or over twelve hours old (`isTooOld`), a reading answers a different question
+ * and the page shows the ask instead, naming the station a refresh would spend airtime on — or, when no station is
  * close enough for its answer to be shown, says so and asks for nothing.
  *
  * `WeatherUpdatePlan` reads its readings step **off this verdict**, so the sentence on the page and
@@ -86,23 +88,25 @@ export const WeatherConditions = Object.freeze({
 
   /**
    * **The one rule**, for the page and for a Places row alike (docs/MESHWX_UI.md §3.1 U-2): a
-   * reading speaks for a place when it is within `goodReadingKilometres` of it and is not stale.
+   * reading speaks for a place when it is within `goodReadingKilometres` of it and is not too old
+   * to show (`MeshWXPresentation.observationShownForMinutes`). A stale one is shown with its age,
+   * on the page and in the row alike.
    *
    * The row used to reach 80 km and show anything it found, so Places read "86° Partly cloudy ·
    * 3 h old" for a place whose own page said "No current conditions" — the list and the page
    * contradicting each other about the same town, one tap apart.
    */
-  isGood({ kilometres, isStale }) {
-    if (kilometres == null || isStale) return false
+  isGood({ kilometres, isTooOld = false }) {
+    if (kilometres == null || isTooOld) return false
     return kilometres <= GOOD_READING_KILOMETRES
   },
 
   /**
-   * A reading the page will show at all: good, or fresh and within `labelledReadingKilometres` to
-   * be shown under its station's name. The same rule for a Places row.
+   * A reading the page will show at all: good, or within `labelledReadingKilometres` to be shown
+   * under its station's name. Not too old either way. The same rule for a Places row.
    */
-  isShowable({ kilometres, isStale }) {
-    if (kilometres == null || isStale) return false
+  isShowable({ kilometres, isTooOld = false }) {
+    if (kilometres == null || isTooOld) return false
     return kilometres <= LABELLED_READING_KILOMETRES
   },
 
@@ -111,7 +115,7 @@ export const WeatherConditions = Object.freeze({
       case 'reading': {
         const reading = primary.value
         const kilometres = reading.distanceKilometres ?? Infinity
-        if (WeatherConditions.isGood({ kilometres: reading.distanceKilometres, isStale: reading.isStale })) {
+        if (WeatherConditions.isGood({ kilometres: reading.distanceKilometres, isTooOld: reading.isTooOld })) {
           return WeatherConditions.reading(reading)
         }
         // Too far to speak for the place: asking that same station again would not bring it
@@ -124,12 +128,12 @@ export const WeatherConditions = Object.freeze({
           nearbyStation.kilometres <= LABELLED_READING_KILOMETRES
             ? nearbyStation
             : null
-        // Fresh and near enough to show: shown under its own name, never as the town's.
-        if (WeatherConditions.isShowable({ kilometres: reading.distanceKilometres, isStale: reading.isStale })) {
+        // Near enough to show, and young enough: shown under its own name, never as the town's.
+        if (WeatherConditions.isShowable({ kilometres: reading.distanceKilometres, isTooOld: reading.isTooOld })) {
           return WeatherConditions.nearby(reading, { nearer })
         }
         if (nearer != null) return WeatherConditions.ask({ icao: nearer.icao, kilometres: nearer.kilometres })
-        // Near enough to show once it is fresh: the station itself is the one to ask about again.
+        // Near enough to show once it reports again: the station itself is the one to ask about.
         if (kilometres <= LABELLED_READING_KILOMETRES) {
           return WeatherConditions.ask({ icao: reading.station.icao, kilometres: reading.distanceKilometres })
         }
@@ -176,7 +180,7 @@ export const WeatherPlaceRowReading = Object.freeze({
       near == null ||
       !WeatherConditions.isShowable({
         kilometres: near.kilometres,
-        isStale: WeatherStoredObservation.isStale(near.reading.stored, { at: now }),
+        isTooOld: WeatherStoredObservation.isTooOld(near.reading.stored, { at: now }),
       })
     ) {
       return WeatherPlaceRowReading.make({})

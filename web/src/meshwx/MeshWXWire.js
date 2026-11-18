@@ -55,16 +55,16 @@ export const MeshWXWire = Object.freeze({
   notAvailableSize: 6,
   /**
    * Header, centre, radius, station cap and the office count, before the offices themselves
-   * and the counted run list (spec §7A).
+   * and the counted run list (spec §10).
    */
   coverageFixedSize: 14,
-  /** Header, the sender's key prefix and the request's own time, before the text (spec §7B). */
+  /** Header, the sender's key prefix and the request's own time, before the text (spec §11). */
   requestFixedSize: 14,
-  /** Header, the build time, and the three assembly bytes, before the entries (spec §7C). */
+  /** Header, the build time, and the three assembly bytes, before the entries (spec §12). */
   areaSweepFixedSize: 11,
   areaSweepEntrySize: 4,
 
-  // MARK: Counts and limits (spec §3, §5, §6, §7, §8.1)
+  // MARK: Counts and limits (spec §3, §5, §6, §7, §8)
 
   /**
    * Text bytes one chunk can carry: the packet budget minus the 8-byte text header. A bot since
@@ -97,23 +97,23 @@ export const MeshWXWire = Object.freeze({
   maxStationsWithAges: 13, // 12 from a bot since 1 October 2026
   maxPeriods: 14,
   /**
-   * Offices one Coverage message may list (spec §7A). 24 offices and 30 runs together are 159
+   * Offices one Coverage message may list (spec §10). 24 offices and 30 runs together are 159
    * bytes, so a full list of either never costs the other one; past it the bot cuts and says so.
    * A bot since 1 October 2026 lists at most 22, to stay inside `maxSend`.
    */
   maxCoverageOffices: 24,
   /**
    * Bytes of the sender's public key a Request carries: the same six-byte prefix a DM
-   * identifies the phone by, so one phone's DM and its datagram are one sender (spec §7B).
+   * identifies the phone by, so one phone's DM and its datagram are one sender (spec §11).
    */
   requestSenderPrefixSize: 6,
   /**
-   * UTF-8 bytes a Request's text may take (spec §7B). Well under the packet budget: the whole
-   * §8.2 grammar fits, and a request is not the place to spend airtime.
+   * UTF-8 bytes a Request's text may take (spec §11). Well under the packet budget: the whole
+   * §14 grammar fits, and a request is not the place to spend airtime.
    */
   maxRequestTextBytes: 40,
   /**
-   * Entries one Area sweep packet carries (spec §7C): `(165 − 11) / 4` is 38, and the packet
+   * Entries one Area sweep packet carries (spec §12): `(165 − 11) / 4` is 38, and the packet
    * budget is what the cap is made of. What a decoder reads; see `areaSweepEntriesSent`.
    */
   maxAreaSweepEntries: 38,
@@ -123,7 +123,7 @@ export const MeshWXWire = Object.freeze({
    */
   areaSweepEntriesSent: 36,
   /**
-   * Packets one sweep may be split into (spec §7C), the same ceiling a Text reply has. Eight
+   * Packets one sweep may be split into (spec §12), the same ceiling a Text reply has. Eight
    * packets is the whole country's worth of airtime, which is why the screen never asks by itself.
    */
   maxAreaSweepPackets: 8,
@@ -196,7 +196,7 @@ export const MeshWXWire = Object.freeze({
   /** Bit 0: the per-station ages follow the station records. */
   flagObservationAges: 0x1,
 
-  // MARK: Coverage flags nibble (spec §7A)
+  // MARK: Coverage flags nibble (spec §10)
   //
   // Both mean "this list is incomplete", never "this place is not covered". They are the reason
   // the message can be read as a denial at all: with them clear the lists are the whole area.
@@ -206,11 +206,11 @@ export const MeshWXWire = Object.freeze({
   /** Bit 1: the office list was cut. */
   flagCoverageOfficesCut: 0x2,
 
-  // MARK: Text flags nibble (spec §8.1)
+  // MARK: Text flags nibble (spec §8)
 
   /**
    * Bit 0: the product was longer than `maxTextChunks` chunks of `maxTextBytes` and the bot
-   * dropped the tail (spec §8.1, revision 7). The bot sets it on *every* chunk of a cut reply,
+   * dropped the tail (spec §8, revision 7). The bot sets it on *every* chunk of a cut reply,
    * not only the last: a phone missing the last chunk would otherwise be the one phone that
    * cannot tell a reply with a hole in it from one that ends early on purpose.
    */
@@ -230,7 +230,7 @@ export const MeshWXWire = Object.freeze({
   /** Area run state byte, bit 7: the run numbers counties, not forecast zones. */
   areaCountyBit: 0x80,
 
-  // MARK: Area sweep entry (spec §7C)
+  // MARK: Area sweep entry (spec §12)
   //
   // A sweep entry is a Warning's area run squeezed from four bytes of state-plus-u16-plus-run
   // into four bytes that also carry the event, which is what lets one packet name 38 runs
@@ -247,7 +247,7 @@ export const MeshWXWire = Object.freeze({
   /** Bits 10-15 of a sweep entry's u16: the run length, less one. */
   sweepRunShift: 10,
 
-  // MARK: Area sweep flags nibble (spec §7C)
+  // MARK: Area sweep flags nibble (spec §12)
 
   /**
    * Bit 0: entries were dropped to fit, so an area absent from the sweep may still be under
@@ -260,7 +260,7 @@ export const MeshWXWire = Object.freeze({
    */
   flagSweepAdvisories: 0x2,
 
-  // MARK: Scoped Area sweep (spec revision 10, §7C)
+  // MARK: Scoped Area sweep (spec revision 10, §12)
   //
   // Revision 10 lets a sweep cover a few states instead of the country, because defaulting to
   // sending everything is what made the map cost eight packets whoever tapped it: "have a way for
@@ -274,7 +274,7 @@ export const MeshWXWire = Object.freeze({
   // at that level here" — which is the reason the scope is on the wire at all.
 
   /**
-   * A sweep entry's event code 0: not an alert but a scope entry naming a state (spec §7C,
+   * A sweep entry's event code 0: not an alert but a scope entry naming a state (spec §12,
    * revision 10). No event has code 0, which is what lets one entry shape carry both.
    */
   sweepScopeEvent: 0,
@@ -286,17 +286,17 @@ export const MeshWXWire = Object.freeze({
   /** `total` byte, bits 0-3: the packet count, 1 to 8. The high bits are flags, not count. */
   sweepTotalMask: 0x0f,
   /**
-   * States one `>wmap` may name (spec §8.2, revision 10). Fifteen two-letter codes run together
+   * States one `>wmap` may name (spec §14, revision 10). Fifteen two-letter codes run together
    * are 30 bytes, and `>wmap all ` is 10 more: exactly the 40-byte request budget.
    */
   maxSweepScopeStates: 15,
   /**
    * How long the bot keeps the transmitted bytes of a multi-packet answer for `>part`
-   * (spec §7C/§8.2, revision 10). Seconds.
+   * (spec §12/§14, revision 10). Seconds.
    */
   partsCacheSeconds: 600,
 
-  // MARK: Radar (spec revision 11, §7D)
+  // MARK: Radar (spec revision 11, §13)
   //
   // A radar answer is one packet, always. Everything below is what makes that true: a fixed
   // lattice so two phones asking about the same storm ask for the same tile, two bits a cell,
@@ -304,7 +304,7 @@ export const MeshWXWire = Object.freeze({
   // fit, the bot halves the grid rather than splitting the answer — there is no `>part` for
   // radar, because half a radar picture is a picture of somewhere else.
 
-  /** Radar flags nibble, bit 0: the grid is 16 × 16, not 32 × 32 (spec §7D). */
+  /** Radar flags nibble, bit 0: the grid is 16 × 16, not 32 × 32 (spec §13). */
   radarCoarseBit: 0x01,
   /**
    * Radar flags nibble, bit 1: the four `bounds` bytes follow the fixed fields. The picture
@@ -321,7 +321,7 @@ export const MeshWXWire = Object.freeze({
   /** `product` is six bits beside the zoom in the `shape` byte. */
   maxRadarProduct: 63,
   /**
-   * The Not-available letter of `>radar` (spec §7D, §8.3). **Not** `r`: that is `>rain`, and a
+   * The Not-available letter of `>radar` (spec §13, §9). **Not** `r`: that is `>rain`, and a
    * refusal has to say which of the two it refuses. The one request whose letter is not its
    * first letter, which is why `WeatherRequest.requestLetter` has a case for it.
    */
@@ -335,7 +335,7 @@ export const MeshWXWire = Object.freeze({
   /** How far up the `shape` byte the product index sits. */
   radarProductShift: 2,
 
-  // MARK: Radar loops (spec revision 13, §7D.4)
+  // MARK: Radar loops (spec revision 13, §13.5)
   //
   // The last hour of a tile, as ordinary Radar packets: nothing new on the wire but one word in
   // the request, and the `taken` of each packet says which picture it is.
@@ -366,20 +366,20 @@ export const MeshWXMessageType = Object.freeze({
   forecast: 5,
   text: 6,
   notAvailable: 7,
-  /** Spec revision 4, §7A: what the bot carries, stated by the bot. */
+  /** Spec revision 4, §10: what the bot carries, stated by the bot. */
   coverage: 8,
   /**
-   * Spec revision 6, §7B: an app's `>` request, flooded on `#meshwx` as a datagram. The one
+   * Spec revision 6, §11: an app's `>` request, flooded on `#meshwx` as a datagram. The one
    * type this app *sends*; another phone's, heard on the channel, is not ours to act on.
    */
   request: 9,
   /**
-   * Spec revision 9, §7C: every area in the country under an alert, in one sweep of at most
+   * Spec revision 9, §12: every area in the country under an alert, in one sweep of at most
    * eight packets.
    */
   areaSweep: 10,
   /**
-   * Spec revision 11, §7D: one tile of a radar picture, as a quadtree of 2-bit levels. The
+   * Spec revision 11, §13: one tile of a radar picture, as a quadtree of 2-bit levels. The
    * number revision 2 reserved "for a future structured product". Request only — nothing
    * broadcasts radar on a schedule.
    */
@@ -445,9 +445,9 @@ export const MeshWXDataSource = Object.freeze({
  * same five keys every decoded message starts with.
  *
  * `bot` is the first two bytes of the bot's public key, which is how an app keeps state per bot
- * when two of them cover the same place (spec §12). `seq` is per-bot and wraps; a gap in it is
+ * when two of them cover the same place (spec §20). `seq` is per-bot and wraps; a gap in it is
  * the cue to ask for a digest, and a repeat of `(bot, seq)` is the bot's own "nobody repeated me"
- * retransmission and must be dropped (spec §2.3).
+ * retransmission and must be dropped (spec §2.4).
  */
 export const MeshWXHeader = Object.freeze({
   make({ seq, bot, type, rawType, flags = 0 }) {

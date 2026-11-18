@@ -112,6 +112,7 @@ export class WeatherAlertNotifier {
   async #applyUnlocked({ botID, changes, isBacklog }) {
     const stored = []
     const ended = []
+    const unlisted = []
     let listArrived = false
     for (const change of changes) {
       switch (change.kind) {
@@ -124,7 +125,7 @@ export class WeatherAlertNotifier {
         case 'digestApplied':
           // A warning the list no longer carries has ended; one it never named was never received
           // and has no geometry, so it stays the dashboard's row and notifies nothing.
-          ended.push(...change.removed)
+          unlisted.push(...change.removed)
           listArrived = true
           break
         default:
@@ -133,6 +134,12 @@ export class WeatherAlertNotifier {
     }
     if (stored.length === 0 && ended.length === 0 && !listArrived) return
     this.#loadIfNeeded()
+    if (unlisted.length > 0) {
+      // One bot's list speaks for that bot's copy (spec §5): a warning another bot still holds
+      // is still that bot's to end, by its own list, its cancel or the expiry.
+      const states = await this.states()
+      ended.push(...unlisted.filter((identity) => !isHeldByAnyBot(identity, states)))
+    }
     if (ended.length > 0) await this.#withdraw(ended)
 
     const watch = this.watchStore.watch()
@@ -389,4 +396,10 @@ function firstStatedStart(identity, { in: states }) {
     if (beginsAt != null) return beginsAt
   }
   return null
+}
+
+/** Whether any bot's state still holds `identity`. */
+function isHeldByAnyBot(identity, states) {
+  const key = identityKey(identity)
+  return Object.values(states ?? {}).some((state) => state?.warnings?.[key] != null)
 }

@@ -88,7 +88,7 @@ export const WeatherPlace = Object.freeze({
   },
 
   /**
-   * The place for a searched ZIP: the ZIP's own point, not its town's, labelled by spec §9.1 as
+   * The place for a searched ZIP: the ZIP's own point, not its town's, labelled by spec §16.2 as
    * the weather bot labels it ("Austin, TX 78701"), with a town's radius.
    */
   zip(zip) {
@@ -348,7 +348,7 @@ export const WeatherPlaceSearch = Object.freeze({
    * Two rows that read the same word for word are one row.
    *
    * `places.json` carries San Juan, PR as both the municipio and its zona urbana, 7 km apart, and
-   * spec §9.1 drops "ZONA URBANA" from the second. The first is kept, so the table's own ranking
+   * spec §16.2 drops "ZONA URBANA" from the second. The first is kept, so the table's own ranking
    * still decides which coordinate a tap opens.
    */
   collapsingDuplicates(places) {

@@ -83,7 +83,7 @@ export const WeatherFormatting = Object.freeze({
       : t('weather.unit.hours', Math.floor(minutes / 60))
   },
 
-  // MARK: - When an alert applies (spec §10.2, revision 12; docs/MESHWX_UI.md §3.1 U-49)
+  // MARK: - When an alert applies (spec §18.2, revision 12; docs/MESHWX_UI.md §3.1 U-49)
 
   /**
    * The longest an alert can have left and still count down: twelve hours. Past it, the day and
@@ -112,7 +112,7 @@ export const WeatherFormatting = Object.freeze({
   },
 
   /**
-   * When an alert applies, everywhere a screen or a notification says so (spec §10.2):
+   * When an alert applies, everywhere a screen or a notification says so (spec §18.2):
    *
    * - **Not in effect yet** (`beginsAt` later than now): "from Wed 19:00 until Fri 19:00".
    *   Nothing counts down to an expiry that has not begun.

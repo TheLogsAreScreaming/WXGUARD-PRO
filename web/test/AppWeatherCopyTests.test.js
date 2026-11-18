@@ -270,7 +270,7 @@ describe('Weather copy', () => {
   })
 
   // Out of range, one request per sender every five seconds, and 60 answers an hour all end in
-  // silence (spec §8.3): the copy allows for all three.
+  // silence (spec §9): the copy allows for all three.
   it('timeouts allow for range and a busy radio, and name the time', () => {
     const at = F.now + 6 * 60 * 1000
     assert.equal(
@@ -438,6 +438,22 @@ describe('Weather copy', () => {
       ),
       'As of 11:18 PM',
     )
+  })
+
+  // Owner decision 2026-10-16: a reading two to twelve hours old is shown rather than replaced by
+  // "No current conditions", and the foot line ends with its age so it never passes for current.
+  it('a stale reading says how old it is at the end of the line under the temperature', () => {
+    const observedAt = F.now - (5 * 60 + 2) * 60 * 1000
+    const line = (options) => F.plain(WeatherCopy.conditionsSource({
+      observedAt, now: F.now, timeZone: F.timeZone, locale: F.locale, ...options,
+    }))
+    assert.equal(
+      line({ stationName: 'Austin-Camp Mabry', kilometres: 6.2, isStale: true }),
+      'Austin-Camp Mabry · 6 km · as of 6:18 PM · 5 h old',
+    )
+    assert.equal(line({ stationName: null, kilometres: null, isStale: true }), 'As of 6:18 PM · 5 h old')
+    // A current reading's line is unchanged.
+    assert.equal(line({ stationName: 'Austin-Camp Mabry', kilometres: 6.2 }), 'Austin-Camp Mabry · 6 km · as of 6:18 PM')
   })
 
   // No good reading means no temperature at all — only the ask, and the code it would spend
@@ -799,7 +815,7 @@ describe('Weather copy', () => {
     assert.equal(WeatherReferenceNames.stateList(['ZZ']), 'ZZ')
     assert.equal(WeatherStateList.maxNamed, 3)
   })
-  // MARK: - Radar (revision 11 §3)
+  // MARK: - Radar (docs/MESHWX_UI.md §18)
 
   const summary = (here, { nearest = null, heavy = null } = {}) => ({
     here,
@@ -864,7 +880,7 @@ describe('Weather copy', () => {
   /**
    * Radar is the one request whose refusal carries most of the information: "no recent picture
    * for this area" and "this radio has no dish at all" ask the reader to do entirely different
-   * things (design §3).
+   * things (docs/MESHWX_UI.md §18.3).
    */
   it('a refused radar tile says which of the four refusals it is', () => {
     const asked = WeatherRequest.radar({ latitude: 30.2672, longitude: -97.7431, zoom: 0 })
@@ -921,7 +937,7 @@ describe('Weather copy', () => {
     )
   })
 
-  // MARK: - The last hour (revision 13 §3)
+  // MARK: - The last hour (docs/MESHWX_UI.md §18.5)
 
   /**
    * "One row per tile, its newest time, and '5 pictures' when it holds more than one." The widths

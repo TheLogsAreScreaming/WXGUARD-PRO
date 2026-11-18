@@ -263,3 +263,107 @@ def test_observation_text_leaves_out_groups_the_metar_did_not_carry():
     conditions = render_text.observation(loc, ob).split("): ", 1)[1]
     assert conditions == "88F VRB5 few"
     assert ob.to_bytes()                                    # the v4 packer still fills its old defaults
+
+
+class TestStaleObservation:
+    """Nothing current within reach: the newest report up to twelve hours old
+    is served with its age rather than nothing (owner, 2026-10-16: "Woodcreek,
+    TX 78676: !Wind Adv til 7:00PM | 70/49 20%" read as complete with no
+    observation at all and a five-hour-old forecast)."""
+
+    def test_the_newest_stale_report_stands_in_when_nothing_is_fresh(self):
+        loc = resolver.resolve("Round Rock, TX")
+        first, second = loc["stations"][0][0], loc["stations"][1][0]
+        store = _store_with(
+            _metar_product(first, f"{first} 131355Z 16010KT 10SM CLR 30/20 A3001", age_min=400, seq=1),
+            _metar_product(second, f"{second} 131855Z 18005KT 10SM CLR 36/21 A2999", age_min=300, seq=2),
+        )
+        ob = services.observation_for(store, loc)
+        # The newest, not the nearest: five hours old beats nearly seven.
+        assert ob is not None and ob.station == second and ob.stale
+        assert 299 <= ob.age_min <= 301
+
+    def test_a_fresh_report_is_never_flagged_and_still_wins(self):
+        loc = resolver.resolve("Round Rock, TX")
+        first, second = loc["stations"][0][0], loc["stations"][1][0]
+        store = _store_with(
+            _metar_product(first, f"{first} 131355Z 16010KT 10SM CLR 30/20 A3001", age_min=300, seq=1),
+            _metar_product(second, f"{second} 131855Z 18005KT 10SM CLR 36/21 A2999", age_min=5, seq=2),
+        )
+        ob = services.observation_for(store, loc)
+        assert ob.station == second and not ob.stale
+
+    def test_over_twelve_hours_is_nothing(self):
+        loc = resolver.resolve("Round Rock, TX")
+        st = loc["stations"][0][0]
+        store = _store_with(_metar_product(st, f"{st} 131355Z 16010KT 10SM CLR 30/20 A3001", age_min=13 * 60))
+        assert services.observation_for(store, loc) is None
+        assert render_text.observation(loc, None) == "Round Rock, TX: no current obs within 12h of nearby stations"
+        assert render_text.summary(loc, None, [], None) == "Round Rock, TX: no data yet"
+
+    def test_the_replies_say_how_old_it_is(self):
+        loc = resolver.resolve("Round Rock, TX")
+        st, km = loc["stations"][0]
+        store = _store_with(_metar_product(st, f"{st} 131355Z 16010KT 10SM CLR 30/20 A3001", age_min=5 * 60 + 20))
+        ob = services.observation_for(store, loc)
+        assert ob.stale
+        text = render_text.observation(loc, ob)
+        assert f"({st} {km:.0f}km, 5h old): 86F dp68 SSE12 clear 10mi 30.01" in text
+        assert text.startswith("Round Rock, TX ")
+        wx = render_text.summary(loc, ob, [], None)
+        assert wx == f"Round Rock, TX: 86F dp68 SSE12 clear ({st} {km:.0f}km, 5h old)"
+        assert len(wx) <= render_text.MAX_DM
+        # A current report reads exactly as before.
+        fresh = services.observation_for(store, loc, max_age_min=6 * 60)
+        assert not fresh.stale
+        assert render_text.summary(loc, fresh, [], None) == f"Round Rock, TX: 86F dp68 SSE12 clear ({st} {km:.0f}km)"
+
+    def test_an_old_forecast_says_when_it_was_issued_in_the_summary(self):
+        loc = resolver.resolve("Round Rock, TX")
+        issued = datetime.now(timezone.utc) - timedelta(hours=5)
+        period = {"period_id": 0, "high_f": 70, "low_f": 49, "precip_pct": 20, "sky_code": 0}
+        fc = services.Forecast(point_name="Austin Bergstrom", point_zone="TXZ192", distance_km=34.0,
+                               issued_at=issued, source="PFM", periods=[period], stale=True)
+        text = render_text.summary(loc, None, [], fc)
+        assert text == f"Round Rock, TX: 70/49 20% fc issued {render_text._when(issued, render_text.tz_for_loc(loc))}"
+        assert len(text) <= render_text.MAX_DM
+        current = services.Forecast(point_name="Austin Bergstrom", point_zone="TXZ192", distance_km=34.0,
+                                    issued_at=issued, source="PFM", periods=[period])
+        assert render_text.summary(loc, None, [], current) == "Round Rock, TX: 70/49 20%"
+
+    def test_the_metar_reply_serves_a_stale_report_and_says_how_old(self):
+        # "metar <place>" is render_text.raw_metar over services.raw_metar_for:
+        # the same twelve hours, the same label.
+        loc = resolver.resolve("Round Rock, TX")
+        st, km = loc["stations"][0]
+        store = _store_with(_metar_product(st, f"{st} 131355Z 16010KT 10SM CLR 30/20 A3001", age_min=5 * 60 + 20))
+        found = services.raw_metar_for(store, loc)
+        assert found is not None and found[0] == st
+        text = render_text.raw_metar(loc, found)
+        assert text.startswith(f"METAR ({st} {km:.0f}km, 5h old) {st} ")
+        # The station asked for by name: no distance, still the age.
+        assert render_text.raw_metar(loc, (st, 0.0, found[2])).startswith(f"METAR (5h old) {st} ")
+        # A current one reads as before.
+        fresh = _store_with(_metar_product(st, f"{st} 131855Z 16010KT 10SM CLR 30/20 A3001", age_min=10))
+        assert render_text.raw_metar(loc, services.raw_metar_for(fresh, loc)).startswith(f"METAR ({st} {km:.0f}km) {st} ")
+        old = _store_with(_metar_product(st, f"{st} 131355Z 16010KT 10SM CLR 30/20 A3001", age_min=13 * 60))
+        assert services.raw_metar_for(old, loc) is None
+        assert render_text.raw_metar(loc, None) == "Round Rock, TX: no METAR within 12h from nearby stations"
+
+    def test_a_station_asked_for_by_name_answers_with_its_own_report(self):
+        # 2026-10-19: "metar KLAX" answered with Hawthorne's (KHHR) newer report.
+        # A METAR is one airport's; the reply says how old it is, as `>metar` does.
+        loc = resolver.resolve("KLAX")
+        near = loc["stations"][1][0]
+        store = _store_with(
+            _metar_product("KLAX", "KLAX 191353Z 25008KT 10SM CLR 20/12 A2995", age_min=155, seq=1),
+            _metar_product(near, f"{near} 191553Z 25008KT 10SM CLR 21/12 A2995", age_min=35, seq=2),
+        )
+        found = services.raw_metar_for(store, loc)
+        assert found[0] == "KLAX" and render_text.raw_metar(loc, found).startswith("METAR (2h old) KLAX ")
+        # A place still gets the nearest current report.
+        place = dict(loc, stations=[(s, km + 1.0) for s, km in loc["stations"]])
+        assert services.raw_metar_for(store, place)[0] == near
+        # A station with nothing in twelve hours: a neighbour, named.
+        silent = _store_with(_metar_product(near, f"{near} 191553Z 25008KT 10SM CLR 21/12 A2995", age_min=35))
+        assert services.raw_metar_for(silent, loc)[0] == near

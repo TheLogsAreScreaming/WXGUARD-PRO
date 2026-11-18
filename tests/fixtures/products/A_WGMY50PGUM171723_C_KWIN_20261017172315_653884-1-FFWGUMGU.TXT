@@ -1,0 +1,58 @@
+WGMY50 PGUM 171723
+FFWGUM
+GUC010-171930-
+/O.EXT.PGUM.FF.W.0036.000000T0000Z-261017T1930Z/
+/00000.0.ER.000000T0000Z.000000T0000Z.000000T0000Z.OO/
+
+BULLETIN - EAS ACTIVATION REQUESTED
+Flash Flood Warning
+National Weather Service Tiyan GU
+323 AM ChST Sun Oct 18 2026
+
+The National Weather Service in Tiyan has extended the
+
+* Flash Flood Warning for...
+  Guam...
+
+* Until 530 AM ChST.
+
+* At 323 AM ChST, Doppler radar indicated thunderstorms producing
+  heavy rain across the warned area with the inner eyewall of Champi
+  approaching southern Guam. Between 2 and 4 inches of rain have
+  fallen. Flash flooding is ongoing or expected to begin shortly and
+  will last through Sunday morning.
+
+  HAZARD...Flash flooding caused by thunderstorms.
+
+  SOURCE...Radar indicated.
+
+  IMPACT...Flash flooding of small creeks and streams, urban areas,
+           highways, streets and underpasses as well as other poor
+           drainage and low-lying areas.
+
+* Some locations that will experience flash flooding include...
+  Dededo, Tamuning, Yigo, Mangilao, Chalan Pago-Ordot, Barrigada,
+  Yona, Hagatna Heights, Andersen AFB, Talofofo, Mongmong-Toto-Maite,
+  Sinajana, Inarajan, Asan, Merizo, Piti, Santa Rita and Umatac.
+
+PRECAUTIONARY/PREPAREDNESS ACTIONS...
+
+Turn around, don't drown when encountering flooded roads. Most flood
+deaths occur in vehicles.
+
+Be especially cautious at night when it is harder to recognize the
+dangers of flooding.
+
+&&
+
+LAT...LON 1344 14459 1346 14460 1348 14462 1350 14475
+      1353 14478 1366 14483 1368 14484 1368 14487
+      1363 14491 1362 14497 1359 14497 1351 14494
+      1341 14481 1327 14479 1323 14476 1321 14464
+      1324 14463 1327 14465 1333 14461 1340 14463
+
+FLASH FLOOD...RADAR INDICATED
+
+$$
+
+CO

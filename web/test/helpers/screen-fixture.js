@@ -135,7 +135,7 @@ export function digest({ nowMinutes, feedHealth = 3, entries = [] }) {
   }
 }
 
-/** A `MeshWXCoverage` as the decoder hands one over (spec §7A). */
+/** A `MeshWXCoverage` as the decoder hands one over (spec §10). */
 export function coverageMessage({
   latitude,
   longitude,
@@ -164,7 +164,7 @@ export function areaRun({ stateIndex, isCounty, start, run }) {
 }
 
 /**
- * One radar tile as the app holds it (`WeatherStoredRadarTile`, spec §7D, revision 11): the
+ * One radar tile as the app holds it (`WeatherStoredRadarTile`, spec §13, revision 11): the
  * lattice square, the decoded Radar message, when it arrived and where the bot got it.
  *
  * `cells` is `[row, col, level]` triples on a dry grid; `size` 16 makes it a coarse tile and
@@ -315,7 +315,7 @@ export const WeatherPhoneFixture = {
     })
   },
 
-  /** WX-AUS's own statement of its area (spec §7A, the vector `coverage_wx_aus`). */
+  /** WX-AUS's own statement of its area (spec §10, the vector `coverage_wx_aus`). */
   get statement() {
     return coverageMessage({
       latitude: 30.2672,

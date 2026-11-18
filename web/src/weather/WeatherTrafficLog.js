@@ -29,7 +29,7 @@ import { bytesToHex, decodeHeader, MeshWXWire } from '../meshwx/index.js'
  * - `isBacklog`: drained from the radio's queue at connect rather than heard live. It can be
  *   hours old and says nothing about whether the bot is in range now.
  * - `isDuplicate`: the reducer recognised it as a copy of a message already applied — the bot's
- *   own "nobody echoed me" retransmission (spec §2.3). Kept rather than hidden: a channel full
+ *   own "nobody echoed me" retransmission (spec §2.4). Kept rather than hidden: a channel full
  *   of repeats is the thing a person opens this screen to find out.
  * - `snr`, `pathLength`: what the radio reported, when it reported anything.
  */
@@ -109,7 +109,7 @@ export const WeatherTrafficEntry = Object.freeze({
  * (PORTING.md §3); `fn` is called with this log after every change.
  */
 export class WeatherTrafficLog {
-  /** Rows kept, oldest dropped (design §2). */
+  /** Rows kept, oldest dropped (docs/MESHWX.md "State"). */
   static limit = 300
   /** Its own key beside the weather state's. */
   static key = 'weather.traffic'

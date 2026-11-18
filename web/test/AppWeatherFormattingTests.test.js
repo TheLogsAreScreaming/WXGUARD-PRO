@@ -216,7 +216,7 @@ describe('Weather formatting', () => {
   })
 })
 
-// MARK: - When an alert applies (docs/MESHWX_REV12.md)
+// MARK: - When an alert applies (docs/MESHWX_UI.md §3.1 U-49)
 //
 // The two clocks every alert test runs in: the phone's own 12- or 24-hour format comes from the
 // locale, so both are fixed here, as are the calendar and the zone — never the machine's.
@@ -249,7 +249,7 @@ describe('When an alert applies', () => {
     F.plain(WeatherFormatting.alertClock(date, { now, timeZone, locale: clock.locale }))
 
   /**
-   * The contract's three moments (docs/MESHWX_REV12.md §3): the screen that said "until Oct 2 at
+   * The contract's three moments (spec §18.2): the screen that said "until Oct 2 at
    * 19:00 · in 81 h 28 min" on Tuesday morning now says when it starts, and counts down only in
    * its last twelve hours.
    */
@@ -332,7 +332,7 @@ describe('When an alert applies', () => {
 
     /**
      * A notification body says when the alert applies the way every screen does, without the
-     * countdown (docs/MESHWX_REV12.md §2).
+     * countdown (docs/MESHWX_UI.md §3.1 U-49).
      */
     it(`a notification says from and until, and never counts down (${clock.name})`, () => {
       const copy = WeatherAlertNotificationCopyImpl.make({ locale: clock.locale, timeZone })

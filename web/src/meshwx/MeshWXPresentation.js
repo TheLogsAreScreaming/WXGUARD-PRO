@@ -1,6 +1,6 @@
 // Port of MC1Services/Sources/MeshWX/MeshWXPresentation.swift
 //
-// The pure half of spec §10 and §11: icons, tints, staleness and unit conversions, with no UI
+// The pure half of spec §18 and §21: icons, tints, staleness and unit conversions, with no UI
 // framework anywhere near them so every rule is a unit test. Nothing here returns a colour or a
 // localised string — only a name, a symbol and a number.
 //
@@ -46,7 +46,7 @@ export const MeshWXSeverity = Object.freeze({
   },
 
   /**
-   * Sort order for a warning list: the thing that can kill you first (spec §10.2, "sort by
+   * Sort order for a warning list: the thing that can kill you first (spec §18.2, "sort by
    * severity then expiry").
    */
   rank(severity) {
@@ -70,7 +70,7 @@ export const MeshWXSeverity = Object.freeze({
  *
  * The palette belongs to the app's design system (and has to answer to dark mode and to
  * accessibility contrast); this module only knows which NWS convention a product falls under,
- * so it names it and stops. Spec §10.2.
+ * so it names it and stops. Spec §18.2.
  */
 export const MeshWXEventTint = Object.freeze({
   red: 'red',
@@ -239,7 +239,7 @@ export const MeshWXFeedHealth = Object.freeze({
 
 export const MeshWXPresentation = Object.freeze({
 
-  // MARK: - Sky and condition icons (spec §10.1)
+  // MARK: - Sky and condition icons (spec §18.6)
 
   /**
    * SF Symbol for an observation's sky, or null for sky 15, which in an observation means the
@@ -291,7 +291,7 @@ export const MeshWXPresentation = Object.freeze({
   },
 
   /**
-   * Icon for a forecast period: the `cond` flags override the base sky code (spec §10.1).
+   * Icon for a forecast period: the `cond` flags override the base sky code (spec §18.6).
    *
    * Order is by what the flag means for a person's day — a thunderstorm outranks the sleet that
    * may follow it, both outrank fog, and wind is an accent on whatever else is happening rather
@@ -312,7 +312,7 @@ export const MeshWXPresentation = Object.freeze({
     return { symbolName: symbol, showsWindAccent: period.windy === true };
   },
 
-  // MARK: - Warning colour and icon (spec §10.2)
+  // MARK: - Warning colour and icon (spec §18.2)
 
   /**
    * NWS colour convention for a VTEC code, falling back to the significance letter.
@@ -346,7 +346,7 @@ export const MeshWXPresentation = Object.freeze({
     }
   },
 
-  // MARK: - Warning tags (spec §10.2)
+  // MARK: - Warning tags (spec §18.2)
   //
   // The app renders "Hail 1.00 in"; this module hands over the 1.0. Unit systems, decimal
   // separators and the word for hail are all localisation, and a string built here would be one
@@ -363,7 +363,7 @@ export const MeshWXPresentation = Object.freeze({
   },
 
   /**
-   * The tags worth showing for a warning, in the order §10.2 lists them, as
+   * The tags worth showing for a warning, in the order §18.2 lists them, as
    * `{ kind: 'tornado' | 'floodSource' | 'floodDamage', value }`, `{ kind: 'hail', inches }` and
    * `{ kind: 'wind', mph }`. Each case carries its number; the words are the app's.
    *
@@ -384,10 +384,17 @@ export const MeshWXPresentation = Object.freeze({
     return out;
   },
 
-  // MARK: - Staleness (spec §10.3, §5)
+  // MARK: - Staleness (spec §18.3, §5)
 
-  /** Observations older than this are stale. */
+  /** Observations older than this are stale: still shown, but with their age. */
   observationStaleAfterMinutes: 120,
+  /**
+   * **Tunable**: observations older than this are not shown at all. Between the two a reading is
+   * the weather as last seen, labelled "5 h old", rather than "No current conditions" (owner
+   * decision 2026-10-16). The bot answers `>o` with reports up to the same twelve hours
+   * (`OBS_STALE_MAX_AGE_MIN` in meshcore_weather/protocol/v5_builders.py).
+   */
+  observationShownForMinutes: 720,
   /** Forecasts older than this are stale. */
   forecastStaleAfterMinutes: 720,
   /**
@@ -410,6 +417,10 @@ export const MeshWXPresentation = Object.freeze({
 
   isObservationStale({ timestampMinutes, now }) {
     return now > timestampMinutes + MeshWXPresentation.observationStaleAfterMinutes;
+  },
+
+  isObservationTooOld({ timestampMinutes, now }) {
+    return now > timestampMinutes + MeshWXPresentation.observationShownForMinutes;
   },
 
   isForecastStale({ issuedMinutes, now }) {

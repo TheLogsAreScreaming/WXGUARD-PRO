@@ -12,6 +12,9 @@ Usage:
 
     # The `sat` reply: GOES receiver status from the dashboard, no EMWIN load
     meshcore-weather-cli sat
+
+    # Check the configuration before going on air (same as meshcore-weather --check)
+    meshcore-weather-cli check [--no-radio]
 """
 
 import asyncio
@@ -234,6 +237,9 @@ def cmd_clear_contacts():
 
 
 def main():
+    if sys.argv[1:2] == ["check"]:
+        from meshcore_weather.cli_check import main as check_main
+        sys.exit(check_main(sys.argv[2:]))
     logging.basicConfig(
         level=getattr(logging, settings.log_level.upper()),
         format="%(asctime)s [%(levelname)s] %(name)s: %(message)s",
@@ -247,6 +253,7 @@ def main():
         print("  query <location>     Fetch data and query for a location")
         print("  interactive          Simulate mesh commands from terminal")
         print("  sat                  GOES receiver status, as the sat command replies")
+        print("  check [--no-radio]   Check the configuration (never transmits); exit 1 on errors")
         print()
         print("Radio admin:")
         print("  contacts             List contacts on the radio device")

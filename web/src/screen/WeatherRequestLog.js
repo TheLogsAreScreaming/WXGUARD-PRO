@@ -9,7 +9,7 @@ export const WeatherRequestLogOutcome = Object.freeze({
   answered: 'answered',
   /** Nothing came back through the one retry. */
   noAnswer: 'noAnswer',
-  /** The bot said it cannot serve this (spec §8.3). */
+  /** The bot said it cannot serve this (spec §9). */
   notAvailable: 'notAvailable',
   /** Your own radio would not send it. */
   refused: 'refused',

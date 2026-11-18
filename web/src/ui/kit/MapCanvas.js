@@ -24,7 +24,7 @@ const MAX_ZOOM = 13
 const CONUS = { minLatitude: 24.4, maxLatitude: 49.6, minLongitude: -125, maxLongitude: -66.6 }
 const TAP_SLOP = 8
 // Radar cells are a wash over the ground, not a layer that hides it: the state lines and the
-// place's dot have to stay readable through them (revision 11 §3).
+// place's dot have to stay readable through them (docs/MESHWX_UI.md §3.1 U-47).
 const CELL_ALPHA = 0.55
 
 // Everything this map draws is American, and America crosses the date line: the western
@@ -189,8 +189,9 @@ export class MapCanvas {
   }
 
   /**
-   * The radar cells (revision 11 §3): `[{ level, south, west, north, east }]` in degrees, one
-   * rectangle per run of cells, and `unknown` for the ones a partial picture does not reach.
+   * The radar cells (docs/MESHWX_UI.md §3.1 U-46): `[{ level, south, west, north, east }]` in
+   * degrees, one rectangle per run of cells, and `unknown` for the ones a partial picture does not
+   * reach.
    *
    * Drawn **over the basemap's fill and under everything else**, so the state lines, the alert
    * outlines, the place's dot and the city labels all read over the weather rather than being

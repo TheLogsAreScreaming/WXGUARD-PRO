@@ -1,8 +1,8 @@
 // Port of MC1Services/Sources/MeshWX/MeshWXPlaceNames.swift
 //
-// MARK: - Place labels (spec §9.1)
+// MARK: - Place labels (spec §16.2)
 //
-// How a bundle place name is shown: the rule of spec §9.1, which the weather bot's text replies
+// How a bundle place name is shown: the rule of spec §16.2, which the weather bot's text replies
 // follow too (`meshcore_weather/geodata/names.py`), so a town or a ZIP reads the same texted to
 // the bot as shown in the app: "Hell's Kitchen, NY 10019", "Adjuntas, PR", "McGuire AFB, NJ".
 //

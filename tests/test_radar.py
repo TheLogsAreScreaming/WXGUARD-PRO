@@ -1,4 +1,4 @@
-"""Radar (type 11, spec 7D, revision 11; loops, revision 13): the tile codec, reading a real EMWIN radar GIF, cutting a tile from it, and the
+"""Radar (type 11, spec 13, revision 11; loops, revision 13): the tile codec, reading a real EMWIN radar GIF, cutting a tile from it, and the
 `>radar` request with its limits.
 
 The two pictures under tests/fixtures/radar are as the dish received them on

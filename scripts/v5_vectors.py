@@ -6,7 +6,7 @@
     python3 scripts/v5_vectors.py --vectors  # only docs/meshwx_v5_vectors.json
 
 ``index.json`` is the append-only table the wire indexes into: office byte,
-station u16 and state byte (spec 9).  It is derived, never hand-edited.
+station u16 and state byte (spec 16).  It is derived, never hand-edited.
 
 The vectors are the conformance fixtures for ``docs/MeshWX_v5_Spec.md``: a
 client is correct when it decodes every ``hex`` to the ``decoded`` JSON and
@@ -80,16 +80,10 @@ def write_index() -> dict:
 
 # Event codes come from protocol.json "events".
 EV_TO_W = 1   # tornado warning
-EV_TO_A = 2   # tornado watch
 EV_SV_W = 3   # severe thunderstorm warning
-EV_SV_A = 4   # severe thunderstorm watch
 EV_FF_W = 6   # flash flood warning
-EV_FF_A = 7   # flash flood watch
-EV_FA_W = 8   # areal flood warning
 EV_FA_A = 10  # flood watch
-EV_FL_W = 11  # flood warning
 EV_WS_W = 24  # winter storm warning
-EV_WS_A = 25  # winter storm watch
 
 
 def build_vectors(index: dict) -> list:
@@ -137,9 +131,9 @@ def build_vectors(index: dict) -> list:
         "SV.W.EWX.42 over Travis and Hays counties; expires 01:45 UTC",
     )
 
-    # 1b. The same warning as this bot sends it from revision 5 on: flags
-    #     nibble bit 1 set and the issue time appended after the area list, as
-    #     minutes before `expires`. Issued 01:24 UTC, expires 01:45.
+    # 1b. The same warning with its issue time: flags nibble bit 1 set and the
+    #     issue time after the area list, as minutes before `expires`. Issued
+    #     01:24 UTC, expires 01:45.
     add(
         "severe_thunderstorm_warning_issued",
         v5.encode_warning(
@@ -163,13 +157,13 @@ def build_vectors(index: dict) -> list:
             areas=v5.areas_from_ugcs(["TXC453", "TXC209"], states),
             issued_min=NOW_MIN + 24,
         ),
-        "SV.W.EWX.42 again, with the revision 5 issue time: 53 bytes, the two "
-        "trailing bytes hold 21 = minutes between the issuance and the expiry",
+        "SV.W.EWX.42 again, with the issue time (flags bit 1): 53 bytes, the "
+        "two trailing bytes hold 21 = minutes between the issuance and the expiry",
     )
 
-    # 1c. The same warning again, as a bot fed by its own GOES dish sends it
-    #     from revision 7 on: source 1 in bits 2-3 of the flags nibble, beside
-    #     the revision 5 issue-time bit. Not one byte of the body moved.
+    # 1c. The same warning again, as a bot fed by its own GOES dish sends it:
+    #     source 1 in bits 2-3 of the flags nibble, beside the issue-time bit.
+    #     Not one byte of the body differs.
     add(
         "severe_thunderstorm_warning_from_goes",
         v5.encode_warning(
@@ -198,9 +192,9 @@ def build_vectors(index: dict) -> list:
         "(bits 2-3); otherwise byte for byte the issued vector",
     )
 
-    # 1d. Revision 12: a watch issued before it takes effect carries its start.
-    #     The 29 September case: a Flood Watch issued at 09:24 on a Tuesday
-    #     for Wednesday 19:00 through Friday 19:00 (both CDT). Zones only.
+    # 1d. A watch issued before it takes effect carries its start: a Flood
+    #     Watch issued at 09:24 on a Tuesday for Wednesday 19:00 through Friday
+    #     19:00 (both CDT). Zones only.
     add(
         "warning_upcoming_watch",
         v5.encode_warning(
@@ -219,8 +213,8 @@ def build_vectors(index: dict) -> list:
         ),
         "FA.A.EWX.8, not in effect until 33 h 36 min after it was issued: after "
         "the issue time (4896 = issued_before) two more bytes, 2880 = minutes "
-        "from the start to the expiry. A revision 11 decoder stops after the "
-        "issue time and reads this as a watch in effect from issuance",
+        "from the start to the expiry, found by length. Shown from Wednesday "
+        "19:00 until Friday 19:00, not as in effect now",
     )
 
     # 2. Winter storm warning: zone list only (TXZ191-194 and TXZ200).
@@ -321,8 +315,8 @@ def build_vectors(index: dict) -> list:
         "KGTU is calm, KHYI has only wind direction and sky",
     )
 
-    # 5b. The same batch as this bot sends it from revision 5 on: flags nibble
-    #     bit 0 set and a trailing nibble per station saying how far behind
+    # 5b. The same batch with per-station ages: flags nibble bit 0 set and a
+    #     trailing nibble per station saying how far behind
     #     `ts` that station's own METAR is, in 10-minute steps. KAUS is the
     #     newest report, so its age is 0; KHYI filed 110 minutes earlier and
     #     must not be drawn as "as of" the batch time.
@@ -377,8 +371,8 @@ def build_vectors(index: dict) -> list:
                 },
             ],
         ),
-        "the revision 5 form: 44 bytes, ages 0 / 20 / 110 minutes packed as "
-        "nibbles 0, 2 and 11 in two trailing bytes (0x20, 0x0b)",
+        "with per-station ages (flags bit 0): 44 bytes, ages 0 / 20 / 110 "
+        "minutes packed as nibbles 0, 2 and 11 in two trailing bytes (0x20, 0x0b)",
     )
 
     # 6. Forecast: point 102 (Austin Bergstrom), 7 periods from tonight.
@@ -512,28 +506,27 @@ def build_vectors(index: dict) -> list:
                 states,
             ),
         ),
-        "the live WX-AUS coverage: 36 zones as 5 runs, offices EWX/FWD/HGX/SJT, "
-        "neither list cut",
+        "WX-AUS's coverage: 36 zones as 5 runs inside 120 km of Austin, offices "
+        "EWX/FWD/HGX/SJT, neither list cut, a station cap of 13",
     )
 
-    # 7. Text: a warning narrative that needs two chunks.
-    narrative = (
-        "SEVERE THUNDERSTORM WARNING FOR NORTHEASTERN HAYS AND SOUTHWESTERN "
-        "TRAVIS COUNTIES UNTIL 145 AM CDT. At 1257 AM a severe thunderstorm "
-        "was near Dripping Springs, moving east at 40 mph. HAZARD: 60 mph "
-        "gusts and quarter size hail. SOURCE: Radar indicated."
-    )
-    for data in v5.text_chunks(
-        23, BOT, subject=v5.SUBJECT_WARNING, text=narrative
+    # 7. Text: a warning narrative in two chunks, chunk 0 filled to the
+    #    transport's 165-byte maximum. A bot sends at most 157, so the encoder
+    #    refuses to build chunk 0 and the bytes are pinned here: a decoder must
+    #    read anything the transport carries (spec section 2.5).
+    for name, hexdata in (
+        ("text_warning_narrative_chunk0", "177a4c6000170002534556455245205448554e44455253544f524d205741524e494e4720464f52204e4f5254484541535445524e204841595320414e4420534f5554485745535445524e2054524156495320434f554e5449455320554e54494c2031343520414d204344542e204174203132353720414d206120736576657265207468756e64657273746f726d20776173206e656172204472697070696e6720537072696e"),
+        ("text_warning_narrative_chunk1", "187a4c600017010267732c206d6f76696e672065617374206174203430206d70682e2048415a4152443a203630206d706820677573747320616e6420717561727465722073697a65206861696c2e20534f555243453a20526164617220696e646963617465642e"),
     ):
-        info = v5.decode(data)
         add(
-            f"text_warning_narrative_chunk{info['idx']}",
-            data,
-            "group 23, reassemble by (bot, group) in idx order",
+            name,
+            bytes.fromhex(hexdata),
+            "group 23, reassemble by (bot, group) in idx order. Chunk 0 is 165 "
+            "bytes, the transport maximum: past what a bot sends, and a decoder "
+            "must still read it",
         )
 
-    # 7b. Text (revision 7): a forecast discussion longer than the air allows.
+    # 7b. Text: a forecast discussion longer than the air allows.
     #     Source 1 (off the bot's own GOES dish) in bits 2-3 and the cut flag
     #     in bit 0 make the flags nibble 0x5, on this chunk and on every other
     #     chunk of the same reply.
@@ -566,14 +559,27 @@ def build_vectors(index: dict) -> list:
         ),
     )
 
-    # 8b. Area sweep (revision 9): the national picture, the answer to `>wmap`.
-    #     A busy spring afternoon — a squall line from Texas to Missouri, a
-    #     winter storm over the Rockies, flooding in the Mississippi valley —
-    #     as 40 runs of UGC numbers the phone draws on its own outlines.
-    #     Warnings first, then watches; inside each, by state and then by the
-    #     run's first number. 38 entries fill the first packet and 2 go in the
-    #     second, and the cut flag is set on BOTH because the rest of the
-    #     country did not fit in eight packets.
+    # 8b. Area sweep: the national picture, the answer to `>wmap`, cut, in two
+    #     packets. Packet 0 holds 38 entries, 163 bytes: past the 36 a bot
+    #     sends, so the encoder refuses it and the bytes are pinned here, and a
+    #     decoder must still read it (spec section 2.5). Warnings first, then
+    #     watches; inside each, by state and then by the run's first number.
+    #     The cut flag is on both packets.
+    for name, hexdata in (
+        ("area_sweep_national_packet0", "207a4ca99c13c7012000020b060a0c0307770806079100180a211c0b1814080b1c1410031fad0803232104082347000b2c2808032f31140b301e140331bd040631fe011834010401471b040347290c064765000355d11003552b0906554b050155c5010155eb0118620c0c040146100207320c190a321404133c0c041df415041f2c2d07235a10072f500c0431901d19320a100435580e194205040247c81419500708"),
+        ("area_sweep_national_packet1", "217a4ca99c13c7012001020255642419621e08"),
+    ):
+        add(
+            name,
+            bytes.fromhex(hexdata),
+            "type byte 0xA9: area sweep, flags 0x9 = cut (bit 0) + source 2 "
+            "internet (bits 2-3); advisories (bit 1) clear, so this is "
+            "warnings and watches only. Group 32, reassemble by (bot, group) "
+            "in idx order. `total` has bit 7 clear and there are no scope "
+            "entries: the country. Packet 0 carries 38 entries (163 bytes), "
+            "more than a bot sends, and a decoder must still read it",
+        )
+
     def runs(event, state, kind, spans):
         """`(event, state index, is_county, start, run)` for one state."""
         return [
@@ -585,71 +591,7 @@ def build_vectors(index: dict) -> list:
         """Inside one severity: by state, then by the run's first number."""
         return sorted(entries, key=lambda e: (e[1], e[3], e[2]))
 
-    sweep_warnings = in_wire_order(
-        # The squall line: tornado, severe thunderstorm and flash flood
-        # warnings over counties, which is what storm-based products carry.
-        runs(EV_TO_W, "TX", "C", [(453, 1), (491, 1)])
-        + runs(EV_SV_W, "TX", "C", [(209, 5), (299, 3)])
-        + runs(EV_FF_W, "TX", "C", [(331, 2)])
-        + runs(EV_TO_W, "OK", "C", [(27, 2)])
-        + runs(EV_SV_W, "OK", "C", [(41, 4)])
-        + runs(EV_FF_W, "OK", "C", [(101, 1)])
-        + runs(EV_SV_W, "AR", "C", [(119, 3)])
-        + runs(EV_FF_W, "AR", "C", [(145, 1)])
-        + runs(EV_SV_W, "LA", "C", [(33, 2)])
-        + runs(EV_FA_W, "LA", "C", [(71, 1)])
-        + runs(EV_SV_W, "MS", "C", [(49, 6)])
-        + runs(EV_SV_W, "MO", "C", [(189, 2)])
-        + runs(EV_FF_W, "MO", "C", [(510, 1)])
-        + runs(EV_SV_W, "KS", "C", [(173, 3)])
-        # The winter storm and the river flooding: zone-coded products.
-        + runs(EV_WS_W, "CO", "Z", [(33, 8)])
-        + runs(EV_WS_W, "WY", "Z", [(12, 4)])
-        + runs(EV_WS_W, "NE", "Z", [(1, 2)])
-        + runs(EV_FL_W, "IA", "Z", [(20, 5)])
-        + runs(EV_FL_W, "MN", "Z", [(40, 3)])
-        + runs(EV_FL_W, "AR", "Z", [(10, 4)])
-        + runs(EV_FL_W, "MO", "Z", [(30, 6)])
-        + runs(EV_FL_W, "IL", "Z", [(20, 3)])
-    )
-    sweep_watches = in_wire_order(
-        runs(EV_TO_A, "TX", "C", [(100, 10)])
-        + runs(EV_TO_A, "OK", "C", [(200, 6)])
-        + runs(EV_TO_A, "AR", "C", [(50, 4)])
-        + runs(EV_SV_A, "KS", "C", [(300, 12)])
-        + runs(EV_SV_A, "MO", "C", [(400, 8)])
-        + runs(EV_SV_A, "IA", "C", [(500, 6)])
-        + runs(EV_SV_A, "NE", "C", [(600, 4)])
-        + runs(EV_SV_A, "AL", "C", [(70, 5)])
-        + runs(EV_SV_A, "GA", "C", [(60, 4)])
-        + runs(EV_FF_A, "LA", "C", [(90, 5)])
-        + runs(EV_FF_A, "MS", "C", [(80, 4)])
-        + runs(EV_WS_A, "CO", "Z", [(50, 6)])
-        + runs(EV_WS_A, "WY", "Z", [(30, 3)])
-        + runs(EV_WS_A, "MT", "Z", [(10, 5)])
-        + runs(EV_WS_A, "ND", "Z", [(5, 2)])
-        + runs(EV_WS_A, "SD", "Z", [(7, 3)])
-    )
-    for data in v5.sweep_packets(
-        32,
-        BOT,
-        built_min=NOW_MIN,
-        entries=sweep_warnings + sweep_watches,
-        cut=True,
-        source=v5.SOURCE_INTERNET,
-    ):
-        info = v5.decode(data)
-        add(
-            f"area_sweep_national_packet{info['idx']}",
-            data,
-            "type byte 0xA9: area sweep, flags 0x9 = cut (bit 0) + source 2 "
-            "internet (bits 2-3); advisories (bit 1) clear, so this is "
-            "warnings and watches only. Group 32, reassemble by (bot, group) "
-            "in idx order. `total` has bit 7 clear and the scope is empty: "
-            "the country, the revision 9 bytes unchanged",
-        )
-
-    # 8c. Area sweep (revision 10): a sweep of two states, the answer to
+    # 8c. Area sweep: a sweep of two states, the answer to
     #     `>wmap OKTX`.  Packet 0 opens with one scope entry per state asked
     #     for — event 0, zone kind, start 0, run 1, which is `XXZ000`, "all of
     #     state XX" — and `total` carries bit 7 to say the picture is those
@@ -678,9 +620,9 @@ def build_vectors(index: dict) -> list:
         "has no alert entry, which says it is clear at this level",
     )
 
-    # 9. Request (revision 6): the one message that travels app -> bot, a `>d`
-    #    flooded on #meshwx.  Its `bot` is 0x041D, not this bot's BOT, because
-    #    the vector is the spec's own (section 7B) and an app must be able to
+    # 9. Request: the one message that travels app -> bot, a `>d` flooded on
+    #    #meshwx.  Its `bot` is 0x041D, not this bot's BOT, because the vector
+    #    is the spec's own (section 11) and an app must be able to
     #    check the bytes it sends without knowing which bot it is talking to.
     add(
         "request_digest",
@@ -692,10 +634,11 @@ def build_vectors(index: dict) -> list:
             ">d",
         ),
         "app -> bot: 16 bytes, sender prefix 01..06, ts 1789660000 "
-        "(2026-09-17 15:46:40 UTC); a resend repeats these bytes exactly",
+        "(2026-09-17 15:46:40 UTC); a resend keeps sender, ts and text and "
+        "takes the next seq",
     )
 
-    # 9b. Request (revision 10): the three packets of a sweep this phone never
+    # 9b. Request: the three packets of a sweep this phone never
     #     heard, asked for by the group the packets it did hear carried.
     add(
         "request_parts",
@@ -711,7 +654,7 @@ def build_vectors(index: dict) -> list:
         "carry does not change",
     )
 
-    # 9c. Request (revision 10): a forecast for a coordinate, which is how a
+    # 9c. Request: a forecast for a coordinate, which is how a
     #     phone asks when it knows of no bundled point near the place. Three
     #     decimals, the comma is what tells it from a place name.
     add(
@@ -728,7 +671,7 @@ def build_vectors(index: dict) -> list:
         "point's bundle index or 0xFFFF when it is not in the bundle",
     )
 
-    # 10. Radar (revision 11): one tile of a radar picture.  This one is real:
+    # 10. Radar: one tile of a radar picture.  This one is real:
     #     the 2 x 2 degree tile around Dallas cut from the Southern Plains
     #     mosaic the dish received at 23:46 UTC on 20 September 2026, picture
     #     time 23:38, with a squall line across it.  32 rows of 32 levels,
@@ -835,8 +778,7 @@ def build_vectors(index: dict) -> list:
         "the last 5 minutes",
     )
 
-    # 11. The last hour of a tile (revision 13): no new message, one new
-    #     request word.
+    # 11. The last hour of a tile: no new message, one request word.
     add(
         "request_radar_loop",
         v5.encode_request(

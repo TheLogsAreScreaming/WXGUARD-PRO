@@ -561,7 +561,7 @@ export class WeatherToolModel {
 
   /**
    * A complete reply to this very request, owned by this device and under five minutes old:
-   * asking again would have the bot rebuild the same reply on everyone's airtime (spec §13), so
+   * asking again would have the bot rebuild the same reply on everyone's airtime (spec §19), so
    * the answer stands in for the button.
    */
   freshOwnedReply({ for: request }) {
@@ -1834,7 +1834,7 @@ export class WeatherToolModel {
 
   // MARK: - Alert map (§17), channel traffic and the request list
   //
-  // Everything the revision 10 screens read, and nothing else. Each of these is one pure rule
+  // Everything these screens read, and nothing else. Each of these is one pure rule
   // called with this page's build and this model's clock, so a screen never assembles state
   // itself — which is how a page came to draw one place's map under another place's name.
 
@@ -2072,7 +2072,7 @@ export class WeatherToolModel {
       const requests = WeatherUpdatePlan.requests(plan)
       for (let offset = 0; offset < requests.length; offset += 1) {
         if (offset > 0) {
-          // The service refuses a second request inside the window (spec §8.2, §13): the steps are
+          // The service refuses a second request inside the window (spec §14, §19): the steps are
           // queued rather than fired together.
           await this.sleep(WeatherService.requestSpacing)
           if (state.cancelled) return

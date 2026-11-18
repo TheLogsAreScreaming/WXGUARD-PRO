@@ -27,6 +27,8 @@ WARNING_TYPES = {
     "TOR", "SVR", "SVS", "SPS", "FFW", "FFS", "FLW", "FLS", "FFA", "FLA",
     "WSW", "NPW", "RFW", "FWW", "MWW", "MWS", "SMW", "DSW", "EWW", "SQW", "CFW",
     "RVA", "WCN", "WOU", "SEL", "HLS", "TCV", "HWO",
+    "TSU",   # tsunami messages: in force until further notice
+    "AQA",   # air quality alerts: issued the evening before, for the next day
 }
 WARNING_HOURS = 48
 LSR_HOURS = 24

@@ -1,4 +1,4 @@
-// The radar screen (revision 11 §3, revision 13 §3), pushed from the place page's Radar card.
+// The radar screen (docs/MESHWX_UI.md §18.2, §18.5), pushed from the place page's Radar card.
 //
 // One map, framed on the tile, and everything the picture says about the place under it: the
 // legend, the time, the summary, and a control that picks the width — Local, Regional, Wide, the
@@ -40,7 +40,8 @@ export const RADAR_WIDTHS = Object.freeze([0, 1, 2])
 
 /**
  * How long a frame of the loop stays on screen: 0.8 s each, and the newest 2 s, so the loop
- * comes to rest on "now" for long enough to read it before it starts again (revision 13 §3).
+ * comes to rest on "now" for long enough to read it before it starts again
+ * (docs/MESHWX_UI.md §18.5).
  */
 export const RADAR_LOOP_TIMING = Object.freeze({ frameMilliseconds: 800, newestMilliseconds: 2000 })
 
@@ -243,7 +244,7 @@ export function WeatherRadarScreen({ app, page }) {
             // The cost above the button: it is what this tap is about to spend on the shared
             // channel, and a reader who has already tapped does not need telling. Always one
             // packet, at every width, held or not — a radar answer is one packet or a coarser
-            // packet, never two (spec §7D).
+            // packet, never two (spec §13).
             model.request != null && isAskable(status(model.request)) ? Line(t('weather.areaMap.packetsOne'), { key: 'cost' }) : null,
             model.request != null
               ? AskButton({

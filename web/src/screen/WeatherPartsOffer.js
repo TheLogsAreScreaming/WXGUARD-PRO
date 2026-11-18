@@ -4,7 +4,7 @@ import { WeatherAreaSweepAssembly, WeatherPartsKind, WeatherRequest, WeatherText
 
 /**
  * Whether the screen offers to ask for the packets of an answer that never arrived, and which
- * request that tap would send (spec §7C, revision 10).
+ * request that tap would send (spec §12, revision 10).
  *
  * Owner, 20 September 2026: *"'4 of 7 parts arrived': should allow me to re-request the missing
  * data."* An **offer**, never automatic — a resend costs one packet of shared airtime per part,

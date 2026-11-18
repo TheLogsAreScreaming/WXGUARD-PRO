@@ -1,0 +1,57 @@
+WGUS74 KMAF 142033
+FFSMAF
+
+Flash Flood Statement
+National Weather Service Midland/Odessa TX
+333 PM CDT Wed Oct 14 2026
+
+TXC371-475-142215-
+/O.CON.KMAF.FF.W.0233.000000T0000Z-261014T2215Z/
+/00000.0.ER.000000T0000Z.000000T0000Z.000000T0000Z.OO/
+Pecos TX-Ward TX-
+333 PM CDT Wed Oct 14 2026
+
+...FLASH FLOOD WARNING REMAINS IN EFFECT UNTIL 515 PM CDT THIS
+AFTERNOON FOR NORTH CENTRAL PECOS AND SOUTHEASTERN WARD COUNTIES...
+
+At 333 PM CDT, Doppler radar indicated thunderstorms producing heavy
+rain across the warned area. Between 2 and 3 inches of rain have
+fallen. The expected rainfall rate is 2.5 to 3.5 inches in 1 hour.
+Flash flooding is ongoing or expected to begin shortly.
+
+HAZARD...Life threatening flash flooding. Thunderstorms producing
+         flash flooding.
+
+SOURCE...Radar indicated.
+
+IMPACT...Life threatening flash flooding of creeks and streams, urban
+         areas, highways, streets and underpasses.
+
+Some locations that will experience flash flooding include...
+  Grandfalls, Imperial Reservoir, Royalty and Fort Stockton-Pecos
+  County Airport.
+
+This includes the following streams and drainages...
+  Comanche Creek, Pecos River and Leon Creek.
+
+PRECAUTIONARY/PREPAREDNESS ACTIONS...
+
+Turn around, don't drown when encountering flooded roads. Most flood
+deaths occur in vehicles.
+
+Please report observed flooding to local emergency services or law
+enforcement and request they pass this information to the National
+Weather Service when you can do so safely.
+
+&&
+
+LAT...LON 3092 10298 3144 10296 3142 10277 3129 10277
+      3129 10276 3092 10279
+
+FLASH FLOOD...RADAR INDICATED
+FLASH FLOOD DAMAGE THREAT...CONSIDERABLE
+EXPECTED RAINFALL RATE...2.5-3.5 INCHES IN 1 HOUR
+
+$$
+
+44

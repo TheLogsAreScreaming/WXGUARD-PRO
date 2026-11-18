@@ -255,7 +255,7 @@ def test_the_bridge_client_is_just_another_sender(client):
 
 def test_a_part_already_on_the_air_is_not_a_delivery(client):
     """`>part` for packets that went out again in the last 30 s sends nothing
-    (spec 7C.2). A simulator must not confirm a delivery that never happened,
+    (spec 14.5). A simulator must not confirm a delivery that never happened,
     so it is told how long to wait rather than "sent"."""
     from meshcore_weather.protocol.broadcaster import PART_RESEND_FLOOR_S
 

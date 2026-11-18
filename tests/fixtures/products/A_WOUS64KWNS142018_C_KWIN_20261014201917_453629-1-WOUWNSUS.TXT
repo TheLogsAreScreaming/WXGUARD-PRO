@@ -1,0 +1,53 @@
+WOUS64 KWNS 142018
+WOU5  
+
+BULLETIN - IMMEDIATE BROADCAST REQUESTED
+SEVERE THUNDERSTORM WATCH OUTLINE UPDATE FOR WS 685
+NWS STORM PREDICTION CENTER NORMAN OK
+320 PM CDT WED OCT 14 2026
+
+SEVERE THUNDERSTORM WATCH 685 IS IN EFFECT UNTIL 1100 PM CDT
+FOR THE FOLLOWING LOCATIONS
+
+OKC031-033-055-057-065-067-075-137-141-150400-
+/O.NEW.KWNS.SV.A.0685.261014T2020Z-261015T0400Z/
+
+OK 
+.    OKLAHOMA COUNTIES INCLUDED ARE
+
+COMANCHE             COTTON              GREER               
+HARMON               JACKSON             JEFFERSON           
+KIOWA                STEPHENS            TILLMAN             
+$$
+
+
+TXC009-023-033-075-077-081-101-103-105-107-115-125-135-151-155-
+169-173-191-197-207-227-235-253-263-269-275-305-317-329-335-345-
+353-371-383-415-431-433-441-447-451-461-485-487-150400-
+/O.NEW.KWNS.SV.A.0685.261014T2020Z-261015T0400Z/
+
+TX 
+.    TEXAS COUNTIES INCLUDED ARE
+
+ARCHER               BAYLOR              BORDEN              
+CHILDRESS            CLAY                COKE                
+COTTLE               CRANE               CROCKETT            
+CROSBY               DAWSON              DICKENS             
+ECTOR                FISHER              FOARD               
+GARZA                GLASSCOCK           HALL                
+HARDEMAN             HASKELL             HOWARD              
+IRION                JONES               KENT                
+KING                 KNOX                LYNN                
+MARTIN               MIDLAND             MITCHELL            
+MOTLEY               NOLAN               PECOS               
+REAGAN               SCURRY              STERLING            
+STONEWALL            TAYLOR              THROCKMORTON        
+TOM GREEN            UPTON               WICHITA             
+WILBARGER            
+$$
+
+
+ATTN...WFO...OUN...MAF...SJT...LUB...
+
+
+

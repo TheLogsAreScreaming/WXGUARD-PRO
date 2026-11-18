@@ -151,7 +151,7 @@ async def bridge_request(request: Request) -> JSONResponse:
     if outcome.startswith("hourly budget spent"):           # with or without the "busy" it was told
         return JSONResponse({"ok": False, "accepted": False, "outcome": "budget_spent",
                              "detail": outcome})
-    # A `>part` whose every packet went out again in the last 30 s (spec 7C.2).
+    # A `>part` whose every packet went out again in the last 30 s (spec 14.5).
     # Nothing was sent, so there is nothing for a client to confirm.
     if outcome == "already resent":
         return JSONResponse({"ok": False, "accepted": False, "outcome": "already_resent",

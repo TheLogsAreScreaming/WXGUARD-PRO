@@ -5,7 +5,7 @@
 #   sudo udevadm control --reload-rules && sudo udevadm trigger
 #   ls -l /dev/meshcore
 #
-# then set MCW_SERIAL_PORT=/dev/meshcore in .env (System > Settings in the
+# then set MCW_SERIAL_PORT=/dev/meshcore in .env (Settings › Radio link in the
 # portal). The bot also scans every USB serial port when the configured one
 # is missing or silent, so this rule is a convenience, not a requirement.
 #

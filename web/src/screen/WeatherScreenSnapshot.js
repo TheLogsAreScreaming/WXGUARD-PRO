@@ -55,7 +55,7 @@ export const WeatherRequestStatus = Object.freeze({
   pending({ attempt, sentAt }) {
     return { kind: 'pending', attempt, sentAt }
   },
-  /** Another request is on the air; one at a time (spec §13). */
+  /** Another request is on the air; one at a time (spec §19). */
   waitingForOther: Object.freeze({ kind: 'waitingForOther' }),
   settled(value, { at }) {
     return { kind: 'settled', value, at }
@@ -241,7 +241,7 @@ export const WeatherScreenSnapshot = Object.freeze({
       requestBlock = WeatherRequestBlock.channelMissing
     } else if (source != null) {
       // A bot heard but never seen to advertise can still be asked: a Request datagram names it
-      // by the two bytes its own packets carry (spec §7B). Only a radio that cannot send one
+      // by the two bytes its own packets carry (spec §11). Only a radio that cannot send one
       // needs the DM, and only the DM needs the whole key an advert brings.
       requestBlock = source.bot == null && inputs.firmwareSupportsWeather !== true
         ? WeatherRequestBlock.botNotAnnounced : null
@@ -310,7 +310,7 @@ export const WeatherScreenSnapshot = Object.freeze({
       forecast,
       // The radar tiles are read across every bot, not from the source alone: a tile is a named
       // square of the earth cut from a national mosaic, so the bot next door's picture of this
-      // place is this place's picture (spec §7D, revision 11). The ask still goes to the source,
+      // place is this place's picture (spec §13, revision 11). The ask still goes to the source,
       // which is what the card's own `tile` is for.
       radar: WeatherRadarCard.make({ place: inputs.place ?? null, tiles: radarTiles, now }),
       // The same list, kept: the radar screen's Local / Regional / Wide control asks what is
@@ -467,7 +467,7 @@ export const WeatherUpdatePlanItem = Object.freeze({
  * is past its three-hour cadence, or a gap is outstanding; the readings when the last hourly batch
  * was missed; the forecast when none is held or it was issued over twelve hours ago. Nothing at
  * all is asked for what the channel delivered in the last five minutes, which is airtime etiquette
- * rather than a claim about the bot (spec §13).
+ * rather than a claim about the bot (spec §19).
  *
  * - `justReceived`: left out only because the channel delivered the answer in the last five
  *   minutes — there is nothing to ask for, but the phone is not current either.
@@ -646,7 +646,7 @@ function makeScreenPlan({
 
   // Outside the bot's area its own list speaks for somewhere else, but the bot answers place-named
   // requests nationwide: the place's zone carries the watches and advisories, its county the
-  // storm-based warnings (spec §8.2).
+  // storm-based warnings (spec §14).
   //
   // Only a verdict of `outside` — a complete statement, or a footprint, that genuinely excludes
   // the place. "No bot says inside" also covers a zone list the bot had to cut, outlines still
@@ -665,8 +665,9 @@ function makeScreenPlan({
   // worked out twice and drifted — a Wimberley page asked about San Marcos while Update, holding a
   // fresh San Marcos reading, called everything current (docs/MESHWX_UI.md §3.1 U-2a).
   //
-  // Two ages, on purpose: the page stops showing a reading after two hours (`isStale`), but one
-  // over `readingFreshFor` has missed an hourly batch and is already worth a packet.
+  // Two ages, on purpose: the page marks a reading stale after two hours (`isStale`) and stops
+  // showing it after twelve (`isTooOld`), but one over `readingFreshFor` has missed an hourly batch
+  // and is already worth a packet.
   const refresh = (held) => {
     const observedAt = WeatherStoredObservation.observedAt(held.stored)
     if ((now - observedAt) / 1000 <= WeatherUpdatePlan.readingFreshFor) currentTimes.push(observedAt)

@@ -1,6 +1,6 @@
 // Port of MC1Services/Tests/MeshWXTests/MeshWXPresentationTests.swift
 //
-// The rendering rules of spec §10, kept testable by never returning a colour or a localised
+// The rendering rules of spec §18, kept testable by never returning a colour or a localised
 // string — only a name, a symbol and a number.
 
 import { test, describe } from 'node:test';
@@ -88,7 +88,7 @@ describe('MeshWX presentation', () => {
   });
 
   test('unlistedEventsFallBackToSignificance', () => {
-    // Nothing in §10.2 covers a dust storm warning or a rip current statement; the letter after
+    // Nothing in §18.2 covers a dust storm warning or a rip current statement; the letter after
     // the dot still ranks and colours them.
     assert.equal(MeshWXPresentation.tint({ forVTEC: 'DS.W' }), 'red');
     assert.equal(MeshWXPresentation.tint({ forVTEC: 'SQ.A' }), 'yellow');
@@ -113,7 +113,7 @@ describe('MeshWX presentation', () => {
   });
 
   test('tagsAreReturnedAsNumbersNotSentences', () => {
-    // §10.2 renders "Hail 1.00 in" and "Wind 60 mph"; the module hands over 1.0 and 60 so the
+    // §18.2 renders "Hail 1.00 in" and "Wind 60 mph"; the module hands over 1.0 and 60 so the
     // app can translate the words and choose the unit.
     assert.equal(MeshWXPresentation.hailInches({ quarterInches: 4 }), 1.0);
     assert.equal(MeshWXPresentation.hailInches({ quarterInches: 7 }), 1.75);

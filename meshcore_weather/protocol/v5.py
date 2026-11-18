@@ -1,19 +1,20 @@
 """MeshWX v5 wire codec — reference encoder and decoder.
 
-This module is the normative implementation of ``docs/MeshWX_v5_Spec.md``.
+This module is the reference implementation of ``docs/MeshWX_v5_Spec.md``.
 It is deliberately dependency-free (standard library only, nothing from
 ``meshcore_weather``) so that an app developer can read it top to bottom and
 port it to Swift, Kotlin or C without chasing imports.
 
 Every v5 message is the ``data`` field of one MeshCore ``GRP_DATA`` packet on
 the ``#meshwx`` channel with ``data_type = 0xFF10``.  ``data`` is at most 165
-bytes and every message fits in one packet; only Text carries chunk numbers.
-The encoders here build at most 157 (``MAX_SEND``); the decoders take
-anything up to 165 (``MAX_DATA``), which older bots sent.
+bytes and every message fits in one packet; only Text and Area sweep answers
+span several, and each of their packets carries its own group, index and
+total.  The encoders here build at most 157 (``MAX_SEND``); the decoders take
+anything up to 165 (``MAX_DATA``), the transport's limit.
 
-Every type but one travels bot -> app.  Request (type 9, spec 7B, new in
-revision 6) is the app's `>` request flooded on the same channel: the bot
-decodes it and never sends one.
+Every type but one travels bot -> app.  Request (type 9, spec 11) is the
+app's `>` request flooded on the same channel: the bot decodes it and never
+sends one.
 
 Layout of the 4-byte common header::
 
@@ -21,8 +22,8 @@ Layout of the 4-byte common header::
     offset 1  u16  bot    first two bytes of the bot's public key, LE
     offset 3  u8   type   high nibble = message type, low nibble = flags
 
-Since revision 7 bits 2-3 of the flags nibble are the same field in every
-type but Cancel: the data source (``SOURCE_*``), where the weather in this
+Bits 2-3 of the flags nibble are the same field in every type but Cancel:
+the data source (``SOURCE_*``), where the weather in this
 message came from.  Cancel spends its whole nibble on a reason code and is
 the one exception.
 
@@ -166,8 +167,8 @@ __all__ = [
 #: MeshCore ``data_type`` carrying a v5 message (development range).
 DATA_TYPE = 0xFF10
 
-#: Largest ``data`` payload the transport accepts, in bytes.  What a decoder
-#: must take: bots before 1 October 2026 filled packets to it.
+#: Largest ``data`` payload the transport accepts, in bytes, and so what a
+#: decoder must take.
 MAX_DATA = 165
 
 #: Largest ``data`` payload a bot sends, in bytes; every encoder here refuses
@@ -191,15 +192,14 @@ TYPE_FORECAST = 5
 TYPE_TEXT = 6
 TYPE_NOT_AVAILABLE = 7
 TYPE_COVERAGE = 8
-#: App -> bot: a `>` request flooded on #meshwx (spec 7B, revision 6).  It is
+#: App -> bot: a `>` request flooded on #meshwx (spec 11).  It is
 #: the only type an app sends; the bot never transmits one.
 TYPE_REQUEST = 9
 #: The national picture of active alerts, as runs of UGC numbers the phone
-#: draws on its own bundled outlines (spec 7C, revision 9).  Request only.
+#: draws on its own bundled outlines (spec 12).  Request only.
 TYPE_AREA_SWEEP = 10
-#: Radar (spec 7D, revision 11): one tile of a radar picture, as a quadtree of
-#: 2-bit levels.  The number revision 2 reserved "for a future structured
-#: product".
+#: Radar (spec 13): one tile of a radar picture, as a quadtree of 2-bit
+#: levels.
 TYPE_RADAR = 11
 
 TYPE_NAMES = {
@@ -216,7 +216,7 @@ TYPE_NAMES = {
     TYPE_RADAR: "radar",
 }
 
-# Text subjects (spec 8.1).
+# Text subjects (spec 8).
 SUBJECT_WARNING = 0
 SUBJECT_AFD = 1
 SUBJECT_SPACE = 2
@@ -227,7 +227,7 @@ SUBJECT_HWO = 6
 SUBJECT_NOWCAST = 7
 SUBJECT_GENERAL = 8
 
-# Not-available reasons (spec 8.3).
+# Not-available reasons (spec 9).
 REASON_NO_DATA = 0
 REASON_UNKNOWN_LOCATION = 1
 REASON_UNSUPPORTED = 2
@@ -264,26 +264,26 @@ _TAG_AREAS = 0x01
 FLAG_WARNING_UPDATE = 0x1
 
 # Warning flags nibble, bit 1: the issue time follows the polygon and the area
-# list (spec 3, revision 5).  The bit lives in the flags nibble and not in the
+# list (spec 3.4).  The bit lives in the flags nibble and not in the
 # tag byte because that byte has no spare bit: 7-6 tornado, 5-4 flood source,
 # 3-2 flood damage, 1 polygon, 0 areas.
 FLAG_WARNING_ISSUED = 0x2
 
 #: Observations flags nibble, bit 0: per-station ages follow the station
-#: records (spec 6, revision 5).
+#: records (spec 6.1).
 FLAG_OBS_AGES = 0x1
 
-# Coverage flags nibble (spec 7A).  A set bit means the list on the wire is
+# Coverage flags nibble (spec 10).  A set bit means the list on the wire is
 # shorter than what the bot really covers, so absence proves nothing.
 FLAG_COVERAGE_ZONES_CUT = 0x1
 FLAG_COVERAGE_OFFICES_CUT = 0x2
 
-#: Text flags nibble, bit 0 (spec 8.1, revision 7): the product was longer
+#: Text flags nibble, bit 0 (spec 8): the product was longer
 #: than eight chunks and the tail was dropped.  It is set on *every* chunk of
 #: a cut reply, so losing the last packet does not lose the fact.
 FLAG_TEXT_CUT = 0x1
 
-# Area sweep flags nibble (spec 7C, revision 9).
+# Area sweep flags nibble (spec 12).
 #: Bit 0: entries were dropped because the sweep did not fit in eight packets.
 #: Set on *every* packet of the sweep, for the same reason the Text cut flag is.
 FLAG_SWEEP_CUT = 0x1
@@ -292,7 +292,7 @@ FLAG_SWEEP_CUT = 0x1
 #: so an area absent from it may still hold an advisory.
 FLAG_SWEEP_ADVISORIES = 0x2
 
-# Radar flags nibble (spec 7D, revision 11).
+# Radar flags nibble (spec 13).
 #: Bit 0: the grid is 16 x 16, not 32 x 32, because the finer picture did not
 #: fit one packet.  Each coarse cell is the highest of the four it replaces.
 FLAG_RADAR_COARSE = 0x1
@@ -301,32 +301,32 @@ FLAG_RADAR_COARSE = 0x1
 FLAG_RADAR_PARTIAL = 0x2
 
 # --------------------------------------------------------------------------
-# Data source (flags nibble bits 2-3, spec 2.2.1, new in revision 7)
+# Data source (flags nibble bits 2-3, spec 2.3)
 # --------------------------------------------------------------------------
 #
 # Where the weather data in this message came from.  The two bits are free in
 # every type except Cancel (type 2), whose whole nibble is a reason code
 # (spec 4) — a Cancel never carries a source and a reader must never take one
-# out of it.  A bot older than revision 7 sends 0 in these bits, which reads
-# as "unstated": the absence of a claim, never a claim of absence.
+# out of it.  0 reads as "unstated": the absence of a claim, never a claim
+# of absence.
 
 #: The two bits of the flags nibble that carry the source.
 SOURCE_MASK = 0x0C
 #: How far to shift the source into the flags nibble.
 SOURCE_SHIFT = 2
 
-#: Not stated: a pre-revision-7 bot, or a message not built from a weather
-#: product (Request, Not available, Coverage).
+#: Not stated: no claim, or a message not built from a weather product
+#: (Request, Not available, Coverage).
 SOURCE_UNSTATED = 0
 #: Received off the GOES satellite by the bot's own dish.
 SOURCE_GOES = 1
-#: Fetched from NOAA over the internet.
+#: Fetched from the NWS over the internet: its EMWIN feed or its web services.
 SOURCE_INTERNET = 2
 #: Built from products of both kinds.
 SOURCE_MIXED = 3
 
 # Counts and limits.  They are what fits in MAX_SEND, so they are what a bot
-# sends; a decoder still reads the larger counts MAX_DATA held.
+# sends; a decoder reads by each message's own counts, up to MAX_DATA.
 MAX_TEXT_BYTES = MAX_SEND - 8  # 149
 MAX_TEXT_CHUNKS = 8
 MIN_POLYGON_VERTICES = 3
@@ -342,7 +342,7 @@ MAX_DIGEST_ENTRIES = 25
 MAX_STATIONS = 13
 # The age nibbles (one per station, packed two to a byte) do not fit beside a
 # full batch: 9 + 11 x 13 + 7 is 159.  Twelve stations with their ages are
-# 147 (spec 6, revision 5).
+# 147 (spec 6.1).
 MAX_STATIONS_WITH_AGES = 12
 #: One age nibble step, in minutes.
 OBS_AGE_STEP_MIN = 10
@@ -350,7 +350,7 @@ OBS_AGE_STEP_MIN = 10
 OBS_AGE_MAX_MIN = 15 * OBS_AGE_STEP_MIN
 #: The largest issue-to-expiry gap the u16 carries (45.5 days), saturating.
 MAX_ISSUED_BEFORE_EXPIRY = 0xFFFF
-# Revision 12: the start, as minutes before `expires`, saturating the same way.
+# The start, as minutes before `expires`; always below the issue time's value.
 MAX_BEGINS_BEFORE_EXPIRY = 0xFFFF
 MAX_PERIODS = 14
 # Coverage: both maxima at once are 14 + 22 + 1 + 120 = 157 bytes, inside
@@ -358,7 +358,7 @@ MAX_PERIODS = 14
 # The offices gave up the room: a bot's runs are cut far more often.
 MAX_COVERAGE_OFFICES = 22
 MAX_COVERAGE_RUNS = 30
-# Request (spec 7B): six bytes of the sender's public key — the prefix a DM
+# Request (spec 11): six bytes of the sender's public key — the prefix a DM
 # identifies the same phone by — then the sender's own Unix seconds, then the
 # `>` text, which ends the packet.
 REQUEST_SENDER_BYTES = 6
@@ -368,9 +368,9 @@ MAX_REQUEST_TEXT = 40
 #: Header + sender + ts + the one `>` byte a request cannot do without.
 MIN_REQUEST_SIZE = HEADER_SIZE + REQUEST_SENDER_BYTES + 4 + 1   # 15
 
-# Area sweep (spec 7C).  Seven fixed bytes after the header, then 4-byte
+# Area sweep (spec 12).  Seven fixed bytes after the header, then 4-byte
 # entries: 11 + 36 x 4 = 155, inside the 157-byte send limit with two to
-# spare.  A bot before 1 October 2026 sent 38, which a decoder still reads.
+# spare.  A decoder reads whatever whole entries a packet holds.
 MAX_SWEEP_PACKETS = 8
 MAX_SWEEP_ENTRIES_PER_PACKET = 36
 #: The whole sweep's ceiling, 288 runs.  Past it the least severe are dropped
@@ -381,15 +381,13 @@ MAX_SWEEP_RUN = 64
 #: The largest UGC number one entry starts at: ten bits.
 MAX_SWEEP_START = 1023
 
-# Scoped sweeps (spec 7C, revision 10).  A sweep may cover a few states
+# Scoped sweeps (spec 12.3).  A sweep may cover a few states
 # instead of the country, and says which in its own entries.
 #: `total` bit 7: this sweep covers only the states its scope entries name.
 #: It is on *every* packet, so a phone that lost packet 0 still knows it is
 #: not looking at the country.
 SWEEP_SCOPED_BIT = 0x80
 #: What is left of `total` once the scoped bit is out of it: 1 to 8 packets.
-#: Revision 9 wrote the whole byte, but never a value above 8, so the four
-#: low bits carried it then too.
 SWEEP_TOTAL_MASK = 0x0F
 #: The event code of a scope entry.  No event has code 0, which is what makes
 #: the entry tellable from an alert; the rest of it reads `XXZ000`, the
@@ -399,13 +397,13 @@ SWEEP_SCOPE_EVENT = 0
 #: sweep carries: 15 codes are 30 bytes, which fits the 40-byte request text.
 MAX_SWEEP_SCOPE_STATES = 15
 
-# Radar (spec 7D, revision 11).
+# Radar (spec 13).
 #: Cells along one side of a tile, and of a coarse one.
 RADAR_GRID = 32
 RADAR_COARSE_GRID = 16
 #: A tile spans 2 ** (zoom + 1) degrees: 2, 4, 8, 16.
 MAX_RADAR_ZOOM = 3
-#: `>radar ... loop` (spec 7D.4, revision 13): the pictures of the last hour,
+#: `>radar ... loop` (spec 13.5): the pictures of the last hour,
 #: at least 10 minutes apart, at most five of them, the newest included.
 RADAR_LOOP_WINDOW_MIN = 60
 RADAR_LOOP_MAX_FRAMES = 5
@@ -609,23 +607,21 @@ def encode_warning(
     a list of ``(state_index, is_county, start, run)`` runs of UGC numbers.
     ``hail_qin`` is the hail tag in quarter inches (4 = 1.00 in).
 
-    ``source`` says where the product came from (spec 2.2.1); it rides in
+    ``source`` says where the product came from (spec 2.3); it rides in
     bits 2-3 of the flags nibble.
 
     ``issued_min`` is when the product was issued, in Unix minutes.  It goes
     on the wire as the minutes between the issue time and ``expires_min``
     (u16, two bytes rather than four), saturating at
     ``MAX_ISSUED_BEFORE_EXPIRY``; a warning issued after its own expiry, which
-    no real product is, encodes as 0 rather than failing.  The two bytes are
-    appended last so that a decoder written before revision 5 stops after the
-    area list and never sees them.
+    no real product is, encodes as 0 rather than failing.  The two bytes come
+    after the area list.
 
-    ``begins_min`` is when the product takes effect (revision 12).  It goes on
+    ``begins_min`` is when the product takes effect.  It goes on
     the wire only when there is an issue time and the start is later than it:
     two more bytes after the issue time, as minutes before ``expires_min``.
     There is no flag for it (the nibble is full), so a decoder finds it by
-    length, and one written before revision 12 reads the issue time at its
-    fixed place and stops, never seeing it.  A product in effect from its
+    length.  A product in effect from its
     issuance carries no start.
     """
     if not (0 <= tornado <= 3):
@@ -717,7 +713,7 @@ def _encode_areas(
 
     Shared by the Warning's area list, which must carry at least one run when
     the tag bit says it is there, and by Coverage, where an empty list is a
-    legitimate answer (spec 7A).
+    legitimate answer (spec 10).
     """
     k = len(areas)
     if not (minimum <= k <= maximum):
@@ -783,15 +779,13 @@ def _decode_warning(data: bytes, hdr: Header) -> dict:
     if tags & _TAG_AREAS:
         out["areas"], off = _decode_areas(data, off)
 
-    # Revision 5: the issue time, as minutes before `expires`, after the
-    # variable blocks.  A decoder that does not know the flag stops above.
+    # The issue time, as minutes before `expires`, after the variable blocks.
     if hdr.flags & FLAG_WARNING_ISSUED:
         _need(data, off + 2, "warning issue time")
         issued_before = struct.unpack_from("<H", data, off)[0]
         out["issued_min"] = expires - issued_before
         off += 2
-        # Revision 12: the start, found by length.  Anything after it belongs
-        # to a later revision and is left alone.
+        # The start, found by length.  Anything after it is left alone.
         if len(data) >= off + 2:
             begins_before = struct.unpack_from("<H", data, off)[0]
             if 0 < begins_before < issued_before:
@@ -879,7 +873,7 @@ def encode_digest(
 
     ``source`` describes the whole list, which is aggregated from many
     products: ``SOURCE_MIXED`` when they did not all arrive the same way
-    (spec 2.2.1).
+    (spec 2.3).
     """
     if len(entries) > MAX_DIGEST_ENTRIES:
         raise ValueError(
@@ -990,7 +984,7 @@ def encode_obs(
     """Encode an Observations batch (1..13 stations, 11 bytes each).
 
     A station carrying ``age_min`` — how many minutes older than ``ts_min``
-    its own report is — puts the batch into the revision 5 form: flags nibble
+    its own report is — puts the batch into the form with ages: flags nibble
     bit 0 set and a trailing block of age nibbles.  The ages are all or
     nothing, so a batch where only some stations know their age is refused
     rather than sent with the rest guessed at; and because the block costs
@@ -998,7 +992,7 @@ def encode_obs(
     stations with ages do not fit in one packet (see ``MAX_STATIONS_WITH_AGES``).
 
     ``source`` describes the batch, which is aggregated from many products:
-    ``SOURCE_MIXED`` when they did not all arrive the same way (spec 2.2.1).
+    ``SOURCE_MIXED`` when they did not all arrive the same way (spec 2.3).
     """
     n = len(stations)
     if not (1 <= n <= MAX_STATIONS):
@@ -1053,8 +1047,7 @@ def _decode_obs(data: bytes, hdr: Header) -> dict:
     ts, n = struct.unpack_from("<IB", data, 4)
     _need(data, 9 + 11 * n, "observation stations")
 
-    # Revision 5: the age nibbles sit after the station records, so a decoder
-    # that does not know the flag reads the batch exactly as it always did.
+    # The age nibbles sit after the station records.
     ages: "list[int | None]" = [None] * n
     if hdr.flags & FLAG_OBS_AGES:
         base = 9 + 11 * n
@@ -1099,7 +1092,7 @@ def _decode_obs(data: bytes, hdr: Header) -> dict:
                 "humidity_pct": None if humidity == _U8_UNKNOWN else humidity,
                 "feels_delta_f": feels,
                 # Minutes this station's own report is older than `ts_min`;
-                # None when the batch predates revision 5 and does not say.
+                # None when the batch carries no ages.
                 "age_min": ages[i],
             }
         )
@@ -1126,7 +1119,7 @@ def encode_forecast(
     """Encode a point Forecast (1..14 periods, 5 bytes each).
 
     ``source`` is where the PFM or ZFP this was rendered from came from
-    (spec 2.2.1).
+    (spec 2.3).
     """
     n = len(periods)
     if not (1 <= n <= MAX_PERIODS):
@@ -1199,7 +1192,7 @@ def _decode_forecast(data: bytes, hdr: Header) -> dict:
 
 
 # --------------------------------------------------------------------------
-# Coverage (type 8, spec 7A)
+# Coverage (type 8, spec 10)
 # --------------------------------------------------------------------------
 
 
@@ -1277,7 +1270,7 @@ def _decode_coverage(data: bytes, hdr: Header) -> dict:
 
 
 # --------------------------------------------------------------------------
-# Text (type 6, spec 8.1)
+# Text (type 6, spec 8)
 # --------------------------------------------------------------------------
 
 
@@ -1296,7 +1289,7 @@ def encode_text(
     """Encode one Text chunk.
 
     ``cut`` says the product was longer than eight chunks and the tail was
-    dropped (spec 8.1, revision 7).  It belongs on *every* chunk of the
+    dropped (spec 8).  It belongs on *every* chunk of the
     reply, not just the last one: a phone that loses the last packet must
     still know it is not holding the whole product.
     """
@@ -1389,7 +1382,7 @@ def _decode_text(data: bytes, hdr: Header) -> dict:
         idx=idx,
         total=total,
         text=data[8:].decode("utf-8"),
-        # Revision 7: set on every chunk of a reply whose tail was dropped.
+        # Set on every chunk of a reply whose tail was dropped.
         cut=bool(hdr.flags & FLAG_TEXT_CUT),
         source=unpack_source(hdr.flags),
     )
@@ -1397,7 +1390,7 @@ def _decode_text(data: bytes, hdr: Header) -> dict:
 
 
 # --------------------------------------------------------------------------
-# Not available (type 7, spec 8.3)
+# Not available (type 7, spec 9)
 # --------------------------------------------------------------------------
 
 
@@ -1433,7 +1426,7 @@ def _decode_not_available(data: bytes, hdr: Header) -> dict:
 
 
 # --------------------------------------------------------------------------
-# Request (type 9, spec 7B) — app -> bot, the only message a bot receives
+# Request (type 9, spec 11) — app -> bot, the only message a bot receives
 # --------------------------------------------------------------------------
 
 
@@ -1444,7 +1437,7 @@ class Request:
     ``sender_prefix`` is the first six bytes of the sender's public key as 12
     lower-case hex characters: exactly the prefix a DM from the same phone
     carries, so a request by datagram and one by DM are one sender to the
-    bot's limits and its copy rule (spec 7B).
+    bot's limits and its copy rule (spec 11).
     """
 
     seq: int
@@ -1493,12 +1486,12 @@ def encode_request(
     ts: int,
     text: str,
 ) -> bytes:
-    """Encode an app's Request datagram (spec 7B).
+    """Encode an app's Request datagram (spec 11).
 
     ``sender_prefix`` is six bytes of the sender's public key (or the same
     twelve hex characters), ``ts`` the sender's own Unix seconds — repeated on
     a resend, which is what makes it a copy — and ``text`` the `>` request of
-    section 8.2.  Nothing here is ever sent by the bot; it exists so the
+    section 14.  Nothing here is ever sent by the bot; it exists so the
     decoder has a matching encoder and the test vectors can be built.
 
     No ``source``: a request carries no weather, so its source bits stay
@@ -1562,7 +1555,7 @@ def _decode_request(data: bytes, hdr: Header) -> dict:
 
 
 # --------------------------------------------------------------------------
-# Area sweep (type 10, spec 7C) — the national picture, in runs
+# Area sweep (type 10, spec 12) — the national picture, in runs
 # --------------------------------------------------------------------------
 #
 # One entry is one run of consecutive UGC numbers in one state, under one
@@ -1581,8 +1574,7 @@ def _decode_request(data: bytes, hdr: Header) -> dict:
 # carries an event code the Warning run does not, and pays for it by capping
 # the run at 64.
 #
-# Revision 10 adds the scope: a sweep may cover a few states rather than the
-# country.  `total` bit 7 says so on every packet, and packet 0 begins with
+# The scope: a sweep may cover a few states rather than the country.  `total` bit 7 says so on every packet, and packet 0 begins with
 # one entry per state named — event 0, zone kind, start 0, run 1, which is
 # `XXZ000`, "all of state XX".  A state in the scope with no alert entry is
 # an answer: nothing is active there at this level.  The decoder lifts those
@@ -1608,7 +1600,7 @@ def encode_area_sweep(
 
     ``entries`` are ``(event, state_index, is_county, start, run)``.  ``group``
     is the same value on every packet of one sweep — the ``seq`` its first
-    packet went out with, exactly as Text does it (spec 8.1) — so a phone
+    packet went out with, exactly as Text does it (spec 8) — so a phone
     reassembles by ``(bot, group)`` and never mixes two sweeps.
 
     ``cut`` says entries were dropped because the sweep did not fit in
@@ -1617,7 +1609,7 @@ def encode_area_sweep(
     ``advisories`` says advisories (VTEC significance Y and S) are included;
     without it the sweep is warnings and watches only.
 
-    ``scope`` is the state indices this sweep covers (spec 7C, revision 10).
+    ``scope`` is the state indices this sweep covers (spec 12.3).
     They go out as one entry each, ahead of the alert entries and counting
     toward the 36 a packet holds, and they belong on packet 0 alone.
     ``scoped`` sets ``total`` bit 7 and belongs on *every* packet, so a phone
@@ -1691,7 +1683,7 @@ def sweep_packets(
 ) -> "list[bytes]":
     """Split an ordered entry list into Area sweep packets.
 
-    Entries arrive most severe first (the caller's ordering, spec 7C), so
+    Entries arrive most severe first (the caller's ordering, spec 12), so
     anything past the sweep's room is the least severe and is dropped here
     with ``cut`` set on every packet.  Packets share
     ``group = seq_start & 0xFF`` and take consecutive sequence numbers from
@@ -1762,7 +1754,7 @@ def _decode_area_sweep(data: bytes, hdr: Header) -> dict:
     # The scope entries lead, and no alert carries event 0, so the run of them
     # at the front is the scope.  They come out of `entries`: a caller drawing
     # the map wants alerts, and "which states is this about" is a different
-    # question with its own answer (spec 7C, revision 10).
+    # question with its own answer (spec 12.3).
     scope = []
     while entries and entries[0]["event"] == SWEEP_SCOPE_EVENT:
         scope.append(entries.pop(0)["state"])
@@ -1783,7 +1775,7 @@ def _decode_area_sweep(data: bytes, hdr: Header) -> dict:
 
 
 # --------------------------------------------------------------------------
-# Radar (type 11, spec 7D) -- one tile of a radar picture
+# Radar (type 11, spec 13) -- one tile of a radar picture
 # --------------------------------------------------------------------------
 
 

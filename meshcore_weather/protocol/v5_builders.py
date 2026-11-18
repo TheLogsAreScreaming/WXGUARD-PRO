@@ -30,8 +30,12 @@ _CLIENT_DATA = Path(__file__).resolve().parent.parent / "client_data"
 LIFE_SAFETY = {"TO.W", "SV.W", "FF.W", "EW.W"}
 
 OBS_MAX_AGE_MIN = 120
+# `>o ICAO` with nothing fresh within reach answers with the newest report up
+# to this old, so the phone shows the weather as last seen with its age rather
+# than "No current conditions" (services.OBS_STALE_MAX_AGE_MIN, owner 2026-10-16).
+OBS_STALE_MAX_AGE_MIN = 720
 # `>o ICAO` for a station with nothing fresh answers with the nearest station
-# within this distance of it that has a report (spec 8.2, revision 8). The same
+# within this distance of it that has a report (spec 14, revision 8). The same
 # 40 km the app will still show a reading from, attributed to its station.
 OBS_SUBSTITUTE_KM = 40.0
 MAX_OBS_STATIONS = v5.MAX_STATIONS
@@ -214,7 +218,7 @@ _LATLON = re.compile(
 
 def parse_sweep_request(arg: str) -> tuple[bool, list[str]] | None:
     """`>wmap [all] [states]` -> (advisories, state codes), None when it
-    cannot be read (spec 7C, revision 10: Not available reason 1).
+    cannot be read (spec 12, revision 10: Not available reason 1).
 
     State codes come run together, spaced or comma separated, in any case:
     `TX`, `tx, ok`, `all TXOKLA`. An empty list is the whole country. `ALL` on
@@ -287,7 +291,7 @@ def parse_radar_request(arg: str) -> "tuple[str, int, list[int] | None] | None":
 
     None when the zoom is not 0..3.  `held` is None for a single picture and
     otherwise the pictures the app already holds, as UTC minutes of the day
-    (spec 7D.4): `loop 2338 2353` is [1418, 1433].  Read from the end: the
+    (spec 13.5): `loop 2338 2353` is [1418, 1433].  Read from the end: the
     loop, then the zoom, each its own token; anything else is part of the
     place, so `>radar zion il` and `>radar loop tx` are towns."""
     arg = (arg or "").strip()
@@ -401,10 +405,37 @@ def _decimate(points: list, n: int) -> list:
     return [points[round(i * step)] for i in range(n)]
 
 
+def _runs_first(areas: list, keep) -> list:
+    """The area runs, those naming any UGC in `keep` first, in wire order
+    within each group, so a cut to 30 (or 12, or 6) runs keeps the bot's own
+    area. County numbers are odd, so each county is a run of its own, and a
+    watch over more than 30 counties of one office (LWX's on 2026-10-16: 49
+    counties and 14 marine zones, 50 runs) lost every run after the 30th in
+    state order, whatever the bot covered. Spec 3 has no flag for a cut area
+    list, so this is the most the wire allows."""
+    if not keep:
+        return areas
+    index = {code: i for i, code in enumerate(tables.states)}
+    wanted = set()
+    for raw in keep:
+        ugc = str(raw).upper()
+        if len(ugc) == 6 and ugc[2] in ("C", "Z") and ugc[3:].isdigit() and ugc[:2] in index:
+            wanted.add((index[ugc[:2]], ugc[2] == "C", int(ugc[3:])))
+
+    def touches(r) -> bool:
+        state, is_county, start, run = r
+        return any((state, is_county, n) in wanted for n in range(start, start + run))
+    return [r for r in areas if touches(r)] + [r for r in areas if not touches(r)]
+
+
 def warning_message(seq: int, bot: int, w: dict, update: bool = False,
-                    source: int | None = None) -> bytes | None:
+                    source: int | None = None, keep=None) -> bytes | None:
     """One Warning packet. `source` defaults to the source of the product this
-    warning was extracted from, which the entry carries (spec 2.2.1)."""
+    warning was extracted from, which the entry carries (spec 2.3).
+
+    `keep`: UGC codes (the bot's coverage, or the county asked about) whose
+    runs survive first when the area list is longer than a packet carries;
+    the runs that go out are still in ascending order."""
     ident = warning_identity(w)
     if ident is None:
         return None
@@ -415,7 +446,12 @@ def warning_message(seq: int, bot: int, w: dict, update: bool = False,
     if len(polygon) < 3:
         polygon = []
     tables.load()
-    areas = v5.areas_from_ugcs(list(w.get("ugcs") or []), tables.states)
+    ranked = _runs_first(v5.areas_from_ugcs(list(w.get("ugcs") or []), tables.states), keep)
+
+    def areas(n: int) -> list:
+        """The first n runs by rank, back in wire order."""
+        return sorted(ranked[:n])
+
     kwargs = dict(event=event, office=office, etn=etn, expires_min=expires_min(w),
                   tornado=int(w.get("tornado_tag") or 0), flood_source=int(w.get("flood_source") or 0),
                   flood_damage=int(w.get("flood_damage") or 0), hail_qin=int(w.get("hail_qin") or 0),
@@ -427,12 +463,12 @@ def warning_message(seq: int, bot: int, w: dict, update: bool = False,
     # the radio heard it, the other whether it is in effect at all, and a
     # vertex costs twice as much (spec 3, revisions 5 and 12).
     attempts = [
-        (polygon[:30], areas[:30]),
-        (_decimate(polygon, 16), areas[:30]),
-        (_decimate(polygon, 16), areas[:12]),
-        (_decimate(polygon, 10), areas[:6]),
+        (polygon[:30], areas(30)),
+        (_decimate(polygon, 16), areas(30)),
+        (_decimate(polygon, 16), areas(12)),
+        (_decimate(polygon, 10), areas(6)),
         (_decimate(polygon, 8), []),
-        ([], areas[:30]),
+        ([], areas(30)),
     ]
     for poly, ar in attempts:
         if not poly and not ar:
@@ -454,7 +490,7 @@ def digest_message(seq: int, bot: int, active: list[dict], feed_health: int,
                    source: int = v5.SOURCE_UNSTATED) -> bytes:
     """The active-warning digest. It is aggregated from many products, so
     `source` is the store-wide answer its caller got from
-    `WeatherStore.products_source()` (spec 2.2.1)."""
+    `WeatherStore.products_source()` (spec 2.3)."""
     entries = []
     for w in sorted(active, key=expires_min):
         ident = warning_identity(w)
@@ -510,7 +546,7 @@ def station_obs_message(seq: int, bot: int, store: WeatherStore, icao: str,
                         source: int | None = None,
                         max_km: float = OBS_SUBSTITUTE_KM) -> bytes | None:
     """`>o ICAO`: that station's own report, or, when it has nothing fresh,
-    the nearest station within `max_km` of it that has one (spec 8.2,
+    the nearest station within `max_km` of it that has one (spec 14,
     revision 8). Always a batch of one, under the index of the station that
     actually reported, so the phone files it under the right airport.
 
@@ -520,21 +556,22 @@ def station_obs_message(seq: int, bot: int, store: WeatherStore, icao: str,
     know that 309 of those 2,237 stations send nothing on the feed: Dayton's
     nearest, Wright-Patterson AFB, never reports, so every `>o KFFO` came back
     Not available while Dayton International, 16.6 km away, reported hourly.
-    None only when nothing within `max_km` has a fresh report.
+    When nothing within `max_km` has a fresh report, the same walk is made
+    again admitting reports up to `OBS_STALE_MAX_AGE_MIN` old: a batch of
+    one whose `ts` is that report's own time, so the phone dates it exactly
+    and shows it with its age. None only when nothing within `max_km` has
+    reported in twelve hours.
     """
     icao = icao.upper()
-    msg = obs_message(seq, bot, store, [icao], source=source)
-    if msg is not None:
-        return msg
     resolver.load()
     here = resolver._stations.get(icao)
+    near: list[tuple[float, str]] = []
     try:
         lat, lon = here["la"], here["lo"]
     except (KeyError, TypeError):
-        return None
-    near: list[tuple[float, str]] = []
+        lat = lon = None                 # not in stations.json: no neighbours, its own report only
     for other, st in resolver._stations.items():
-        if other == icao or tables.station(other) is None:
+        if lat is None or other == icao or tables.station(other) is None:
             continue
         try:
             km = _haversine_km(lat, lon, st["la"], st["lo"])
@@ -543,13 +580,22 @@ def station_obs_message(seq: int, bot: int, store: WeatherStore, icao: str,
         if km <= max_km:
             near.append((km, other))
     # Nearest first, stopping at the first that answers: each look is a scan
-    # of the store, and a dense metro can put a dozen stations in range.
-    for km, other in sorted(near):
-        msg = obs_message(seq, bot, store, [other], source=source)
+    # of the store, and a dense metro can put a dozen stations in range. A
+    # fresh neighbour beats the station's own stale report, as it does for
+    # the text path (services.observation_for).
+    for max_age_min in (OBS_MAX_AGE_MIN, OBS_STALE_MAX_AGE_MIN):
+        msg = obs_message(seq, bot, store, [icao], source=source, max_age_min=max_age_min)
         if msg is not None:
-            logger.info("Observations: %s has nothing fresh; answered with %s, %.0f km from it",
-                        icao, other, km)
+            if max_age_min > OBS_MAX_AGE_MIN:
+                logger.info("Observations: %s has nothing fresh within %.0f km; answered with "
+                            "its own report, over %d min old", icao, max_km, OBS_MAX_AGE_MIN)
             return msg
+        for km, other in sorted(near):
+            msg = obs_message(seq, bot, store, [other], source=source, max_age_min=max_age_min)
+            if msg is not None:
+                logger.info("Observations: %s has nothing fresh; answered with %s, %.0f km from it%s",
+                            icao, other, km, "" if max_age_min == OBS_MAX_AGE_MIN else ", not current either")
+                return msg
     return None
 
 
@@ -578,7 +624,7 @@ def _feels_delta(temp_f: int | None, rh: int | None, wind_mph: int | None) -> in
 
 
 def obs_message(seq: int, bot: int, store: WeatherStore, stations: list[str],
-                source: int | None = None) -> bytes | None:
+                source: int | None = None, max_age_min: int = OBS_MAX_AGE_MIN) -> bytes | None:
     """One Observations batch, with every station's own age (spec 6).
 
     The batch's `ts` is the newest METAR in it and each station says how far
@@ -590,6 +636,12 @@ def obs_message(seq: int, bot: int, store: WeatherStore, stations: list[str],
     (152 bytes already, 159 with them, over the 157 a bot sends). A full batch
     therefore drops its farthest station — the list arrives nearest first —
     rather than leave the phone to guess which readings the timestamp describes.
+
+    `max_age_min` admits reports up to that old; the hourly batch keeps the
+    default. A caller admitting stale reports (`station_obs_message`) gets
+    only the stations the age nibble can place honestly: one more than
+    `OBS_AGE_MAX_MIN` behind the newest would go out saturated, and the phone
+    would date it fresher than it is.
 
     A batch is aggregated from many products, so `source` defaults to the
     store-wide answer: `mixed` whenever the store holds both kinds (spec
@@ -608,7 +660,7 @@ def obs_message(seq: int, bot: int, store: WeatherStore, stations: list[str],
         # The product's time is when the collective arrived, the same for every
         # station in it; the report's own DDHHMMZ group is when it was taken.
         ts = metar_observed_at(text, ts) or ts
-        if (now - ts) > timedelta(minutes=OBS_MAX_AGE_MIN):
+        if (now - ts) > timedelta(minutes=max_age_min):
             continue
         f = parse_metar(text)
         if not f:
@@ -635,6 +687,13 @@ def obs_message(seq: int, bot: int, store: WeatherStore, stations: list[str],
             logger.warning("Observation %s left out: %s", icao, e)
             continue
         rows.append((row, ts))
+    if max_age_min > OBS_MAX_AGE_MIN and rows:
+        # Honest ages only: a nibble is 0-150 minutes behind the batch's
+        # newest, and 15 means "150 or more" (spec 6.1), which the phone
+        # cannot date. Below the rounding edge, never at it.
+        newest = max(ts for _, ts in rows)
+        limit = timedelta(minutes=v5.OBS_AGE_MAX_MIN - v5.OBS_AGE_STEP_MIN // 2)
+        rows = [(row, ts) for row, ts in rows if (newest - ts) < limit]
     if not rows:
         return None
     while True:
@@ -667,7 +726,7 @@ def forecast_message(seq: int, bot: int, store: WeatherStore, lat: float, lon: f
     point carries its own index, or 0xFFFF.
 
     `source` defaults to the source of the PFM product this was rendered from
-    (spec 2.2.1)."""
+    (spec 2.3)."""
     from meshcore_weather.core import services
     from meshcore_weather.parser.pfm import downsample_to_daily
     found = services.nearest_pfm_point(store, lat, lon)
@@ -721,7 +780,7 @@ def coverage_facts(coverage, home: tuple[float, float] | None = None, radius_km:
 
     A set too big for one packet is cut to the runs that account for the most
     zones and the cut is flagged, so a zone missing from the wire means "not
-    stated", never "not covered" (spec 7A).
+    stated", never "not covered" (spec 10).
     """
     tables.load()
     resolver.load()
@@ -794,7 +853,7 @@ def coverage_message(seq: int, bot: int, coverage, home: tuple[float, float] | N
 
 # -- Area sweep -------------------------------------------------------------------------
 #
-# The national picture of what is active, as runs of UGC numbers (spec 7C).
+# The national picture of what is active, as runs of UGC numbers (spec 12).
 # The phone already ships every zone and county outline, so the mesh carries
 # numbers and the phone draws the map. It is never scheduled and never cheap:
 # see AppResponder for the limits that keep it off the air.
@@ -904,13 +963,13 @@ def area_sweep_messages(seq: SeqCounter, bot: int, store: WeatherStore,
     own area — so it reads the store with `coverage=None`. Empty when nothing
     the tables know is active, which the caller answers as Not available.
 
-    `states` scopes the sweep to those state codes (spec 7C, revision 10).
+    `states` scopes the sweep to those state codes (spec 12, revision 10).
     A scoped sweep names them in its scope entries and carries the alerts of
     those states only, so it is never empty: a state with nothing active is
     answered by its scope entry alone.
 
     A sweep is aggregated from every product the bot holds, so `source`
-    defaults to the store-wide answer (spec 2.2.1).
+    defaults to the store-wide answer (spec 2.3).
     """
     from meshcore_weather.protocol.warnings import extract_active_warnings
     tables.load()
@@ -971,7 +1030,7 @@ def fit_text(text: str) -> tuple[str, bool]:
     cut after a full stop it reads as an excerpt, which is what it is. So:
     the last sentence boundary (a `.`, `!` or `?` followed by a space) that
     fits, else the last word boundary, and the cut flag carries the rest of
-    the meaning (spec 8.1). No ellipsis: the flag is the signal and every
+    the meaning (spec 8). No ellipsis: the flag is the signal and every
     byte is airtime.
     """
     if _fits(text):
@@ -1020,7 +1079,7 @@ def text_messages(seq: SeqCounter, bot: int, subject: int, text: str,
 
 
 def request_letter(request: str) -> str:
-    """The letter a Not available carries for a request word (spec 8.3): its
+    """The letter a Not available carries for a request word (spec 9): its
     first, except `radar`, whose `r` was already `rain`'s."""
     word = request.lstrip(">").strip().lower()
     return v5.RADAR_REQUEST_LETTER if word == "radar" else (word[:1] or "?")

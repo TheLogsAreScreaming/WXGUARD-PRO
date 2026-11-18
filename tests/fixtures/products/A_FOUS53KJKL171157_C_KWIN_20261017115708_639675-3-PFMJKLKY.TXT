@@ -1,0 +1,2706 @@
+FOUS53 KJKL 171157
+PFMJKL
+
+Point Forecast Matrices
+National Weather Service Jackson KY
+756 AM EDT Sat Oct 17 2026
+
+KYZ086-172000-
+BARBOURVILLE-KNOX KY 
+36.87N  83.88W Elev. 986 ft
+756 AM EDT Sat Oct 17 2026
+
+Date             Sat 10/17/26            Sun 10/18/26            Mon 10/19/26
+EDT 3hrly     05 08 11 14 17 20 23 02 05 08 11 14 17 20 23 02 05 08 11 14 17 20
+UTC 3hrly     09 12 15 18 21 00 03 06 09 12 15 18 21 00 03 06 09 12 15 18 21 00
+
+Max/Min                      56          33          66          30          69
+Temp             44 47 53 56 46 41 37 35 33 51 65 66 48 40 35 32 32 53 66 67 51
+Dewpt            42 43 40 36 36 36 33 32 31 34 33 31 36 34 33 30 31 34 35 35 38
+RH               93 86 61 47 68 82 85 89 92 52 30 27 63 79 92 92 96 48 32 30 61
+Wind dir          N  N  N  N NE NE  N  N  N NE  E  E  E  N  N  N  N  N  N  N NE
+Wind spd          9  8  8  6  2  1  0  0  0  2  4  3  1  0  0  0  0  0  2  2  1
+Wind gust        20                                                            
+Clouds           B1 OV B2 FW FW CL FW FW FW CL CL CL CL CL FW FW FW CL CL CL CL
+PoP 12hr                     40           0           0           0           0
+QPF 12hr                   0.01           0           0           0           0
+Snow 12hr                 00-00       00-00       00-00                        
+Drizzle           C  C                                                         
+Rain                                                                           
+Obvis                                 PF PF                                    
+Frost                               Y  Y  Y                                    
+
+
+Date          Tue 10/20/26  Wed 10/21/26  Thu 10/22/26  Fri 10/23/26
+EDT 6hrly     02 08 14 20   02 08 14 20   02 08 14 20   02 08 14 20
+UTC 6hrly     06 12 18 00   06 12 18 00   06 12 18 00   06 12 18 00
+
+Min/Max          35    72      40    75      41    74      43    76
+Temp          40 37 70 59   45 41 72 61   46 42 72 62   48 44 74 63
+Dewpt         37 37 40 45   43 40 45 47   46 42 46 49   47 44 48 49
+PWind dir        NE    NE      NE     N      NE     N      NE    NE
+Wind char        LT    LT      LT    LT      LT    LT      LT    LT
+Avg clouds    CL FW CL CL   CL FW FW CL   CL FW FW CL   CL FW FW CL
+PoP 12hr          0     0       0     0       0     0       0     0
+
+$$
+KYZ111-172000-
+BEATTYVILLE-LEE KY 
+37.58N  83.72W Elev. 666 ft
+756 AM EDT Sat Oct 17 2026
+
+Date             Sat 10/17/26            Sun 10/18/26            Mon 10/19/26
+EDT 3hrly     05 08 11 14 17 20 23 02 05 08 11 14 17 20 23 02 05 08 11 14 17 20
+UTC 3hrly     09 12 15 18 21 00 03 06 09 12 15 18 21 00 03 06 09 12 15 18 21 00
+
+Max/Min                      56          33          64          33          68
+Temp             45 48 54 56 46 41 37 35 33 50 62 64 48 41 37 35 33 54 64 67 52
+Dewpt            43 43 39 37 35 35 35 33 33 34 33 31 35 33 33 32 31 36 36 34 38
+RH               93 83 57 49 65 79 92 92100 54 33 29 60 73 85 89 92 50 35 29 59
+Wind dir          N  N  N  N  N  N  N  N  N  E  E  E  N  N  N  N  N  N NE NE  N
+Wind spd          5  4  4  3  0  0  0  0  0  2  4  2  0  0  0  0  0  0  1  1  0
+Wind gust        17                                                            
+Clouds           B1 B2 B1 FW CL CL CL CL CL CL CL CL CL CL CL CL CL CL CL CL CL
+PoP 12hr                     30           0           0           0           0
+QPF 12hr                   0.01           0           0           0           0
+Snow 12hr                 00-00       00-00       00-00                        
+Drizzle           C                                                            
+Rain                                                                           
+Obvis                              PF PF F+                                    
+Frost                               Y  Y  YDate          Tue 10/20/26  Wed 10/21/26  Thu 10/22/26  Fri 10/23/26
+EDT 6hrly     02 08 14 20   02 08 14 20   02 08 14 20   02 08 14 20
+UTC 6hrly     06 12 18 00   06 12 18 00   06 12 18 00   06 12 18 00
+
+Min/Max          37    70      40    74      40    74      43    74
+Temp          42 37 67 59   46 41 71 60   47 42 71 62   49 44 72 62
+Dewpt         38 36 39 43   44 41 46 46   46 42 46 48   48 43 49 48
+PWind dir         N    NE      NE    NE       N     N       N    NE
+Wind char        LT    LT      LT    LT      LT    LT      LT    LT
+Avg clouds    CL FW CL CL   CL FW FW CL   CL CL FW CL   CL FW FW CL
+PoP 12hr          0     0       0     0       0     0       0     0
+
+$$
+KYZ084-172000-
+BIG SOUTH FORK NATIONAL RIVER AND RECREATION AREA-MCCREARY KY 
+36.67N  84.55W Elev. 732 ft
+756 AM EDT Sat Oct 17 2026
+
+Date             Sat 10/17/26            Sun 10/18/26            Mon 10/19/26
+EDT 3hrly     05 08 11 14 17 20 23 02 05 08 11 14 17 20 23 02 05 08 11 14 17 20
+UTC 3hrly     09 12 15 18 21 00 03 06 09 12 15 18 21 00 03 06 09 12 15 18 21 00
+
+Max/Min                      57          35          67          33          69
+Temp             46 48 55 56 48 43 40 37 35 53 65 67 53 46 40 37 38 57 66 68 54
+Dewpt            44 44 41 38 36 36 35 33 32 34 34 31 33 33 34 31 33 36 37 36 39
+RH               93 86 59 51 63 76 82 85 89 48 31 26 46 60 79 79 82 45 34 31 57
+Wind dir          N  N  N  N  N NE  N  N NE  E  E  E  E  N  N  N  N  N  N  N  N
+Wind spd          9  8  6  5  2  1  0  0  1  2  4  3  1  0  0  0  0  0  2  2  1
+Wind gust        21 18 19 16                                                   
+Clouds           B1 B2 B1 FW FW FW CL FW FW CL CL CL CL CL CL FW FW CL CL CL CL
+PoP 12hr                     40           5           0           0           0
+QPF 12hr                   0.01           0           0           0           0
+Snow 12hr                 00-00       00-00       00-00                        
+Drizzle           C  S                                                         
+Rain                                                                           
+Obvis                                    PF                                    
+Frost                               Y  Y  Y                                    
+
+
+Date          Tue 10/20/26  Wed 10/21/26  Thu 10/22/26  Fri 10/23/26
+EDT 6hrly     02 08 14 20   02 08 14 20   02 08 14 20   02 08 14 20
+UTC 6hrly     06 12 18 00   06 12 18 00   06 12 18 00   06 12 18 00
+
+Min/Max          37    72      41    75      42    75      44    76
+Temp          43 40 70 60   48 42 73 62   49 44 73 64   51 45 74 64
+Dewpt         37 38 40 42   44 41 46 44   46 43 47 45   48 45 49 46
+PWind dir         N    NE      NE     N      NE     N       N    NE
+Wind char        LT    LT      LT    LT      LT    LT      LT    LT
+Avg clouds    CL FW CL CL   CL CL FW CL   CL CL FW CL   CL CL FW CL
+PoP 12hr          0     0       0     0       0     0       0     0
+
+$$
+KYZ088-172000-
+BLACK MOUNTAIN-HARLAN KY 
+36.91N  82.89W Elev. 4139 ft
+756 AM EDT Sat Oct 17 2026
+
+Date             Sat 10/17/26            Sun 10/18/26            Mon 10/19/26
+EDT 3hrly     05 08 11 14 17 20 23 02 05 08 11 14 17 20 23 02 05 08 11 14 17 20
+UTC 3hrly     09 12 15 18 21 00 03 06 09 12 15 18 21 00 03 06 09 12 15 18 21 00
+
+Max/Min                      42          32          55          36          58
+Temp             39 36 38 40 35 35 33 32 32 44 54 55 43 40 39 38 37 50 57 56 44
+Dewpt            38 36 35 34 31 29 27 23 20 19 27 27 29 22 21 20 22 26 30 31 33
+RH               96100 89 79 85 78 78 69 61 36 35 34 57 48 48 48 54 39 35 38 65
+Wind dir          N  N  N  N  N NE NE  E  E  E  E  E  E  E SE SE SE  E  N  N  N
+Wind spd         20 14 11 11  9 11 10  9  9  6  6  5  6  9  8  5  4  2  4  4  5
+Wind gust        32 26 21                                                      
+CloudsB2 OV B2 SC B1 FW FW FW FW CL CL CL CL CL FW FW FW CL FW CL CL
+PoP 12hr                     70          30           5           0           0
+QPF 12hr                   0.11        0.01           0           0           0
+Snow 12hr                 00-00       00-00       00-00                        
+Rain              L  C  C  C                                                   
+Snow                          C                                                
+Wind chill       29 27 31 33 28 27 25 24 24             34 33                  
+Min chill        29    26    28    25    24    27    39    33    31    38      
+Frost                               Y  Y  Y                                    
+
+
+Date          Tue 10/20/26  Wed 10/21/26  Thu 10/22/26  Fri 10/23/26
+EDT 6hrly     02 08 14 20   02 08 14 20   02 08 14 20   02 08 14 20
+UTC 6hrly     06 12 18 00   06 12 18 00   06 12 18 00   06 12 18 00
+
+Min/Max          40    60      43    62      44    62      46    63
+Temp          42 41 59 51   45 45 61 52   46 46 59 54   49 48 61 53
+Dewpt         30 29 34 38   37 34 38 40   39 38 40 41   41 40 43 43
+PWind dir        NE    NE      NE     N      NE     N      NE    NE
+Wind char        LT    LT      LT    LT      LT    LT      LT    LT
+Avg clouds    FW FW FW CL   CL FW FW CL   CL FW FW FW   CL FW FW CL
+PoP 12hr          0     0       0     0       0     0       0     0
+
+$$
+KYZ088-172000-
+BLACK MOUNTAIN-HARLAN KY 
+36.94N  82.86W Elev. 4139 ft
+756 AM EDT Sat Oct 17 2026
+
+Date             Sat 10/17/26            Sun 10/18/26            Mon 10/19/26
+EDT 3hrly     05 08 11 14 17 20 23 02 05 08 11 14 17 20 23 02 05 08 11 14 17 20
+UTC 3hrly     09 12 15 18 21 00 03 06 09 12 15 18 21 00 03 06 09 12 15 18 21 00
+
+Max/Min                      42          32          55          36          58
+Temp             39 36 38 40 35 35 33 32 32 44 54 55 43 40 39 38 37 50 57 56 44
+Dewpt            38 36 35 34 31 29 27 23 20 19 27 27 29 22 21 20 22 26 30 31 33
+RH               96100 89 79 85 78 78 69 61 36 35 34 57 48 48 48 54 39 35 38 65
+Wind dir          N  N  N  N  N NE NE  E  E  E  E  E  E  E SE SE SE  E  N  N  N
+Wind spd         20 14 11 11  9 11 10  9  9  6  6  5  6  9  8  5  4  2  4  4  5
+Wind gust        32 26 21                                                      
+Clouds           B2 OV B2 SC B1 FW FW FW FW CL CL CL CL CL FW FW FW CL FW CL CL
+PoP 12hr                     70          30           5           0           0
+QPF 12hr                   0.11        0.01           0           0           0
+Snow 12hr                 00-00       00-00       00-00                        
+Rain              L  C  C  C                                                   
+Snow                          C                                                
+Wind chill       29 27 31 33 28 27 25 24 24             34 33                  
+Min chill        29    26    28    25    24    27    39    33    31    38      
+Frost                               Y  Y  Y                                    
+
+
+Date          Tue 10/20/26  Wed 10/21/26  Thu 10/22/26  Fri 10/23/26
+EDT 6hrly     02 08 14 20   02 08 14 20   02 08 14 20   02 08 14 20
+UTC 6hrly     06 12 18 00   06 12 18 00   06 12 18 00   06 12 18 00
+
+Min/Max          40    60      43    62      44    62      46    63
+Temp          42 41 59 51   45 45 61 52   46 46 59 54   49 48 61 53
+Dewpt         30 29 34 38   37 34 38 40   39 38 40 41   41 40 43 43
+PWind dir        NE    NE      NE     N      NE     N      NE    NE
+Wind char        LT    LT      LT    LT      LT    LT      LT    LT
+Avg clouds    FW FW FW CL   CL FW FW CL   CL FW FW FW   CL FW FW CL
+PoP 12hr          0     0       0     0       0     0       0     0
+
+$$
+KYZ120-172000-
+BREAKS INTERSTATE STATE PARK-PIKE KY 
+37.27N  82.32W Elev. 1800 ft
+756 AM EDT Sat Oct 17 2026
+
+Date             Sat 10/17/26            Sun 10/18/26            Mon 10/19/26
+EDT 3hrly     05 08 11 14 17 20 23 02 05 08 11 14 17 20 23 02 05 08 11 14 17 20
+UTC 3hrly     09 12 15 18 21 00 03 06 09 12 15 18 21 00 03 06 09 12 15 18 21 00
+
+Max/Min                      48          34          58          36          61
+Temp             45 40 47 47 41 39 37 36 34 45 56 57 46 42 39 38 36 48 59 59 48
+Dewpt            43 40 39 36 33 33 31 29 28 28 31 31 33 27 25 22 24 26 32 32 36
+RH               93100 74 65 73 79 79 75 78 51 38 37 60 55 57 52 61 42 36 36 63
+Wind dir          N  N  N  N  N NE NE  E  E  E NE NE  E SE SE SE SE  E  N  N  N
+Wind spd         25 16 11 11  8  6  4  2  3  3  6  5  5  6  8  5  5  1  4  4  3
+Clouds           OV OV B1 SC CL CL CL FW CL CL CL CL CL CL CL FW FW FW FW FW FW
+PoP 12hr                     70           0           5           0           0
+QPF 12hr                   0.01           0           0           0           0
+Snow 12hr                 00-00       00-00       00-00                        
+Drizzle           L  C                                                         
+Rain                    C  S                                                   
+Wind chill       36 32                                     33                  
+Min chill        36    29    36    32    31    33          33    30    36      
+Frost                               Y  Y  Y                                    
+
+
+Date          Tue 10/20/26  Wed 10/21/26  Thu 10/22/26  Fri 10/23/26
+EDT 6hrly     02 08 14 20   02 08 14 20   02 08 14 20   02 08 14 20
+UTC 6hrly     06 12 18 00   06 12 18 00   06 12 18 00   06 12 18 00
+
+Min/Max          39    63      41    66      43    65      46    66
+Temp          42 39 62 53   45 42 63 54   47 44 63 56   49 47 64 56
+Dewpt         35 35 38 44   42 39 45 46   44 42 48 47   46 45 51 48
+PWind dir        NE     N       N     N       N     N       N     N
+Wind char        LT    LT      LT    LT      LT    LT      LT    LT
+Avg clouds    FW FW FW FW   FW FW FW CL   FW FW FW FW   FW FW FW CL
+PoP 12hr          0     0       0     0       0     0       0     0
+
+$$
+KYZ114-172000-
+BOONEVILLE-OWSLEY KY 
+37.46N  83.68W Elev. 708 ft
+756 AM EDT Sat Oct 17 2026
+
+Date             Sat 10/17/26            Sun 10/18/26            Mon 10/19/26
+EDT 3hrly     05 08 11 14 17 20 23 02 05 08 11 14 17 20 23 02 05 08 11 14 17 20
+UTC 3hrly     09 12 15 18 21 00 03 06 09 12 15 18 21 00 03 06 09 12 15 18 21 00
+
+Max/Min                      55          33          64          29          67
+Temp             43 47 53 55 45 39 37 35 33 50 62 64 47 39 35 31 31 52 63 66 50
+Dewpt            43 42 39 36 35 35 34 33 32 34 33 31 35 33 34 31 31 35 35 34 37
+RH              100 83 59 49 68 85 89 92 96 54 33 29 63 79 96100100 52 35 30 61
+Wind dir          N  N  N  N  N  N  N  N  N  E  E  E  N  N  N  N  N  N  N  N  N
+Wind spd          4  3  3  2  0  0  0  0  0  1  3  2  0  0  0  0  0  0  0  0  0
+Wind gust        16                                                            
+Clouds           B1 B2 B1 FW CL CL CL CL CL CL CL CL CL CL CL FW CL CL CL CL CL
+PoP 12hr                     30           0           0           0           0
+QPF 12hr                   0.01           0           0           0           0
+Snow 12hr                 00-00       00-00       00-00                        
+Drizzle           C  S                                                         
+Rain                                                                           
+Obvis                              PF PF  F                                    
+Frost                               Y  Y  Y                                    
+
+
+Date          Tue 10/20/26  Wed 10/21/26  Thu 10/22/26  Fri 10/23/26
+EDT 6hrly     02 08 14 20   02 08 14 20   02 08 14 20   02 08 14 20
+UTC 6hrly     06 12 18 00   06 12 18 00   06 12 18 00   06 12 18 00
+
+Min/Max          34    69      39    73      40    7342    74
+Temp          38 36 66 58   44 41 71 60   46 42 70 61   48 43 72 61
+Dewpt         37 36 39 43   43 40 44 46   45 42 45 47   47 43 48 47
+PWind dir         N    NE      NE    NE       N     N       N    NE
+Wind char        LT    LT      LT    LT      LT    LT      LT    LT
+Avg clouds    CL FW CL CL   CL FW FW CL   CL FW FW CL   CL FW FW CL
+PoP 12hr          0     0       0     0       0     0       0     0
+
+$$
+KYZ115-172000-
+BUCKHORN STATE PARK-PERRY KY 
+37.31N  83.44W Elev. 782 ft
+756 AM EDT Sat Oct 17 2026
+
+Date             Sat 10/17/26            Sun 10/18/26            Mon 10/19/26
+EDT 3hrly     05 08 11 14 17 20 23 02 05 08 11 14 17 20 23 02 05 08 11 14 17 20
+UTC 3hrly     09 12 15 18 21 00 03 06 09 12 15 18 21 00 03 06 09 12 15 18 21 00
+
+Max/Min                      55          35          64          32          66
+Temp             46 45 54 54 46 41 39 37 35 50 63 64 50 42 38 35 36 54 64 64 51
+Dewpt            45 41 38 36 35 34 34 33 31 33 32 32 35 33 32 31 30 33 34 33 37
+RH               96 86 54 50 65 76 82 85 85 52 31 30 56 70 79 85 79 45 32 31 59
+Wind dir          N  N  N  N  N  N  N  N  N  E  E  E  N  N  N  N  N  N  N  N  N
+Wind spd          6  3  3  3  0  0  0  0  0  1  3  2  0  0  0  0  0  0  1  1  0
+Clouds           B1 B2 B1 FW CL CL CL CL FW CL CL CL CL CL CL FW FW CL CL CL CL
+PoP 12hr                     50           0           0           0           0
+QPF 12hr                   0.01           0           0           0           0
+Snow 12hr                 00-00       00-00       00-00                        
+Drizzle           C                                                            
+Rain                                                                           
+Frost                               Y  Y  Y                                    
+
+
+Date          Tue 10/20/26  Wed 10/21/26  Thu 10/22/26  Fri 10/23/26
+EDT 6hrly     02 08 14 20   02 08 14 20   02 08 14 20   02 08 14 20
+UTC 6hrly     06 12 18 00   06 12 18 00   06 12 18 00   06 12 18 00
+
+Min/Max          36    68      41    73      42    72      45    73
+Temp          41 39 66 58   46 42 71 60   47 43 70 61   50 46 71 61
+Dewpt         37 37 38 42   44 42 43 44   46 43 44 46   48 45 47 46
+PWind dir         N    NE      NE    NE      NE     N       N    NE
+Wind char        LT    LT      LT    LT      LT    LT      LT    LT
+Avg clouds    CL FW CL CL   CL FW FW CL   CL FW FW CL   CL FW FW CL
+PoP 12hr          0     0       0     0       0     0       0     0
+
+$$
+KYZ108-172000-
+CAMPTON-WOLFE KY 
+37.72N  83.56W Elev. 975 ft
+756 AM EDT Sat Oct 17 2026
+
+Date             Sat 10/17/26            Sun 10/18/26            Mon 10/19/26
+EDT 3hrly     05 08 11 14 17 20 23 02 05 08 11 14 17 20 23 02 05 08 11 14 17 20
+UTC 3hrly     09 12 15 18 21 00 03 06 09 12 15 18 21 00 03 06 09 12 15 18 21 00
+
+Max/Min                      54          33          61          33          65
+Temp             42 45 51 54 45 40 37 35 33 47 59 61 48 42 38 35 33 51 62 64 51
+Dewpt            41 43 39 37 35 35 35 33 33 33 33 31 34 33 33 32 31 36 35 34 38
+RH               96 93 63 52 68 82 92 92100 58 37 32 58 70 82 89 92 56 36 32 61
+Wind dir          N  N  N  N  N  N  N  N NE  E  E  E  N  N  N  N  N  E NE NE  N
+Wind spd          5  4  4  3  0  0  0  0  1  3  4  2  0  0  0  0  0  1  1  1  0
+Clouds           B1 B2 B1 FW CL CL CL CL CL CL CL CL CL CL CL CL CL CL CL CL CL
+PoP 12hr                     40           0           0           0           0
+QPF 12hr                   0.01           0           0           0           0
+Snow 12hr                 00-00       00-00       00-00                        
+Drizzle           C                                                            
+Rain                                                                           
+Frost                               Y  Y  YDate          Tue 10/20/26  Wed 10/21/26  Thu 10/22/26  Fri 10/23/26
+EDT 6hrly     02 08 14 20   02 08 14 20   02 08 14 20   02 08 14 20
+UTC 6hrly     06 12 18 00   06 12 18 00   06 12 18 00   06 12 18 00
+
+Min/Max          37    67      41    71      42    72      45    71
+Temp          41 37 64 58   46 42 68 60   47 43 68 61   50 45 69 61
+Dewpt         38 37 39 43   44 42 46 46   46 43 46 48   47 45 49 48
+PWind dir         N    NE      NE    NE       N     N       N    NE
+Wind char        LT    LT      LT    LT      LT    LT      LT    LT
+Avg clouds    CL FW CL CL   CL FW FW CL   CL CL FW CL   FW FW FW CL
+PoP 12hr          0     0       0     0       0     0       0     0
+
+$$
+KYZ113-172000-
+CARR CREEK STATE PARK-KNOTT KY 
+37.24N  83.03W Elev. 1017 ft
+756 AM EDT Sat Oct 17 2026
+
+Date             Sat 10/17/26            Sun 10/18/26            Mon 10/19/26
+EDT 3hrly     05 08 11 14 17 20 23 02 05 08 11 14 17 20 23 02 05 08 11 14 17 20
+UTC 3hrly     09 12 15 18 21 00 03 06 09 12 15 18 21 00 03 06 09 12 15 18 21 00
+
+Max/Min                      53          34          63          32          66
+Temp             47 45 52 52 45 40 37 35 34 49 62 62 49 43 39 37 35 54 64 64 52
+Dewpt            45 43 40 36 35 35 33 32 31 33 33 33 36 33 30 30 29 34 35 35 38
+RH               93 93 63 54 68 82 85 89 89 54 33 33 61 67 70 75 78 46 34 34 59
+Wind dir          N  N  N  N NE NE  N  N NE  E NE NE NE  E  N  N  N NE  N  N NE
+Wind spd          8  6  6  5  2  1  0  0  1  3  5  3  2  1  0  0  0  1  2  2  1
+Wind gust        18                                                            
+Clouds           B2 OV B2 FW CL CL CL FW FW CL CL CL CL CL FW FW FW CL CL CL CL
+PoP 12hr                     60           0           0           0           0
+QPF 12hr                   0.01           0           0           0           0
+Snow 12hr                 00-00       00-00       00-00                        
+Drizzle           L  C                                                         
+Rain                                                                           
+Frost                               Y  Y  Y                                    
+
+
+Date          Tue 10/20/26  Wed 10/21/26  Thu 10/22/26  Fri 10/23/26
+EDT 6hrly     02 08 14 20   02 08 14 20   02 08 14 20   02 08 14 20
+UTC 6hrly     06 12 18 00   06 12 18 00   06 12 18 00   06 12 18 00
+
+Min/Max          36    68      41    71      43    71      46    72
+Temp          42 39 67 56   45 42 69 58   46 44 68 59   49 47 70 59
+Dewpt         37 36 40 46   44 40 45 47   46 43 46 49   47 45 49 50
+PWind dir        NE    NE       E    NE      NE     N      NE    NE
+Wind char        LT    LT      LT    LT      LT    LT      LT    LT
+Avg clouds    FW FW FW CL   CL FW FW CL   CL FW FW CL   CL FW FW CL
+PoP 12hr          0     0       0     0       0     0       0     0
+
+$$
+KYZ052-172000-
+CAVE RUN LAKE-ROWAN KY 
+38.12N  83.52W Elev. 730 ft
+756 AM EDT Sat Oct 17 2026
+
+Date             Sat 10/17/26            Sun 10/18/26            Mon 10/19/26
+EDT 3hrly     05 08 11 14 17 20 23 02 05 08 11 14 17 20 23 02 05 08 11 14 17 20
+UTC 3hrly     09 12 15 18 21 00 03 06 09 12 15 18 21 00 03 06 09 12 15 18 21 00
+
+Max/Min                      54          32          61          38          65
+Temp             45 47 52 53 47 41 39 36 35 50 59 61 51 46 44 41 39 54 63 64 54
+Dewpt            38 41 38 35 35 35 35 33 32 33 32 31 34 32 33 31 32 34 35 35 38
+RH               76 79 59 50 63 79 85 89 89 52 36 32 52 58 65 67 76 46 35 34 54
+Wind dir          N  N  N  N NE NE NE  E  E  E  E  E  E  E  E  N  E  E NE NE NE
+Wind spd          8  8  5  5  2  2  2  1  2  3  5  4  3  2  2  0  1  1  2  2  2
+Clouds           SC B1 SC FW CL CL CL CL FW CL CL CL CL CL CL CL CL CL CL CL CL
+PoP 12hr                     10           0           0           0           0
+QPF 12hr                      0           00           0           0
+Snow 12hr                 00-00       00-00       00-00                        
+Drizzle                                                                        
+Obvis                                 PF PF                                    
+Freeze                              W  W  W                                    
+
+
+Date          Tue 10/20/26  Wed 10/21/26  Thu 10/22/26  Fri 10/23/26
+EDT 6hrly     02 08 14 20   02 08 14 20   02 08 14 20   02 08 14 20
+UTC 6hrly     06 12 18 00   06 12 18 00   06 12 18 00   06 12 18 00
+
+Min/Max          40    67      41    70      42    71      45    71
+Temp          44 40 65 59   46 42 68 60   47 43 69 63   50 46 70 62
+Dewpt         38 37 38 43   43 42 43 46   46 43 44 47   47 45 46 47
+PWind dir        NE    NE      NE    NE      NE     N      NE    NE
+Wind char        LT    LT      LT    LT      LT    LT      LT    LT
+Avg clouds    CL CL CL CL   CL FW FW CL   CL CL FW FW   FW FW FW CL
+PoP 12hr          0     0       0     0       0     0       0     0
+
+$$
+KYZ086-172000-
+CORBIN-KNOX KY 
+36.95N  84.08W Elev. 1074 ft
+756 AM EDT Sat Oct 17 2026
+
+Date             Sat 10/17/26            Sun 10/18/26            Mon 10/19/26
+EDT 3hrly     05 08 11 14 17 20 23 02 05 08 11 14 17 20 23 02 05 08 11 14 17 20
+UTC 3hrly     09 12 15 18 21 00 03 06 09 12 15 18 21 00 03 06 09 12 15 18 21 00
+
+Max/Min                      55          35          64          33          68
+Temp             45 46 53 55 46 41 39 36 35 50 62 64 51 44 40 37 38 55 66 67 52
+Dewpt            43 42 40 36 36 35 34 32 31 33 33 32 36 34 34 31 32 35 36 35 37
+RH               93 86 61 49 68 79 82 85 85 52 33 30 56 68 79 79 79 47 33 30 56
+Wind dir          N  N  N  N  N NE NE NE NE NE  E  E NE  E  N  N  N  N  N  N NE
+Wind spd         12 10  9  8  4  3  2  2  3  4  5  4  4  2  0  0  0  0  2  3  3
+Clouds           B1 B2 B1 FW CL CL CL FW FW CL CL CL CL CL FW FW FW CL CL CL CL
+PoP 12hr                     40           0           0           0           0
+QPF 12hr                   0.01           0           0           0           0
+Snow 12hr                 00-00       00-00       00-00                        
+Drizzle           C  C                                                         
+Wind chill       39                                                            
+Min chill        39    39          38    32    37                36            
+Frost                               Y  Y  Y                                    
+
+
+Date          Tue 10/20/26  Wed 10/21/26  Thu 10/22/26  Fri 10/23/26
+EDT 6hrly     02 08 14 20   02 08 14 20   02 08 14 20   02 08 14 20
+UTC 6hrly     06 12 18 00   06 12 18 00   06 12 18 00   06 12 18 00
+
+Min/Max          37    70      40    74      41    73      43    74
+Temp          42 39 68 59   46 41 71 61   46 43 71 62   49 44 72 63
+Dewpt         37 37 40 43   43 40 46 45   45 42 46 47   47 44 48 47
+PWind dir        NE    NE      NE    NE      NE     N      NE    NE
+Wind char        LT    LT      LT    LT      LT    LT      LT    LT
+Avg clouds    CL FW CL CL   CL FW FW CL   CL FW FW CL   CL FW FW CL
+PoP 12hr          0     0       0     0       0     0       0     0
+
+$$
+KYZ088-172000-
+CUMBERLAND-HARLAN KY 
+36.99N  82.97W Elev. 1440 ft
+756 AM EDT Sat Oct 17 2026
+
+Date             Sat 10/17/26            Sun 10/18/26            Mon 10/19/26
+EDT 3hrly     05 08 11 14 17 20 23 02 05 08 11 14 17 20 23 02 05 08 11 14 17 20
+UTC 3hrly     09 12 15 18 21 00 03 06 09 12 15 18 21 00 03 06 09 12 15 18 21 00
+
+Max/Min                      56          35          65          33          68
+Temp             45 47 54 56 47 42 39 36 35 50 63 65 51 44 39 36 36 54 65 67 53
+Dewpt            43 42 40 37 36 35 34 33 32 33 33 31 35 34 33 31 32 35 36 35 38
+RH               93 83 59 49 65 76 82 89 89 52 32 28 54 68 79 82 85 48 34 30 57
+Wind dir          N  N  N  NN NE NE NE NE  E  E  E NE  E  E SE SE NE  N  N NE
+Wind spd         11 10  9  8  3  2  1  1  2  4  5  4  3  1  0  0  0  0  2  3  2
+Wind gust        26 20 20 18                                                   
+Clouds           B1 B2 B1 FW FW CL CL FW FW CL CL CL CL CL CL FW FW CL CL CL CL
+PoP 12hr                     30           0           0           0           0
+QPF 12hr                   0.01           0           0           0           0
+Snow 12hr                 00-00       00-00       00-00                        
+Drizzle           C  C                                                         
+Rain                                                                           
+Obvis                              PF PF PF                                    
+Frost                               Y  Y  Y                                    
+
+
+Date          Tue 10/20/26  Wed 10/21/26  Thu 10/22/26  Fri 10/23/26
+EDT 6hrly     02 08 14 20   02 08 14 20   02 08 14 20   02 08 14 20
+UTC 6hrly     06 12 18 00   06 12 18 00   06 12 18 00   06 12 18 00
+
+Min/Max          37    70      42    74      42    74      45    75
+Temp          42 39 68 60   47 43 71 62   48 44 71 63   51 46 73 64
+Dewpt         37 37 40 44   43 41 45 46   46 43 46 47   47 45 48 47
+PWind dir        NE    NE      NE    NE      NE     N      NE    NE
+Wind char        LT    LT      LT    LT      LT    LT      LT    LT
+Avg clouds    CL FW CL CL   CL FW FW CL   CL CL FW CL   CL FW FW CL
+PoP 12hr          0     0       0     0       0     0       0     0
+
+$$
+KYZ085-172000-
+CUMBERLAND FALLS STATE PARK-WHITLEY KY 
+36.81N  84.33W Elev. 780 ft
+756 AM EDT Sat Oct 17 2026
+
+Date             Sat 10/17/26            Sun 10/18/26            Mon 10/19/26
+EDT 3hrly     05 08 11 14 17 20 23 02 05 08 11 14 17 20 23 02 05 08 11 14 17 20
+UTC 3hrly     09 12 15 18 21 00 03 06 09 12 15 18 21 00 03 06 09 12 15 18 21 00
+
+Max/Min                      56          35          65          33          68
+Temp             45 48 53 56 48 43 39 36 35 51 63 65 54 45 40 37 38 56 66 67 54
+Dewpt            44 42 39 37 36 35 34 33 32 33 32 30 33 34 34 31 32 35 36 35 38
+RH               96 80 59 49 63 73 82 89 89 50 31 27 45 65 79 79 79 45 33 30 54
+Wind dir          N  N  N  N  N NE NE NE NE  E  E  E  E  E  N  N  N  N  N  N NE
+Wind spd         10  9  8  6  3  2  1  1  2  3  5  4  2  1  0  0  0  0  2  3  2
+Wind gust        20                                                            
+Clouds           B1 B2 B1 FW FW CL CL FW FW CL CL CL CL CL CL FW FW CL CL CL CL
+PoP 12hr                     30           0           0           0           0
+QPF 12hr                   0.01           0           0           0           0
+Snow 12hr                 00-00       00-00       00-00                        
+Drizzle           C  S                                                         
+Rain                                                                           
+Obvis                                 PF PF                                    
+Frost                               Y  Y  Y                                    
+
+
+Date          Tue 10/20/26  Wed 10/21/26  Thu 10/22/26  Fri 10/23/26
+EDT 6hrly     02 08 14 20   02 08 14 20   02 08 14 20   02 08 14 20
+UTC 6hrly     06 12 18 00   06 12 18 00   06 12 18 00   06 12 18 00
+
+Min/Max          37    70      41    74      42    73      44    74
+Temp          43 40 68 60   47 42 71 62   48 43 71 63   51 45 73 64
+Dewpt         37 38 40 42   43 40 45 44   46 43 45 46   47 44 48 46
+PWind dir        NE    NE      NE    NE      NE     N      NE    NE
+Wind char        LT    LT      LT    LT      LT    LT      LT    LT
+Avg clouds    CL FW CL CL   CL FW FW CL   CL CL FW CL   CL FW CL CL
+PoP 12hr          0     0       0     0       0     0       0     0
+
+$$
+KYZ087-172000-
+CUMBERLAND GAP NATIONAL PARK-BELL KY 
+36.61N  83.68W Elev. 3513 ft
+756 AMEDT Sat Oct 17 2026
+
+Date             Sat 10/17/26            Sun 10/18/26            Mon 10/19/26
+EDT 3hrly     05 08 11 14 17 20 23 02 05 08 11 14 17 20 23 02 05 08 11 14 17 20
+UTC 3hrly     09 12 15 18 21 00 03 06 09 12 15 18 21 00 03 06 09 12 15 18 21 00
+
+Max/Min                      55          35          65          35          69
+Temp             47 45 53 55 47 41 38 36 35 50 63 64 50 43 40 38 36 52 66 67 54
+Dewpt            46 43 40 37 36 35 33 31 30 29 31 31 34 32 30 29 29 33 36 37 39
+RH               96 93 61 51 65 79 82 82 82 44 30 29 54 65 67 70 75 48 33 33 57
+Wind dir          N  N  N  N  N  N  N  N NE  E  E  E NE  E  E  N  N  N  N  N  N
+Wind spd         10 11 10  8  2  2  1  0  1  3  5  4  1  1  1  0  0  0  1  2  1
+Wind gust        25                                                            
+Clouds           B2 OV B1 FW FW FW FW FW FW CL CL CL CL CL FW FW FW CL CL CL CL
+PoP 12hr                     50          10           0           0           0
+QPF 12hr                   0.01           0           0           0           0
+Snow 12hr                 00-00       00-00       00-00                        
+Drizzle           C  C                                                         
+Rain                                                                           
+Wind chill          39                                                         
+Min chill              38          38    35    38                35            
+Frost                               Y  Y  Y                                    
+
+
+Date          Tue 10/20/26  Wed 10/21/26  Thu 10/22/26  Fri 10/23/26
+EDT 6hrly     02 08 14 20   02 08 14 20   02 08 14 20   02 08 14 20
+UTC 6hrly     06 12 18 00   06 12 18 00   06 12 18 00   06 12 18 00
+
+Min/Max          40    72      43    74      44    74      45    75
+Temp          44 41 69 58   46 44 71 60   47 45 71 62   49 46 72 62
+Dewpt         36 37 40 46   42 40 46 47   45 43 47 50   47 45 50 50
+PWind dir         N     N       N     N       N     N       N     N
+Wind char        LT    LT      LT    LT      LT    LT      LT    LT
+Avg clouds    CL FW FW CL   CL FW FW CL   CL FW FW CL   CL FW FW CL
+PoP 12hr          0     0       0     0       0     0       0     0
+
+$$
+KYZ120-172000-
+ELKHORN CITY-PIKE KY 
+37.30N  82.34W Elev. 787 ft
+756 AM EDT Sat Oct 17 2026
+
+Date             Sat 10/17/26            Sun 10/18/26            Mon 10/19/26
+EDT 3hrly     05 08 11 14 17 20 23 02 05 08 11 14 17 20 23 02 05 08 11 14 17 20
+UTC 3hrly     09 12 15 18 21 00 03 06 09 12 15 18 21 00 03 06 09 12 15 18 21 00
+
+Max/Min                      54          33          63          31          66
+Temp             48 48 53 53 44 39 36 35 33 50 62 62 46 36 31 31 31 52 65 64 49
+Dewpt            46 47 42 39 35 33 32 32 31 33 34 34 35 31 29 28 28 34 36 37 39
+RH               93 96 66 59 70 79 85 89 92 52 35 35 65 82 92 88 88 50 34 37 68
+Wind dir          N  N  N  N  N  N  N  N  N  E NE NE  E SE SE  N SE  N  N  N  N
+Wind spd         13 10  9  9  2  1  0  0  0  2  4  3  1  1  1  0  1  0  2  3  0
+Wind gust        25                                                            
+Clouds           OV OV B1 SC CL CL CL FW CL CL CL CL CL CL CL FW FW FW FW FW FW
+PoP 12hr                     70           0           5           0           0
+QPF 12hr                   0.01           0           0           0           0
+Snow 12hr                 00-00       00-00       00-00                        
+Drizzle           L  C                                                         
+Rain                    C  S                                                   
+Obvis                                 PF PF                                    
+Frost                               Y  Y  Y                                    
+
+
+Date          Tue 10/20/26  Wed 10/21/26  Thu 10/22/26  Fri 10/23/26
+EDT 6hrly     02 08 14 20   02 08 14 2002 08 14 20   02 08 14 20
+UTC 6hrly     06 12 18 00   06 12 18 00   06 12 18 00   06 12 18 00
+
+Min/Max          35    68      40    71      43    70      45    71
+Temp          36 37 67 55   45 41 68 57   46 44 68 59   49 46 69 58
+Dewpt         36 36 41 47   43 40 50 48   45 43 53 50   47 46 56 51
+PWind dir         N     N       N     N       N     N       N     N
+Wind char        LT    LT      LT    LT      LT    LT      LT    LT
+Avg clouds    FW FW FW FW   FW FW FW CL   FW FW FW FW   FW FW FW CL
+PoP 12hr          0     0       0     0       0     0       0     0
+
+$$
+KYZ044-172000-
+FLEMINGSBURG-FLEMING KY 
+38.42N  83.74W Elev. 823 ft
+756 AM EDT Sat Oct 17 2026
+
+Date             Sat 10/17/26            Sun 10/18/26            Mon 10/19/26
+EDT 3hrly     05 08 11 14 17 20 23 02 05 08 11 14 17 20 23 02 05 08 11 14 17 20
+UTC 3hrly     09 12 15 18 21 00 03 06 09 12 15 18 21 00 03 06 09 12 15 18 21 00
+
+Max/Min                      54          31          62          35          65
+Temp             42 47 53 53 45 41 37 35 33 51 61 62 50 44 42 39 36 54 64 64 52
+Dewpt            37 40 38 36 35 35 34 32 31 33 32 29 33 31 32 31 32 36 36 35 38
+RH               82 76 57 52 68 79 89 89 92 50 33 28 52 60 67 73 85 50 35 34 59
+Wind dir          N  N  N  N  N NE NE NE NE  E  E  E  E  E  E  E  E  E NE NE NE
+Wind spd         12 12  9  8  3  3  3  2  2  4  8  5  3  3  3  1  2  2  3  3  3
+Clouds           CL B1 SC FW CL CL CL FW FW CL CL CL CL CL CL CL CL CL CL CL CL
+PoP 12hr                      0           0           0           0           0
+QPF 12hr                      0           0           0           0           0
+Snow 12hr                 00-00       00-00       00-00                        
+Rain                                                                           
+Wind chill       35                                                            
+Min chill        35    35          34    33    37                35            
+Freeze                              W  W  W                                    
+
+
+Date          Tue 10/20/26  Wed 10/21/26  Thu 10/22/26  Fri 10/23/26
+EDT 6hrly     02 08 14 20   02 08 14 20   02 08 14 20   02 08 14 20
+UTC 6hrly     06 12 18 00   06 12 18 00   06 12 18 00   06 12 18 00
+
+Min/Max          37    68      40    69      41    71      44    71
+Temp          42 38 66 58   46 41 68 60   46 43 69 62   50 45 69 61
+Dewpt         37 36 39 43   43 41 46 47   45 43 46 47   46 45 48 48
+PWind dir        NE    NE      NE    NE      NE     N      NE    NE
+Wind char        LT    LT      LT    LT      LT    LT      LT    LT
+Avg clouds    CL CL CL CL   CL FW FW CL   CL CL FW FW   FW CL FW FW
+PoP 12hr          0     0       0     0       0     0       0     0
+
+$$
+KYZ060-172000-
+FRENCHBURG-MENIFEE KY 
+37.95N  83.62W Elev. 864 ft
+756 AM EDT Sat Oct 17 2026
+
+Date             Sat 10/17/26            Sun 10/18/26            Mon 10/19/26
+EDT 3hrly     05 08 11 14 17 20 23 02 05 08 11 14 17 20 23 02 05 08 11 14 17 20
+UTC 3hrly     09 12 15 18 21 00 03 06 09 12 15 18 21 00 03 06 09 12 15 18 21 00
+
+Max/Min                      54          34          61          31          65
+Temp             44 46 52 54 46 40 38 35 34 48 59 61 47 41 36 33 34 52 63 64 51
+Dewpt            41 43 39 37 35 35 35 34 33 33 33 31 35 33 33 32 32 35 35 34 38
+RH               89 89 61 52 65 82 89 96 96 56 37 32 63 73 89 96 92 52 35 32 61
+Wind dir          N  N  N  N  N  N  N  N  N  E  E  E  N  N  N  N  N  N NE NE  N
+Wind spd          6  5  4  3  0  0  0  0  0  2  3  2  0  0  0  0  0  0  1  1  0
+Clouds           SC B1 SC FW CL CL CL CL CL CL CL CL CL CL CL CL CL CL CL CL CL
+PoP 12hr                     30           0           0           0           0
+QPF 12hr                   0.01           0           0           0           0
+Snow 12hr                 00-00       00-00       00-00                        
+DrizzleC                                                            
+Obvis                              PF  F  F                                    
+Frost                               Y  Y  Y                                    
+
+
+Date          Tue 10/20/26  Wed 10/21/26  Thu 10/22/26  Fri 10/23/26
+EDT 6hrly     02 08 14 20   02 08 14 20   02 08 14 20   02 08 14 20
+UTC 6hrly     06 12 18 00   06 12 18 00   06 12 18 00   06 12 18 00
+
+Min/Max          36    67      42    71      42    71      45    71
+Temp          41 38 65 58   46 43 68 60   47 44 69 62   50 46 70 61
+Dewpt         38 38 39 43   44 43 46 46   46 44 46 47   47 46 48 48
+PWind dir         N    NE      NE    NE      NE     N       N    NE
+Wind char        LT    LT      LT    LT      LT    LT      LT    LT
+Avg clouds    CL CL CL CL   CL FW FW CL   CL CL FW CL   FW FW CL CL
+PoP 12hr          0     0       0     0       0     0       0     0
+
+$$
+KYZ120-172000-
+FISHTRAP LAKE-PIKE KY 
+37.43N  82.37W Elev. 778 ft
+756 AM EDT Sat Oct 17 2026
+
+Date             Sat 10/17/26            Sun 10/18/26            Mon 10/19/26
+EDT 3hrly     05 08 11 14 17 20 23 02 05 08 11 14 17 20 23 02 05 08 11 14 17 20
+UTC 3hrly     09 12 15 18 21 00 03 06 09 12 15 18 21 00 03 06 09 12 15 18 21 00
+
+Max/Min                      54          35          63          32          66
+Temp             48 47 53 54 47 41 38 37 35 50 61 62 49 40 36 34 35 54 64 64 52
+Dewpt            45 47 42 38 35 34 33 32 31 33 34 34 36 31 30 29 28 34 36 37 39
+RH               89100 66 54 63 76 82 82 85 52 36 35 61 70 79 82 75 46 35 37 61
+Wind dir          N  N  N  N  N NE  N  N  N  E  E NE  E  E  E  N SE  N  N  N  N
+Wind spd         11  9  8  8  3  1  0  0  0  1  4  3  2  1  1  0  1  0  2  2  1
+Wind gust        23                                                            
+Clouds           OV OV B1 FW CL CL CL FW CL CL CL CL CL CL CL FW FW FW FW FW FW
+PoP 12hr                     70           0           0           0           0
+QPF 12hr                   0.01           0           0           0           0
+Snow 12hr                 00-00       00-00       00-00                        
+Drizzle           L  C                                                         
+Rain                    S                                                      
+Frost                               Y  Y  Y                                    
+
+
+Date          Tue 10/20/26  Wed 10/21/26  Thu 10/22/26  Fri 10/23/26
+EDT 6hrly     02 08 14 20   02 08 14 20   02 08 14 20   02 08 14 20
+UTC 6hrly     06 12 18 00   06 12 18 00   06 12 18 00   06 12 18 00
+
+Min/Max          35    68      40    70      43    70      46    70
+Temp          38 39 67 57   45 41 68 58   47 44 68 60   50 47 69 60
+Dewpt         37 37 41 47   44 41 51 49   46 44 52 50   48 47 55 51
+PWind dir         N     N      NE     N      NE     N       N     N
+Wind char        LT    LT      LT    LT      LT    LT      LT    LT
+Avg clouds    FW FW FW FW   CL FW FW CL   CL FW FW FW   FW FW FW CL
+PoP 12hr          0     0       0     0       0     0       0     0
+
+$$
+KYZ079-172000-
+GENERAL BURNSIDE STATE PARK-PULASKI KY 
+36.98N  84.59W Elev. 894 ft
+756 AM EDT Sat Oct 17 2026
+
+Date             Sat 10/17/26            Sun 10/18/26            Mon 10/19/26
+EDT 3hrly     05 08 11 14 17 20 23 02 05 08 11 14 17 20 23 02 05 08 11 14 17 20
+UTC 3hrly     09 12 15 18 21 00 03 06 09 12 15 18 21 00 03 06 09 12 15 18 21 00
+
+Max/Min                      57          36          66          34          69
+Temp             45 48 55 57 49 44 40 38 36 50 64 66 54 46 41 38 39 54 66 68 55
+Dewpt            43 43 40 37 36 35 35 34 33 35 34 32 35 34 35 33 34 36 38 36 39
+RH               93 83 57 47 61 70 82 85 89 56 32 28 48 63 79 82 82 50 36 31 55
+Wind dir          N  N  N  N  N NE NE NE NE  E  E  E NE  E  N  N  N  N  N  N NE
+Wind spd         11 11  9  8  4  2  1  1  2  4  54  3  1  0  0  0  0  2  3  2
+Wind gust        21                                                            
+Clouds           SC B1 B1 FW CL CL CL CL CL CL CL CL CL CL CL FW FW CL CL CL CL
+PoP 12hr                     20           0           0           0           0
+QPF 12hr                      0           0           0           0           0
+Snow 12hr                 00-00       00-00       00-00                        
+Drizzle           S                                                            
+Obvis                                    PF                                    
+Wind chill       39                                                            
+Min chill        39                      36    37                37            
+Frost                               Y  Y  Y                                    
+
+
+Date          Tue 10/20/26  Wed 10/21/26  Thu 10/22/26  Fri 10/23/26
+EDT 6hrly     02 08 14 20   02 08 14 20   02 08 14 20   02 08 14 20
+UTC 6hrly     06 12 18 00   06 12 18 00   06 12 18 00   06 12 18 00
+
+Min/Max          38    71      41    74      42    75      44    76
+Temp          43 41 68 62   48 43 71 64   48 43 71 65   51 45 74 66
+Dewpt         37 38 41 44   44 41 47 45   47 43 47 47   48 45 49 47
+PWind dir        NE    NE      NE    NE      NE     N      NE    NE
+Wind char        LT    LT      LT    LT      LT    LT      LT    LT
+Avg clouds    CL FW CL CL   CL FW FW CL   CL CL FW CL   CL FW FW CL
+PoP 12hr          0     0       0     0       0     0       0     0
+
+$$
+KYZ104-172000-
+GRAYSON LAKE STATE PARK-ELLIOT KY 
+38.20N  83.00W Elev. 699 ft
+756 AM EDT Sat Oct 17 2026
+
+Date             Sat 10/17/26            Sun 10/18/26            Mon 10/19/26
+EDT 3hrly     05 08 11 14 17 20 23 02 05 08 11 14 17 20 23 02 05 08 11 14 17 20
+UTC 3hrly     09 12 15 18 21 00 03 06 09 12 15 18 21 00 03 06 09 12 15 18 21 00
+
+Max/Min                      54          32          62          31          66
+Temp             45 46 52 54 45 40 37 35 33 49 60 62 47 40 36 33 34 51 63 64 49
+Dewpt            40 43 38 35 35 35 35 33 32 33 32 31 35 33 33 32 32 35 34 35 40
+RH               82 89 59 48 68 82 92 92 96 54 35 31 63 76 89 96 92 54 34 34 71
+Wind dir          N  N  N  N  N NE NE NE NE  E  E  E NE  E  N  N  N  N NE NE NE
+Wind spd          8  8  5  4  1  1  1  1  1  2  4  3  1  1  0  0  0  0  1  2  1
+Wind gust        18                                                            
+Clouds           SC B1 SC FW CL CL CL FW FW CL CL CL CL CL CL FW CL CL CL CL CL
+PoP 12hr                     20           0           0           0           0
+QPF 12hr                   0.01           0           0           0           0
+Snow 12hr                 00-00       00-00       00-00                        
+Rain                                                                           
+Frost                               Y  Y  Y                                    
+
+
+Date          Tue 10/20/26  Wed 10/21/26  Thu 10/22/26  Fri 10/23/26
+EDT 6hrly     02 08 14 20   02 08 14 20   02 08 14 20   02 08 14 20
+UTC 6hrly     06 12 18 00   06 12 18 00   06 12 18 00   06 12 18 00
+
+Min/Max          34    68      40    70      40    71      43    70
+Temp          39 36 65 56   44 41 67 57   46 43 68 59   48 44 69 59
+Dewpt         38 36 39 46   44 41 47 49   46 42 47 50   47 44 50 50
+PWind dir        NE    NE      NE    NE      NE     N       N    NE
+Wind char        LT    LT      LT    LT      LT    LT      LT    LT
+Avg clouds    CL FW CL CL   CL FW FW CL   CL CL FW FW   CL FW FW FW
+PoP 12hr          0     0       0     0       0     0       0     0
+
+$$
+KYZ088-172000-
+HARLAN-HARLAN KY 
+36.83N  83.32W Elev. 1206 ft
+756 AM EDT Sat Oct 17 2026
+
+Date             Sat 10/17/26            Sun 10/18/26            Mon 10/19/26
+EDT 3hrly     05 08 11 14 17 20 23 02 05 08 11 14 17 20 23 02 05 08 11 14 17 20
+UTC 3hrly     09 12 15 18 21 00 03 06 09 12 15 18 21 00 03 06 09 12 15 18 21 00
+
+Max/Min                      54          34          65          30          68
+Temp             46 43 53 54 45 41 39 36 34 49 64 64 47 40 36 32 34 50 66 66 50
+Dewpt            44 42 39 36 36 35 33 31 29 30 31 31 34 32 29 28 28 33 35 36 38
+RH               93 96 59 50 70 79 79 82 82 48 29 29 60 73 75 85 78 52 32 33 63
+Wind dir          N  N  N  N  N  N  N  N  N  E  E  E  N  N  N  N  N  N  N  N  N
+Wind spd          8  9  9  8  0  0  0  0  0  1  3  2  0  0  0  0  0  0  0  1  0
+Wind gust        20          10                                                
+Clouds           B2 OV B1 SC SC CL FW FW FW CL CL CL CL CL FW FW FW CL CL CL CL
+PoP 12hr                     60          20           5           0           0
+QPF 12hr                   0.01           0           0           0           0
+Snow 12hr                 00-00       00-00       00-00                        
+Drizzle           L  C                                                         
+Rain                    S     S                                                
+Frost                               Y  Y  Y                                    
+
+
+Date          Tue 10/20/26  Wed 10/21/26  Thu 10/22/26  Fri 10/23/26
+EDT 6hrly     02 08 14 20   02 08 14 20   02 08 14 20   02 08 14 20
+UTC 6hrly     06 12 18 00   06 12 18 00   06 12 18 00   06 12 18 00
+
+Min/Max          35    70      43    73      44    72      47    74
+Temp          41 39 68 58   47 44 71 59   48 45 70 60   51 47 72 60
+Dewpt         36 35 39 45   43 39 43 47   46 42 44 49   48 45 48 50
+PWind dir         N     N      NE     N       N     N       N     N
+Wind char        LT    LT      LT    LT      LT    LT      LT    LT
+Avg clouds    FW FW FW CL   CL FW FW CL   CL FW FW CL   CL FW FW CL
+PoP 12hr          0     0       0     0       0     0       0     0
+
+$$
+KYZ115-172000-
+HAZARD-PERRY KY 
+37.25N  83.19W Elev. 686 ft
+756 AM EDT Sat Oct 17 2026
+
+Date             Sat 10/17/26            Sun 10/18/26            Mon 10/19/26
+EDT 3hrly     05 08 11 14 17 20 23 02 05 08 11 14 17 20 23 02 05 08 11 14 17 20
+UTC 3hrly     09 12 15 18 21 00 03 06 09 12 15 18 21 00 03 06 09 12 15 18 21 00
+
+Max/Min                      55          34          64          29          67
+Temp             46 46 54 54 45 41 38 35 34 50 63 64 47 39 34 32 32 53 65 65 51
+Dewpt            46 43 40 36 35 34 34 33 32 33 33 33 36 34 33 31 29 34 35 35 38
+RH              100 89 59 50 68 76 85 92 92 52 32 31 65 82 96 96 88 48 33 33 61
+Wind dir          N  N  N  N  N  N  N  N  N  E NE NE  N  N  N  N  N  N  N  N  N
+Wind spd          6  4  4  4  0  0  0  0  0  1  3  2  0  0  0  0  0  0  1  1  0
+Clouds           B2 B2 B2 SC CL CL CL CL FW CL CL CL CL CL FW FW FW CL CL CL CL
+PoP 12hr                     50           0           0           0           0
+QPF 12hr                   0.01           0           0           0           0
+Snow 12hr                 00-00       00-00       00-00                        
+Drizzle           C  S                                                         
+Rain                                                                           
+Obvis                                 PF PF                                    
+Frost                               Y  Y  Y                                    
+
+
+Date          Tue 10/20/26  Wed 10/21/26  Thu 10/22/26  Fri 10/23/26
+EDT 6hrly     02 08 14 20   02 08 14 20   02 08 14 20   02 08 14 20
+UTC 6hrly     06 12 18 00   06 12 18 00   06 12 18 00   06 12 18 00
+
+Min/Max          35    69      41    73      43    73      46    73
+Temp          40 38 67 58   46 42 71 60   48 44 70 61   50 47 71 61
+Dewpt         37 37 39 45   45 42 44 46   47 44 46 48   48 46 48 48
+PWind dir         N    NE      NE    NE      NE     N      NE    NE
+Wind char        LT    LT      LT    LT      LT    LT      LT    LT
+Avg clouds    CL FW FW CL   CL FW FW CL   CL FW FW CL   CL FW FW CL
+PoP 12hr          0     0       0     0       0     0       0     0
+
+$$
+KYZ113-172000-
+HINDMAN-KNOTT KY 
+37.33N  82.99W Elev. 1037 ft
+756 AM EDT Sat Oct 17 2026
+
+Date             Sat 10/17/26            Sun 10/18/26            Mon 10/19/26
+EDT 3hrly     05 08 11 14 17 20 23 02 05 08 11 14 17 20 23 02 05 08 11 14 17 20
+UTC 3hrly     09 12 15 18 21 00 03 06 09 12 15 18 21 00 03 06 09 12 15 18 21 00
+
+Max/Min                      54          34          63          31          66
+Temp             47 46 53 53 45 41 37 35 34 48 62 62 47 39 34 31 33 54 64 64 50
+Dewpt            45 44 40 37 35 35 34 32 31 33 34 33 36 33 32 30 29 34 34 35 38
+RH               93 93 61 54 68 79 89 89 89 56 35 33 65 79 92 96 85 46 32 34 63
+Wind dir          N  N  N  N NE NE NE NE  E  E NE NE NE  E  E  N  N  N  N  N NE
+Wind spd          8  5  5  4  2  2  1  1  1  2  4  3  2  1  1  0  0  0  2  2  1
+Clouds           B2 OV B1 FW CL CL CL CL CL CL CL CL CL CL FW FW FW CL CL CL CL
+PoP 12hr                     60           0           0           0           0
+QPF 12hr                   0.01           0           0           0           0
+Snow 12hr                 00-00       00-00       00-00                        
+Drizzle           L  C                                                         
+Rain                                                                           
+Obvis                              PF PF PF                                    
+Frost                               Y  Y  Y                                    
+
+
+Date          Tue 10/20/26  Wed 10/21/26  Thu 10/22/26  Fri 10/23/26
+EDT 6hrly     02 08 14 20   02 08 14 20   02 08 14 20   02 08 14 20
+UTC 6hrly     06 12 18 00   06 12 18 00   06 12 18 00   06 12 18 00
+
+Min/Max          35    68      41    71      43    71      46    71
+Temp          37 37 66 56   46 42 69 58   47 44 69 59   50 47 70 59
+Dewpt         37 36 40 45   44 41 46 47   46 43 47 49   48 46 50 49
+PWind dir        NE    NE      NE    NE      NE     N      NE    NE
+Wind char        LT    LT      LT    LT      LT    LT      LT    LT
+Avg clouds    CL FW FW CL   CL FW FW CL   CL FW FW CL   CL FW FW CL
+PoP 12hr          0     0       0     0       0     0       0     0
+
+$$
+KYZ117-172000-
+HYDEN-LESLIE KY 
+37.15N  83.37W Elev. 856 ft
+756 AM EDT Sat Oct 17 2026
+
+Date             Sat 10/17/26            Sun 10/18/26            Mon 10/19/26
+EDT 3hrly     05 08 11 14 17 20 23 02 05 08 11 14 17 20 23 02 05 08 11 14 17 20
+UTC 3hrly     09 12 15 18 21 00 03 06 09 12 15 18 21 00 03 06 09 12 15 18 21 00
+
+Max/Min                      56          34          66          29          69
+Temp             46 48 55 55 46 41 37 35 34 51 65 66 48 39 34 32 32 54 67 67 50
+Dewpt            46 44 41 37 36 35 34 32 31 34 34 33 36 34 32 30 29 34 35 35 38
+RH              100 86 59 51 68 79 89 89 89 52 31 29 63 82 92 92 88 46 30 30 63
+Wind dir          N  N  N  N  N  N  N  N  N NE NE NE  N  N  N  N  N  N  N  N  N
+Wind spd          5  4  4  4  0  0  0  0  0  1  3  2  0  0  0  0  0  0  1  1  0
+Wind gust        17                                                            
+Clouds           B2 B2 B2 SC CL CL FW FW FW CL CL CL CL CL FW FW FW CL CL CL CL
+PoP 12hr                     50           0           0           0           0
+QPF 12hr                   0.01           0           0           0           0
+Snow 12hr                 00-00       00-00       00-00                        
+Drizzle           C  C                                                         
+Rain                                                                           
+Obvis                              PF PF PF                                    
+Frost                               Y  Y  Y                                    
+
+
+Date          Tue 10/20/26  Wed 10/21/26  Thu 10/22/26  Fri 10/23/26
+EDT 6hrly     02 08 14 20   02 08 14 20   02 08 14 20   02 08 14 20
+UTC 6hrly     06 12 18 00   06 12 18 00   06 12 18 00   06 12 18 00
+
+Min/Max          35    70      41    74      43    74      45    75
+Temp          40 37 69 58   45 42 72 60   47 44 71 62   49 46 73 62
+Dewpt         37 36 40 46   44 41 46 47   46 44 47 49   48 46 50 50
+PWind dir         N    NE      NE    NE      NE     N      NE    NE
+Wind char        LT    LT      LT    LT      LT    LT      LT    LT
+Avg clouds    CL FW FW CL   CL FW FW CL   CL FW FW CL   CL FW FW CL
+PoP 12hr          0     0       0     0       0     0       0     0
+
+$$
+KYZ119-172000-
+INEZ-MARTIN KY 
+37.85N  82.53W Elev. 636 ft
+756 AM EDT Sat Oct 17 2026
+
+Date             Sat 10/17/26            Sun 10/18/26            Mon 10/19/26
+EDT 3hrly     05 08 11 14 17 20 23 02 05 08 11 14 17 20 23 02 05 08 11 14 17 20
+UTC 3hrly     09 12 15 18 21 00 03 06 09 12 15 18 21 00 03 06 09 12 15 18 21 00
+
+Max/Min                      54          35          61          31          65
+Temp             46 48 53 54 46 42 39 37 35 49 60 61 49 39 35 32 31 50 63 63 50
+Dewpt            45 43 38 35 34 34 34 32 32 33 33 33 37 34 32 30 31 34 35 36 39
+RH               96 83 57 48 63 73 82 82 89 54 36 35 63 82 89 92100 54 35 36 66
+Wind dir          N  N  N  N  N  N  N  N  N NE NE NE  N  N  N  N  N  N NE  N  N
+Wind spd          6  6  5  4  0  0  0  0  0  1  3  2  0  0  0  0  0  0  1  1  0
+Wind gust        20                                                            
+Clouds           B2 B2 B1 FW CL CL CL CL CL CL CL CL CL CL CL FW FW CL FW CL CL
+PoP 12hr                     50           0           0           0           0
+QPF 12hr                   0.01           0           0           0           0
+Snow 12hr                 00-00       00-00       00-00                        
+Drizzle           C  S                                                         
+Rain                                                                           
+Obvis                                    PF                                    
+Frost                               Y  Y  Y                                    
+
+
+Date          Tue 10/20/26  Wed 10/21/26  Thu 10/22/26  Fri 10/23/26
+EDT 6hrly     02 08 14 20   02 08 14 20   02 08 14 20   02 08 14 20
+UTC 6hrly     06 12 18 00   06 12 18 00   06 12 18 00   06 12 18 00
+
+Min/Max          34    66      41    69      42    69      45    69
+Temp          37 37 64 57   46 42 67 58   48 44 67 60   50 46 68 60
+Dewpt         37 37 39 46   46 42 46 48   48 44 46 49   49 46 49 50
+PWind dir         N     N       N     N       N     N       N     N
+Wind char        LT    LT      LT    LT      LT    LT      LT    LT
+Avg clouds    CL FW FW FW   CL FW FW FW   CL CL FW FW   FW FW FW FW
+PoP 12hr          0     0       0     0       0     0       0     0
+
+$$
+KYZ058-172000-
+IRVINE-ESTILL KY 
+37.70N  83.97W Elev. 685 ft
+756 AM EDT Sat Oct 17 2026
+
+Date             Sat 10/17/26            Sun 10/18/26            Mon 10/19/26
+EDT 3hrly     05 08 11 14 17 20 23 02 05 08 11 14 17 20 23 02 05 08 11 14 17 20
+UTC 3hrly     09 12 15 18 21 00 03 06 09 12 15 18 21 00 03 06 09 12 15 18 21 00
+
+Max/Min                      56          33          64          31          68
+Temp             45 48 53 56 47 40 36 34 33 50 61 64 50 41 37 34 34 54 66 67 53
+Dewpt            41 43 40 38 36 35 35 33 32 35 34 32 35 33 33 32 33 36 37 35 38
+RH               86 83 61 51 65 82 96 96 96 56 36 30 56 73 85 92 96 50 34 30 57
+Wind dir          N  N  N  N  N  N  N  N  N  E  E  E  N  N  N  N  N  N  N  N  N
+Wind spd          5  4  4  3  0  0  0  0  0  1  3  2  0  0  0  0  0  0  0  0  0
+Wind gust        17 14                                                         
+Clouds           SC B1 B1 FW CL CL CL FW CL CL CL CL CL CL CL CL CL CL CL CL CL
+PoP 12hr                     20           0           00           0
+QPF 12hr                   0.01           0           0           0           0
+Snow 12hr                 00-00       00-00       00-00                        
+Drizzle           S                                                            
+Rain                                                                           
+Obvis                               F  F  F                                    
+Frost                               Y  Y  Y                                    
+
+
+Date          Tue 10/20/26  Wed 10/21/26  Thu 10/22/26  Fri 10/23/26
+EDT 6hrly     02 08 14 20   02 08 14 20   02 08 14 20   02 08 14 20
+UTC 6hrly     06 12 18 00   06 12 18 00   06 12 18 00   06 12 18 00
+
+Min/Max          36    70      40    73      41    74      44    75
+Temp          40 37 67 60   46 42 70 62   47 43 70 64   50 45 72 64
+Dewpt         38 37 40 44   43 41 47 47   46 43 47 48   47 44 50 48
+PWind dir         N    NE      NE    NE       N     N       N    NE
+Wind char        LT    LT      LT    LT      LT    LT      LT    LT
+Avg clouds    CL FW CL CL   CL FW FW CL   CL CL FW CL   CL FW FW CL
+PoP 12hr          0     0       0     0       0     0       0     0
+
+$$
+KYZ058-172000-
+IRVINE-ESTILL KY 
+37.68N  83.03W Elev. 685 ft
+756 AM EDT Sat Oct 17 2026
+
+Date             Sat 10/17/26            Sun 10/18/26            Mon 10/19/26
+EDT 3hrly     05 08 11 14 17 20 23 02 05 08 11 14 17 20 23 02 05 08 11 14 17 20
+UTC 3hrly     09 12 15 18 21 00 03 06 09 12 15 18 21 00 03 06 09 12 15 18 21 00
+
+Max/Min                      56          33          64          31          68
+Temp             45 48 53 56 47 40 36 34 33 50 61 64 50 41 37 34 34 54 66 67 53
+Dewpt            41 43 40 38 36 35 35 33 32 35 34 32 35 33 33 32 33 36 37 35 38
+RH               86 83 61 51 65 82 96 96 96 56 36 30 56 73 85 92 96 50 34 30 57
+Wind dir          N  N  N  N  N  N  N  N  N  E  E  E  N  N  N  N  N  N  N  N  N
+Wind spd          5  4  4  3  0  0  0  0  0  1  3  2  0  0  0  0  0  0  0  0  0
+Wind gust        17 14                                                         
+Clouds           SC B1 B1 FW CL CL CL FW CL CL CL CL CL CL CL CL CL CL CL CL CL
+PoP 12hr                     20           0           0           0           0
+QPF 12hr                   0.01           0           0           0           0
+Snow 12hr                 00-00       00-00       00-00                        
+Drizzle           S                                                            
+Rain                                                                           
+Obvis                               F  F  F                                    
+Frost                               Y  Y  Y                                    
+
+
+Date          Tue 10/20/26  Wed 10/21/26  Thu 10/22/26  Fri 10/23/26
+EDT 6hrly     02 08 14 20   02 08 14 20   02 08 14 20   02 08 14 20
+UTC 6hrly     06 12 18 00   06 12 18 00   06 12 18 00   06 12 18 00
+
+Min/Max          36    70      40    73      41    74      44    75
+Temp          40 37 67 60   46 42 70 62   47 43 70 64   50 45 72 64
+Dewpt         38 37 40 44   43 41 47 47   46 43 47 48   47 44 50 48
+PWind dir         N    NE      NE    NE       N     N       N    NE
+Wind char        LT    LT      LT    LT      LT    LT      LT    LT
+Avg clouds    CL FW CL CL   CL FW FW CL   CL CL FW CL   CL FW FW CL
+PoP 12hr          0     0       0     0       0     0       0     0
+
+$$
+KYZ112-172000-
+JACKSON AIRPORT-BREATHITT KY 
+37.59N  83.32W Elev. 1357 ft
+756 AM EDT Sat Oct 17 2026
+
+Date             Sat 10/17/26            Sun 10/18/26            Mon 10/19/26
+EDT 3hrly     05 08 11 14 17 20 23 02 05 08 11 14 17 20 23 02 05 08 11 14 17 20
+UTC 3hrly     09 12 15 18 21 00 03 06 09 12 15 18 21 00 03 06 09 12 15 18 21 00
+
+Max/Min                      53          35          61          39          65
+Temp             46 46 51 53 4541 38 36 35 47 59 61 50 46 43 42 40 53 63 64 51
+Dewpt            46 42 38 36 35 34 34 33 32 33 32 32 35 33 32 30 30 34 34 34 38
+RH              100 86 61 52 68 76 85 89 89 58 36 33 56 60 65 62 67 48 34 32 61
+Wind dir          N  N  N  N NE NE NE NE NE  E  E  E NE  E  E  N  E  N NE NE NE
+Wind spd          6  4  4  3  2  2  2  2  2  2  4  2  2  2  1  0  1  0  2  1  1
+Clouds           B1 B2 B1 FW CL CL CL CL CL CL CL CL CL CL CL FW FW CL CL CL CL
+PoP 12hr                     40           0           0           0           0
+QPF 12hr                   0.01           0           0           0           0
+Snow 12hr                 00-00       00-00       00-00                        
+Drizzle           C                                                            
+Rain                                                                           
+Frost                               Y  Y  Y                                    
+
+
+Date          Tue 10/20/26  Wed 10/21/26  Thu 10/22/26  Fri 10/23/26
+EDT 6hrly     02 08 14 20   02 08 14 20   02 08 14 20   02 08 14 20
+UTC 6hrly     06 12 18 00   06 12 18 00   06 12 18 00   06 12 18 00
+
+Min/Max          41    66      41    70      43    70      46    70
+Temp          43 41 63 57   46 42 67 59   48 44 67 60   51 46 68 60
+Dewpt         37 37 38 44   44 42 45 46   46 44 46 48   47 46 48 48
+PWind dir        NE    NE      NE    NE      NE     N      NE    NE
+Wind char        LT    LT      LT    LT      LT    LT      LT    LT
+Avg clouds    CL FW CL CL   CL FW FW CL   CL FW FW CL   FW FW FW CL
+PoP 12hr          0     0       0     0       0     0       0     0
+
+$$
+KYZ112-172000-
+JACKSON DOWNTOWN-BREATHITT KY 
+37.56N  83.39W Elev. 787 ft
+756 AM EDT Sat Oct 17 2026
+
+Date             Sat 10/17/26            Sun 10/18/26            Mon 10/19/26
+EDT 3hrly     05 08 11 14 17 20 23 02 05 08 11 14 17 20 23 02 05 08 11 14 17 20
+UTC 3hrly     09 12 15 18 21 00 03 06 09 12 15 18 21 00 03 06 09 12 15 18 21 00
+
+Max/Min                      55          34          63          33          67
+Temp             45 47 53 55 45 41 37 35 34 50 62 63 48 40 35 33 33 52 64 66 50
+Dewpt            44 44 40 37 35 35 34 33 33 35 33 32 36 34 33 32 32 36 35 35 38
+RH               96 89 61 51 68 79 89 92 96 56 33 31 63 79 92 96 96 54 34 32 63
+Wind dir          N  N  N  N  N  N  N  N  N  E  E  E  N  N  N  N  N  N  N  N  N
+Wind spd          4  3  3  2  0  0  0  0  0  1  3  1  0  0  0  0  0  0  0  0  0
+Clouds           B1 B2 B1 FW CL CL CL CL CL CL CL CL CL CL CL FW CL CL CL CL CL
+PoP 12hr                     40           0           0           0           0
+QPF 12hr                   0.01           0           0           0           0
+Snow 12hr                 00-00       00-00       00-00                        
+Drizzle           C                                                            
+Rain                                                                           
+Obvis                              PF PF  F                                    
+Frost                               Y  Y  Y                                    
+
+
+Date          Tue 10/20/26  Wed 10/21/26  Thu 10/22/26  Fri 10/23/26
+EDT 6hrly     02 08 14 20   02 08 14 20   02 08 14 20   02 08 14 20
+UTC 6hrly     06 12 18 00   06 12 18 00   06 12 18 00   06 12 18 00
+
+Min/Max          37    69      41    73      42    73      44    73
+Temp          41 38 67 58   47 42 71 60   48 43 70 62   50 45 71 62
+Dewpt         38 37 40 44   44 42 46 46   46 43 47 48   48 45 50 48
+PWind dir         N    NE      NE    NE       N     N       N    NE
+Wind char        LT    LT      LT    LT      LT    LT      LT    LT
+Avg clouds    CL FW CL CL   CL FW FW CL   CL FW FW CL   CL FW FW CL
+PoP 12hr          0     0       0     0       0     0       0     0
+
+$$
+KYZ118-172000-
+JENKINS-LETCHER KY
+37.18N  82.63W Elev. 1526 ft
+756 AM EDT Sat Oct 17 2026
+
+DateSat 10/17/26            Sun 10/18/26            Mon 10/19/26
+EDT 3hrly     05 08 11 14 17 20 23 02 05 08 11 14 17 20 23 02 05 08 11 14 17 20
+UTC 3hrly     09 12 15 18 21 00 03 06 09 12 15 18 21 00 03 06 09 12 15 18 21 00
+
+Max/Min                      52          31          63          33          66
+Temp             46 44 51 50 43 37 35 33 31 49 62 62 47 40 37 34 33 53 65 64 49
+Dewpt            44 43 41 37 34 32 31 30 30 30 32 32 34 30 27 26 26 32 34 36 37
+RH               93 96 68 61 70 82 85 89 96 48 32 32 60 67 67 72 75 44 31 35 63
+Wind dir          N  N  N  N  N NE  E  E  E  E  E  E  E SE SE SE SE NE  N  N  N
+Wind spd         14 11 11 10  5  4  3  3  3  4  6  5  3  3  3  2  2  2  4  4  3
+Clouds           OV OV B2 SC FW CL FW FW CL CL CL CL CL CL FW FW FW CL FW CL FW
+PoP 12hr                     70          10           0           0           0
+QPF 12hr                   0.02           0           0           0           0
+Snow 12hr                 00-00       00-00       00-00                        
+Drizzle           L  C                                                         
+Rain                    C  C                                                   
+Wind chill          38                                                         
+Min chill              37    39    32    28    32          34    33    38      
+Frost                               Y  Y  Y                                    
+
+
+Date          Tue 10/20/26  Wed 10/21/26  Thu 10/22/26  Fri 10/23/26
+EDT 6hrly     02 08 14 20   02 08 14 20   02 08 14 20   02 08 14 20
+UTC 6hrly     06 12 18 00   06 12 18 00   06 12 18 00   06 12 18 00
+
+Min/Max          37    68      41    70      43    70      45    70
+Temp          41 37 67 55   45 42 69 56   47 44 68 58   49 46 69 58
+Dewpt         35 35 39 44   40 38 45 46   42 41 47 47   44 44 51 48
+PWind dir         E    NE       E     N      NE     N       N    NE
+Wind char        LT    LT      LT    LT      LT    LT      LT    LT
+Avg clouds    FW FW FW CL   CL FW FW CL   CL FW FW FW   FW FW FW CL
+PoP 12hr          0     0       0     0       0     0       0     0
+
+$$
+KYZ110-172000-
+JENNY WILEY STATE PARK-FLOYD KY 
+37.71N  82.72W Elev. 650 ft
+756 AM EDT Sat Oct 17 2026
+
+Date             Sat 10/17/26            Sun 10/18/26            Mon 10/19/26
+EDT 3hrly     05 08 11 14 17 20 23 02 05 08 11 14 17 20 23 02 05 08 11 14 17 20
+UTC 3hrly     09 12 15 18 21 00 03 06 09 12 15 18 21 00 03 06 09 12 15 18 21 00
+
+Max/Min                      54          35          62          29          64
+Temp             45 47 53 53 46 42 39 36 35 49 60 62 49 39 34 31 32 51 62 63 50
+Dewpt            43 43 39 36 34 34 34 33 32 33 33 32 37 34 32 30 31 34 34 35 38
+RH               93 86 59 52 63 73 82 89 89 54 36 32 63 82 92 96 96 52 35 35 63
+Wind dir          N  N  N  N  N  N  N  N  N NE NE NE NE  N  N  N  N  N NE  N  N
+Wind spd          6  6  5  4  1  0  0  0  0  1  3  2  1  0  0  0  0  0  1  1  0
+Wind gust        18                                                            
+Clouds           B2 B2 B1 FW CL CL CL CL CL CL CL CL CL CL CL FW FW CL FW CL CL
+PoP 12hr                     50           0           0           0           0
+QPF 12hr                   0.01           0           0           0           0
+Snow 12hr                 00-00       00-00       00-00                        
+Drizzle           C  S                                                         
+Rain                                                                           
+Obvis                                 PF PF                                    
+Frost                               Y  Y  Y                                    
+
+
+Date          Tue 10/20/26  Wed 10/21/26  Thu 10/22/26  Fri 10/23/26
+EDT 6hrly     02 08 14 20   02 08 14 20   02 08 14 20   02 08 14 20
+UTC 6hrly     06 12 18 00   06 12 18 00   06 12 18 00   06 12 18 00Min/Max          34    67      41    69      43    70      45    70
+Temp          37 37 65 57   46 42 67 58   47 44 67 60   50 46 69 60
+Dewpt         37 37 40 45   45 42 47 48   47 44 47 49   48 46 50 50
+PWind dir         N     N       N     N       N     N       N    NE
+Wind char        LT    LT      LT    LT      LT    LT      LT    LT
+Avg clouds    FW FW FW FW   CL FW FW FW   CL FW FW FW   FW FW FW FW
+PoP 12hr          0     0       0     0       0     0       0     0
+
+$$
+KYZ088-172000-
+KENTENIA STATE FOREST-HARLAN KY 
+36.92N  83.23W Elev. 2725 ft
+756 AM EDT Sat Oct 17 2026
+
+Date             Sat 10/17/26            Sun 10/18/26            Mon 10/19/26
+EDT 3hrly     05 08 11 14 17 20 23 02 05 08 11 14 17 20 23 02 05 08 11 14 17 20
+UTC 3hrly     09 12 15 18 21 00 03 06 09 12 15 18 21 00 03 06 09 12 15 18 21 00
+
+Max/Min                      49          35          61          39          64
+Temp             43 37 47 49 43 40 38 37 35 47 60 61 49 45 43 42 40 52 62 62 50
+Dewpt            41 37 37 34 34 33 31 30 27 27 29 29 34 29 27 25 25 28 32 32 36
+RH               93100 68 56 70 76 76 75 72 45 31 29 56 53 53 50 55 39 32 32 58
+Wind dir          N  N  N  N  N NE NE NE NE  E  E  E  E  E SE SE SE  N  N  N NE
+Wind spd         17 10 10  9  5  8  6  5  4  3  4  3  4  5  5  3  2  0  2  2  3
+Clouds           B2 OV B2 SC FW CL FW FW FW CL CL CL CL CL FW FW FW CL CL CL CL
+PoP 12hr                     60          10           5           0           0
+QPF 12hr                   0.01           0           0           0           0
+Snow 12hr                 00-00       00-00       00-00                        
+Rain              L  C  S                                                      
+Wind chill       35 30                                                         
+Min chill        35    30    39    33    31    36          39    37            
+Frost                               Y  Y  Y                                    
+
+
+Date          Tue 10/20/26  Wed 10/21/26  Thu 10/22/26  Fri 10/23/26
+EDT 6hrly     02 08 14 20   02 08 14 20   02 08 14 20   02 08 14 20
+UTC 6hrly     06 12 18 00   06 12 18 00   06 12 18 00   06 12 18 00
+
+Min/Max          41    66      44    69      46    69      48    69
+Temp          44 42 64 55   48 45 67 57   49 46 66 58   52 49 67 58
+Dewpt         35 34 37 43   43 39 40 45   45 42 41 47   47 45 44 48
+PWind dir        NE    NE      NE     N      NE     N      NE    NE
+Wind char        LT    LT      LT    LT      LT    LT      LT    LT
+Avg clouds    FW FW FW CL   CL FW FW CL   CL FW FW CL   CL FW FW CL
+PoP 12hr          0     0       0     0       0     0       0     0
+
+$$
+KYZ118-172000-
+KINGDOM COME STATE PARK-LETCHER KY 
+37.01N  82.94W Elev. 2617 ft
+756 AM EDT Sat Oct 17 2026
+
+Date             Sat 10/17/26            Sun 10/18/26            Mon 10/19/26
+EDT 3hrly     05 08 11 14 17 20 23 02 05 08 11 14 17 20 23 02 05 08 11 14 17 20
+UTC 3hrly     09 12 15 18 21 00 03 06 09 12 15 18 21 00 03 06 09 12 15 18 21 00
+
+Max/Min                      48          35          60          39          63
+Temp             43 37 46 48 42 40 38 37 35 48 59 59 47 44 42 41 40 52 62 61 49
+Dewpt            42 37 37 34 34 32 30 28 26 26 29 30 32 27 24 23 23 28 31 32 35
+RH               96100 71 58 73 73 73 70 69 42 32 33 56 51 48 48 50 39 31 33 58
+Wind dir          N  N  N  N NE NE NE  E  E  E  E  E  E  E SE SE SE NE  N  N NE
+Wind spd         20 11  9  8  6  8  8  6  4  3  5  4  4  6  5  3  3  1  3  3  3
+Clouds           OV OV B2 SC SC FW FW FW FW CL CL CL CL CL FW FW FW CL CL CL CL
+PoP 12hr                     70          20           5           0           0
+QPF 12hr                   0.06        0.01           0           0           0
+Snow 12hr                 00-00       00-00       00-00                        
+Rain              L  C  C  C  S                                                
+Windchill       34 29             32                                          
+Min chill        34    29    38    32    30    34          38    37            
+Frost                               Y  Y  Y                                    
+
+
+Date          Tue 10/20/26  Wed 10/21/26  Thu 10/22/26  Fri 10/23/26
+EDT 6hrly     02 08 14 20   02 08 14 20   02 08 14 20   02 08 14 20
+UTC 6hrly     06 12 18 00   06 12 18 00   06 12 18 00   06 12 18 00
+
+Min/Max          43    65      46    68      47    67      49    68
+Temp          45 44 64 54   48 47 66 56   50 48 65 58   52 50 66 57
+Dewpt         34 33 36 43   41 37 39 45   43 40 41 46   45 43 45 47
+PWind dir        NE    NE      NE     N      NE     N      NE    NE
+Wind char        LT    LT      LT    LT      LT    LT      LT    LT
+Avg clouds    FW FW FW CL   CL FW FW CL   CL FW FW CL   CL FW FW CL
+PoP 12hr          0     0       0     0       0     0       0     0
+
+$$
+KYZ083-172000-
+LAKE CUMBERLAND-WAYNE KY 
+36.93N  84.85W Elev. 723 ft
+756 AM EDT Sat Oct 17 2026
+
+Date             Sat 10/17/26            Sun 10/18/26            Mon 10/19/26
+EDT 3hrly     05 08 11 14 17 20 23 02 05 08 11 14 17 20 23 02 05 08 11 14 17 20
+UTC 3hrly     09 12 15 18 21 00 03 06 09 12 15 18 21 00 03 06 09 12 15 18 21 00
+
+Max/Min                      58          35          67          33          69
+Temp             47 49 56 57 49 43 40 37 35 50 64 67 54 46 40 37 38 55 65 69 56
+Dewpt            43 43 41 38 37 36 36 35 34 36 34 33 36 36 36 33 35 37 38 36 40
+RH               86 80 57 49 63 76 85 92 96 58 32 28 50 68 85 85 89 51 37 30 55
+Wind dir          N  N NE NE  N NE NE  E  E  E  E  E NE  E  N  N  N  N  N  N  N
+Wind spd         10 10  8  6  3  2  1  1  2  4  5  4  2  1  0  0  0  0  2  2  1
+Wind gust        21                                                            
+Clouds           SC B1 B1 FW CL CL CL CL CL CL CL CL CL CL CL FW FW CL CL CL CL
+PoP 12hr                      5           0           5           0           0
+QPF 12hr                      0           0           0           0           0
+Snow 12hr                 00-00       00-00       00-00                        
+Drizzle                                                                        
+Obvis                                 PF PF                                    
+Frost                               Y  Y  Y                                    
+
+
+Date          Tue 10/20/26  Wed 10/21/26  Thu 10/22/26  Fri 10/23/26
+EDT 6hrly     02 08 14 20   02 08 14 20   02 08 14 20   02 08 14 20
+UTC 6hrly     06 12 18 00   06 12 18 00   06 12 18 00   06 12 18 00
+
+Min/Max          38    71      41    75      42    75      44    77
+Temp          44 41 68 62   48 43 71 64   49 44 72 65   52 45 74 66
+Dewpt         38 38 41 45   45 42 47 46   48 44 47 47   49 45 49 48
+PWind dir        NE    NE      NE    NE      NE    NE      NE    NE
+Wind char        LT    LT      LT    LT      LT    LT      LT    LT
+Avg clouds    CL FW CL CL   CL FW FW CL   CL CL FW CL   CL FW FW CL
+PoP 12hr          0     0       0     0       0     0       0     0
+
+$$
+KYZ080-172000-
+LEVI JACKSON STATE PARK-LAUREL KY 
+37.11N  84.05W Elev. 1200 ft
+756 AM EDT Sat Oct 17 2026
+
+Date             Sat 10/17/26            Sun 10/18/26            Mon 10/19/26
+EDT 3hrly     05 08 11 14 17 20 23 02 05 08 11 14 17 20 23 02 05 08 11 14 17 20
+UTC 3hrly     09 12 15 18 21 00 03 06 09 12 15 18 21 00 03 06 09 12 15 18 21 00
+
+Max/Min                      55          33          64          33          67
+Temp             43 46 53 55 45 40 37 35 33 49 62 64 49 42 38 35 33 53 64 66 51
+Dewpt            43 41 38 36 35 35 33 32 31 33 31 30 34 33 32 30 31 34 35 33 36
+RH              100 83 57 49 68 82 85 89 92 54 31 28 56 70 79 82 92 48 34 29 56
+Wind dir          N  N  N  N  N NE NE NE NE  E  E  E NE NE  E  E  E  E  N  N NE
+Wind spd         13 11 10  9  5  5  4  4  4  56  6  5  4  2  1  1  1  3  4  4
+Clouds           B1 B2 B1 FW CL CL CL FW CL CL CL CL CL CL FW FW FW CL CL CL CL
+PoP 12hr                     40           0           0           0           0
+QPF 12hr                   0.01           0           0           0           0
+Snow 12hr                 00-00       00-00       00-00                        
+Drizzle           C  S                                                         
+Wind chill       36                                                            
+Min chill        36    36          33    29    32          37    33    38      
+Frost                               Y  Y  Y                                    
+
+
+Date          Tue 10/20/26  Wed 10/21/26  Thu 10/22/26  Fri 10/23/26
+EDT 6hrly     02 08 14 20   02 08 14 20   02 08 14 20   02 08 14 20
+UTC 6hrly     06 12 18 00   06 12 18 00   06 12 18 00   06 12 18 00
+
+Min/Max          37    69      40    73      41    73      43    74
+Temp          42 37 66 58   45 41 70 59   46 42 70 61   49 44 72 61
+Dewpt         37 36 38 42   42 40 44 45   45 42 45 46   46 44 47 46
+PWind dir        NE    NE      NE    NE      NE     N      NE    NE
+Wind char        LT    LT      LT    LT      LT    LT      LT    LT
+Avg clouds    CL FW CL CL   CL FW FW CL   CL FW FW CL   CL FW FW CL
+PoP 12hr          0     0       0     0       0     0       0     0
+
+$$
+KYZ080-172000-
+LONDON-LAUREL KY 
+37.09N  84.08W Elev. 1212 ft
+756 AM EDT Sat Oct 17 2026
+
+Date             Sat 10/17/26            Sun 10/18/26            Mon 10/19/26
+EDT 3hrly     05 08 11 14 17 20 23 02 05 08 11 14 17 20 23 02 05 08 11 14 17 20
+UTC 3hrly     09 12 15 18 21 00 03 06 09 12 15 18 21 00 03 06 09 12 15 18 21 00
+
+Max/Min                      55          34          64          35          68
+Temp             43 46 53 54 45 39 37 35 34 50 62 63 50 45 42 39 36 54 65 67 52
+Dewpt            43 42 39 36 35 35 34 32 32 33 32 31 35 33 33 31 32 36 36 35 37
+RH              100 86 59 50 68 85 89 89 92 52 32 30 56 62 70 73 85 50 34 30 56
+Wind dir          N  N  N  N  N NE NE NE NE  E  E  E NE  E  E  E  E  E  N  N NE
+Wind spd         12 11 10  9  4  4  3  4  4  6  6  6  5  4  2  1  1  1  3  4  4
+Clouds           B1 B2 B1 FW CL CL CL FW CL CL CL CL CL CL FW FW FW CL CL CL CL
+PoP 12hr                     40           0           0           0           0
+QPF 12hr                   0.01           0           0           0           0
+Snow 12hr                 00-00       00-00       00-00                        
+Drizzle           C  S                                                         
+Wind chill       36                                                            
+Min chill        36    36          34    30    32                35            
+Frost                               Y  Y  Y                                    
+
+
+Date          Tue 10/20/26  Wed 10/21/26  Thu 10/22/26  Fri 10/23/26
+EDT 6hrly     02 08 14 20   02 08 14 20   02 08 14 20   02 08 14 20
+UTC 6hrly     06 12 18 00   06 12 18 00   06 12 18 00   06 12 18 00
+
+Min/Max          38    70      40    73      41    73      43    74
+Temp          43 39 67 58   46 41 71 60   47 42 71 61   50 44 72 62
+Dewpt         37 37 39 43   42 41 45 45   45 42 46 46   46 44 48 47
+PWind dir        NE    NE      NE    NE      NE    NE      NE    NE
+Wind char        LT    LT      LT    LT      LT    LT      LT    LT
+Avg clouds    CL FW CL CL   CL FW FW CL   CL FW FW CL   CL FW FW CL
+PoP 12hr          0     0       0     0       0     0       0     0
+
+$$
+KYZ116-172000-
+MANCHESTER-CLAY KY 
+37.16N  83.76W Elev. 870 ft
+756 AM EDT Sat Oct 17 2026
+
+Date             Sat 10/17/26            Sun 10/18/26            Mon 10/19/26
+EDT 3hrly     05 08 11 14 17 20 23 02 05 08 11 14 17 20 23 02 05 08 11 14 17 20
+UTC 3hrly     09 12 15 18 21 00 03 06 09 12 15 18 21 00 03 06 09 12 15 18 21 00
+
+Max/Min                      57          33          66          29          70
+Temp             44 48 55 56 46 40 37 35 33 51 65 65 47 39 34 31 31 54 68 68 51
+Dewpt            43 43 40 37 35 35 34 33 32 33 33 31 36 34 33 31 31 35 35 34 37
+RH               96 83 57 49 65 82 89 92 96 50 30 28 65 82 96100100 48 29 28 59
+Wind dir          N  N  N  N  N  N  N  N  N NE  E NE NE  N  N  N  N  N  N  N  N
+Wind spd          8  5  5  4  0  0  0  0  0  2  3  2  1  0  0  0  0  0  1  1  0
+Wind gust        18                                                            
+Clouds           B1 OV B1 FW CL FW CL FW FW CL CL CL CL CL FW FW FW CL CL CL CL
+PoP 12hr                     40           0           0           0           0
+QPF 12hr                   0.01           0           0           0           0
+Snow 12hr                 00-00       00-00       00-00                        
+Drizzle           C  C                                                         
+Rain                                                                           
+Obvis                              PF PF  F                                    
+Frost                               Y  Y  Y                                    
+
+
+Date          Tue 10/20/26  Wed 10/21/26  Thu 10/22/26  Fri 10/23/26
+EDT 6hrly     02 08 14 20   02 08 14 20   02 08 14 20   02 08 14 20
+UTC 6hrly     06 12 18 00   06 12 18 00   06 12 18 00   06 12 18 00
+
+Min/Max          34    71      39    75      40    75      42    76
+Temp          39 36 70 58   45 40 73 60   46 41 72 61   48 43 74 62
+Dewpt         37 36 40 43   43 40 45 45   45 41 46 46   47 43 48 47
+PWind dir         N    NE      NE    NE      NE     N       N    NE
+Wind char        LT    LT      LT    LT      LT    LT      LT    LT
+Avg clouds    CL FW CL CL   CL FW FW CL   CL FW FW CL   CL FW FW CL
+PoP 12hr          0     0       0     0       0     0       0     0
+
+$$
+KYZ069-172000-
+MCKEE-JACKSON KY 
+37.42N  83.98W Elev. 1030 ft
+756 AM EDT Sat Oct 17 2026
+
+Date             Sat 10/17/26            Sun 10/18/26            Mon 10/19/26
+EDT 3hrly     05 08 11 14 17 20 23 02 05 08 11 14 17 20 23 02 05 08 11 14 17 20
+UTC 3hrly     09 12 15 18 21 00 03 06 09 12 15 18 21 00 03 06 09 12 15 18 21 00
+
+Max/Min                      54          32          63          33          66
+Temp             43 46 52 53 43 38 36 34 32 49 61 63 48 42 38 36 33 54 64 65 50
+Dewpt            42 41 38 36 36 34 34 33 32 33 32 30 34 33 33 31 31 35 35 33 37
+RH               96 83 59 52 76 85 92 96100 54 33 29 58 70 82 82 92 48 34 30 61
+Wind dir          N  N  N  N  N NE NE NE NE  E  E  E NE  E  E  N  N  E NE NE NE
+Wind spd          9  6  5  4  3  2  1  2  2  4  5  4  3  2  1  0  0  1  2  2  2
+Wind gust        19                                                            
+Clouds           B1 B2 B1 FW CL CL CL CL CL CL CL CL CL CL CL CL CL CL CL CL CL
+PoP 12hr                     40           0           0           0           0
+QPF 12hr                   0.01           0           0           0           0
+Snow 12hr                 00-00       00-00       00-00                        
+Drizzle           C                                                            
+Rain                                                                           
+Frost                               Y  Y  Y                                    
+
+
+Date          Tue 10/20/26  Wed 10/21/26  Thu 10/22/26  Fri 10/23/26
+EDT 6hrly     02 08 14 20   02 08 14 20   02 08 14 20   02 08 14 20
+UTC 6hrly     06 12 18 00   06 12 18 00   06 12 18 00   06 12 18 00
+
+Min/Max          37    68      40    72      41    72      44    72
+Temp          41 37 65 57   45 41 69 59   47 43 69 61   49 45 71 61
+Dewpt         37 36 39 44   43 41 44 47   45 43 45 47   46 45 47 48
+PWind dir        NE    NE      NE    NE      NE     N       N    NE
+Wind char        LT    LT      LT    LT      LT    LT      LT    LT
+Avg clouds    CLFW CL CL   CL FW FW CL   CL CL FW CL   CL FW FW CL
+PoP 12hr          0     0       0     0       0     0       0     0
+
+$$
+KYZ087-172000-
+MIDDLESBORO-BELL KY 
+36.60N  83.72W Elev. 1138 ft
+756 AM EDT Sat Oct 17 2026
+
+Date             Sat 10/17/26            Sun 10/18/26            Mon 10/19/26
+EDT 3hrly     05 08 11 14 17 20 23 02 05 08 11 14 17 20 23 02 05 08 11 14 17 20
+UTC 3hrly     09 12 15 18 21 00 03 06 09 12 15 18 21 00 03 06 09 12 15 18 21 00
+
+Max/Min                      56          34          66          31          70
+Temp             48 46 54 56 46 40 36 35 34 49 64 65 48 40 36 33 35 52 67 68 52
+Dewpt            47 44 40 38 37 35 33 32 31 30 31 31 35 32 31 29 30 33 36 37 39
+RH               96 93 59 51 71 82 89 89 89 48 29 28 60 73 82 85 82 48 32 32 61
+Wind dir          N  N  N  N  N  N  N  N  N  E  E  E NE  N  N  N  N  N  N  N  N
+Wind spd         11 10  8  8  3  2  0  0  0  2  5  4  1  0  0  0  0  0  0  1  1
+Wind gust        21                                                            
+Clouds           B2 OV B1 FW FW FW FW FW FW CL CL CL CL CL FW FW FW CL CL CL CL
+PoP 12hr                     60          10           0           0           0
+QPF 12hr                   0.01           0           0           0           0
+Snow 12hr                 00-00       00-00       00-00                        
+Drizzle           L  C                                                         
+Rain                                                                           
+Obvis                              PF PF PF                                    
+Frost                               Y  Y  Y                                    
+
+
+Date          Tue 10/20/26  Wed 10/21/26  Thu 10/22/26  Fri 10/23/26
+EDT 6hrly     02 08 14 20   02 08 14 20   02 08 14 20   02 08 14 20
+UTC 6hrly     06 12 18 00   06 12 18 00   06 12 18 00   06 12 18 00
+
+Min/Max          37    73      44    75      45    74      47    75
+Temp          40 40 71 60   46 45 73 61   47 46 72 62   49 48 73 62
+Dewpt         37 37 40 46   42 40 46 48   45 44 47 50   47 46 50 50
+PWind dir         N     N       N     N       N     N       N     N
+Wind char        LT    LT      LT    LT      LT    LT      LT    LT
+Avg clouds    CL FW FW CL   CL FW FW CL   CL FW FW CL   CL FW FW CL
+PoP 12hr          0     0       0     0       0     0       0     0
+
+$$
+KYZ083-172000-
+MONTICELLO-WAYNE KY 
+36.84N  84.86W Elev. 919 ft
+756 AM EDT Sat Oct 17 2026
+
+Date             Sat 10/17/26            Sun 10/18/26            Mon 10/19/26
+EDT 3hrly     05 08 11 14 17 20 23 02 05 08 11 14 17 20 23 02 05 08 11 14 17 20
+UTC 3hrly     09 12 15 18 21 00 03 06 09 12 15 18 21 00 03 06 09 12 15 18 21 00
+
+Max/Min                      57          33          66          31          68
+Temp             44 46 55 57 48 41 37 34 33 50 62 66 50 41 36 34 34 53 65 67 52
+Dewpt            41 43 40 37 37 36 35 33 33 35 34 32 35 35 35 33 34 37 38 36 40
+RH               89 89 57 47 65 82 92 96100 56 35 28 56 79 96 96100 54 37 32 63
+Wind dir          N  N NE  N NE NE  E NE  E  E  E  E  E  E  N  N  N  N  N  N  N
+Wind spd         12 11 10  9  5  4  3  3  4  5  6  5  4  1  0  0  0  0  3  3  2
+Clouds           SC B1 B1 FW CL CL CL CL FW CL CL CL CL CL CL FW FW CL CL CL CL
+PoP 12hr                      5           0           0           0           0
+QPF 12hr                      0           0           0           0           0
+Snow 12hr                 00-00       00-00       00-00                        
+Drizzle                                                                        
+Obvis                              PF PF PF                                    
+Wind chill       38                                                            
+Min chill        38    38          34    29    34          36    32    39      
+Frost                               Y  Y  YDate          Tue 10/20/26  Wed 10/21/26  Thu 10/22/26  Fri 10/23/26
+EDT 6hrly     02 08 14 20   02 08 14 20   02 08 14 20   02 08 14 20
+UTC 6hrly     06 12 18 00   06 12 18 00   06 12 18 00   06 12 18 00
+
+Min/Max          35    70      39    74      40    74      42    76
+Temp          40 37 67 60   48 43 71 62   49 44 71 64   52 46 73 64
+Dewpt         37 37 40 43   43 43 45 44   45 44 45 45   47 46 47 46
+PWind dir        NE    NE      NE    NE      NE    NE      NE    NE
+Wind char        LT    LT      LT    LT      LT    LT      LT    LT
+Avg clouds    CL FW CL CL   CL FW FW CL   CL CL FW CL   CL CL FW CL
+PoP 12hr          0     0       0     0       0     0       0     0
+
+$$
+KYZ052-172000-
+MOREHEAD-ROWAN KY 
+38.19N  83.44W Elev. 748 ft
+756 AM EDT Sat Oct 17 2026
+
+Date             Sat 10/17/26            Sun 10/18/26            Mon 10/19/26
+EDT 3hrly     05 08 11 14 17 20 23 02 05 08 11 14 17 20 23 02 05 08 11 14 17 20
+UTC 3hrly     09 12 15 18 21 00 03 06 09 12 15 18 21 00 03 06 09 12 15 18 21 00
+
+Max/Min                      55          31          62          30          66
+Temp             46 48 53 54 45 40 37 34 33 50 60 61 46 39 35 31 32 54 64 65 51
+Dewpt            38 43 39 36 35 35 34 33 32 34 32 31 34 32 33 31 32 34 35 35 38
+RH               73 83 59 50 68 82 89 96 96 54 35 32 63 76 92100100 46 34 33 61
+Wind dir          N  N  N  N  N  N  N  N  N  E  E  E  N  N  N  N  N  N NE NE  N
+Wind spd          6  6  4  3  0  0  0  0  0  2  4  3  0  0  0  0  0  0  1  1  0
+Clouds           SC B1 SC FW CL CL CL CL FW CL CL CL CL CL CL CL CL CL CL CL CL
+PoP 12hr                     10           0           0           0           0
+QPF 12hr                      0           0           0           0           0
+Snow 12hr                 00-00       00-00       00-00                        
+Rain                                                                           
+Freeze                              W  W  W                                    
+
+
+Date          Tue 10/20/26  Wed 10/21/26  Thu 10/22/26  Fri 10/23/26
+EDT 6hrly     02 08 14 20   02 08 14 20   02 08 14 20   02 08 14 20
+UTC 6hrly     06 12 18 00   06 12 18 00   06 12 18 00   06 12 18 00
+
+Min/Max          36    69      40    71      41    72      44    72
+Temp          40 38 67 58   46 41 69 59   46 43 70 62   50 46 71 61
+Dewpt         38 37 39 43   43 41 45 46   45 42 46 47   46 45 48 48
+PWind dir         N    NE      NE    NE      NE     N      NE    NE
+Wind char        LT    LT      LT    LT      LT    LT      LT    LT
+Avg clouds    CL CL CL CL   CL FW FW CL   CL CL FW CL   FW FW FW CL
+PoP 12hr          0     0       0     0       0     0       0     0
+
+$$
+KYZ052-172000-
+MOREHEAD-ROWAN KY 
+38.18N  83.46W Elev. 748 ft
+756 AM EDT Sat Oct 17 2026
+
+Date             Sat 10/17/26            Sun 10/18/26            Mon 10/19/26
+EDT 3hrly     05 08 11 14 17 20 23 02 05 08 11 14 17 20 23 02 05 08 11 14 17 20
+UTC 3hrly     09 12 15 18 21 00 03 06 09 12 15 18 21 00 03 06 09 12 15 18 21 00
+
+Max/Min                      55          31          62          30          66
+Temp             46 48 53 54 45 40 37 34 33 50 60 61 46 39 35 31 32 54 64 65 51
+Dewpt            38 43 39 36 35 35 34 33 32 34 32 31 34 32 33 31 32 34 35 35 38
+RH               73 83 59 50 68 82 89 96 96 54 35 32 63 76 92100100 46 34 33 61
+Wind dir          N  N  N  N  N  N  N  N  N  E  E  E  N  N  N  N  N  N NE NE  N
+Wind spd          6  6  4  3  0  0  0  0  0  2  4  3  0  0  0  0  0  0  1  1  0
+Clouds           SC B1 SC FW CL CL CL CL FW CL CL CL CL CL CL CL CL CL CL CL CL
+PoP 12hr                     10           0           0           0           0
+QPF 12hr                      0           0           0           0           0
+Snow 12hr                 00-00       00-00       00-00                        
+RainFreeze                              W  W  W                                    
+
+
+Date          Tue 10/20/26  Wed 10/21/26  Thu 10/22/26  Fri 10/23/26
+EDT 6hrly     02 08 14 20   02 08 14 20   02 08 14 20   02 08 14 20
+UTC 6hrly     06 12 18 00   06 12 18 00   06 12 18 00   06 12 18 00
+
+Min/Max          36    69      40    71      41    72      44    72
+Temp          40 38 67 58   46 41 69 59   46 43 70 62   50 46 71 61
+Dewpt         38 37 39 43   43 41 45 46   45 42 46 47   46 45 48 48
+PWind dir         N    NE      NE    NE      NE     N      NE    NE
+Wind char        LT    LT      LT    LT      LT    LT      LT    LT
+Avg clouds    CL CL CL CL   CL FW FW CL   CL CL FW CL   FW FW FW CL
+PoP 12hr          0     0       0     0       0     0       0     0
+
+$$
+KYZ050-172000-
+MOUNT STERLING-MONTGOMERY KY 
+38.06N  83.94W Elev. 940 ft
+756 AM EDT Sat Oct 17 2026
+
+Date             Sat 10/17/26            Sun 10/18/26            Mon 10/19/26
+EDT 3hrly     05 08 11 14 17 20 23 02 05 08 11 14 17 20 23 02 05 08 11 14 17 20
+UTC 3hrly     09 12 15 18 21 00 03 06 09 12 15 18 21 00 03 06 09 12 15 18 21 00
+
+Max/Min                      54          31          62          36          65
+Temp             43 46 53 54 46 40 37 34 33 50 61 62 52 44 42 39 37 54 64 64 54
+Dewpt            38 41 38 36 34 34 33 32 31 33 33 30 33 31 32 31 31 35 36 34 38
+RH               82 83 57 50 63 79 85 92 92 52 35 30 48 60 67 73 79 48 35 32 54
+Wind dir          N  N  N  N  N NE NE NE  E  E  E  E  E  E  E  E  E  E NE NE NE
+Wind spd         11 10  8  6  3  3  2  2  2  4  6  4  3  2  2  1  1  1  2  3  2
+Clouds           FW B1 SC FW CL CL CL CL FW CL CL CL CL CL CL CL CL CL CL CL CL
+PoP 12hr                      0           0           0           0           0
+QPF 12hr                      0           0           0           0           0
+Snow 12hr                 00-00       00-00       00-00                        
+Drizzle                                                                        
+Wind chill       37                                                            
+Min chill        37    36          37    33    36                36            
+Freeze                              W  W  W                                    
+
+
+Date          Tue 10/20/26  Wed 10/21/26  Thu 10/22/26  Fri 10/23/26
+EDT 6hrly     02 08 14 20   02 08 14 20   02 08 14 20   02 08 14 20
+UTC 6hrly     06 12 18 00   06 12 18 00   06 12 18 00   06 12 18 00
+
+Min/Max          37    68      40    71      40    72      44    73
+Temp          42 38 66 59   45 41 68 60   46 42 69 63   49 45 70 62
+Dewpt         37 37 39 42   43 41 45 45   45 42 44 45   47 44 47 46
+PWind dir        NE    NE      NE    NE      NE     N      NE    NE
+Wind char        LT    LT      LT    LT      LT    LT      LT    LT
+Avg clouds    CL FW CL CL   CL FW FW FW   CL CL FW FW   FW FW FW FW
+PoP 12hr          0     0       0     0       0     0       0     0
+
+$$
+KYZ068-172000-
+MOUNT VERNON-ROCKCASTLE KY 
+37.35N  84.33W Elev. 1156 ft
+756 AM EDT Sat Oct 17 2026
+
+Date             Sat 10/17/26            Sun 10/18/26            Mon 10/19/26
+EDT 3hrly     05 08 11 14 17 20 23 02 05 08 11 14 17 20 23 02 05 08 11 14 17 20
+UTC 3hrly     09 12 15 18 21 00 03 06 09 12 15 18 21 00 03 06 09 12 15 18 21 00
+
+Max/Min                      54          35          63          40          67
+Temp             44 45 52 54 45 41 38 36 35 49 61 63 52 46 45 44 42 56 65 66 53
+Dewpt            44 40 39 36 35 35 34 33 32 33 33 31 35 32 33 31 32 35 36 35 38
+RH              100 82 61 50 68 79 85 89 89 54 35 30 52 58 62 60 67 45 34 32 57
+Wind dir          N  N  N  N  N NE NE  E  E  E  E  E  E  E  E  E  E  E  N NE NE
+Wind spd         12 11  9  9  4  4  3  3  4  6  8  5  4  3  3  1  1  1  3  4  3
+Wind gust        23                                                            
+Clouds           B1 B1 B1 FW CL CL CL CL CL CL CL CL CL CL CL CL CL CL CL CL CL
+PoP 12hr                     30           0           0           0           0
+QPF 12hr                      0           0           0           0           0
+Snow 12hr                 00-00       00-00       00-00                        
+Drizzle           C                                                            
+Rain                                                                           
+Wind chill       38 39                                                         
+Min chill        38    37          36    31    34                              
+Frost                               Y  Y  Y                                    
+
+
+Date          Tue 10/20/26  Wed 10/21/26  Thu 10/22/26  Fri 10/23/26
+EDT 6hrly     02 08 14 20   02 08 14 20   02 08 14 20   02 08 14 20
+UTC 6hrly     06 12 18 00   06 12 18 00   06 12 18 00   06 12 18 00
+
+Min/Max          42    69      42    73      43    73      46    74
+Temp          45 43 67 59   48 43 70 61   49 44 70 62   51 47 72 63
+Dewpt         37 37 39 44   42 41 43 46   45 43 43 47   46 45 46 48
+PWind dir        NE    NE      NE    NE      NE     N      NE    NE
+Wind char        LT    LT      LT    LT      LT    LT      LT    LT
+Avg clouds    CL FW CL CL   CL CL CL CL   CL CL CL CL   CL CL CL CL
+PoP 12hr          0     0       0     0       0     0       0     0
+
+$$
+KYZ059-172000-
+NATURAL BRIDGE STATE PARK-POWELL KY 
+37.76N  83.70W Elev. 1248 ft
+756 AM EDT Sat Oct 17 2026
+
+Date             Sat 10/17/26            Sun 10/18/26            Mon 10/19/26
+EDT 3hrly     05 08 11 14 17 20 23 02 05 08 11 14 17 20 23 02 05 08 11 14 17 20
+UTC 3hrly     09 12 15 18 21 00 03 06 09 12 15 18 21 00 03 06 09 12 15 18 21 00
+
+Max/Min                      53          35          61          38          65
+Temp             42 45 51 53 45 40 38 36 35 47 58 61 50 44 42 40 39 54 62 64 52
+Dewpt            40 41 38 36 35 35 35 33 33 33 32 31 34 32 33 31 31 35 35 34 37
+RH               93 86 61 52 68 82 89 89 92 58 37 32 54 62 70 70 73 48 36 32 56
+Wind dir          N  N  N  N NE NE NE  E  E  E  E  E  E  E  E  N  N  N NE NE  N
+Wind spd          6  4  3  3  1  1  1  1  1  2  4  2  1  1  1  0  0  0  1  1  0
+Wind gust        17                                                            
+Clouds           B1 B1 B1 FW CL CL CL CL CL CL CL CL CL CL CL CL CL CL CL CL CL
+PoP 12hr                     30           0           0           0           0
+QPF 12hr                   0.01           0           0           0           0
+Snow 12hr                 00-00       00-00       00-00                        
+Drizzle           C                                                            
+Rain                                                                           
+Frost                               Y  Y  Y                                    
+
+
+Date          Tue 10/20/26  Wed 10/21/26  Thu 10/22/26  Fri 10/23/26
+EDT 6hrly     02 08 14 20   02 08 14 20   02 08 14 20   02 08 14 20
+UTC 6hrly     06 12 18 00   06 12 18 00   06 12 18 00   06 12 18 00
+
+Min/Max          41    67      41    71      42    71      45    71
+Temp          44 42 64 58   46 42 68 60   47 43 68 61   50 45 69 61
+Dewpt         37 37 39 43   43 42 44 46   46 43 45 47   47 45 47 48
+PWind dir         N    NE      NE    NE       N     N       N    NE
+Wind char        LT    LT      LT    LT      LT    LT      LT    LT
+Avg clouds    CL CL CL CL   CL FW FW CL   CL FW CL CL   FW FW CL CL
+PoP 12hr          0     0       0     0       0     0       0     0
+
+$$
+KYZ051-172000-
+OWINGSVILLE-BATH KY 
+38.14N  83.77W Elev. 1005 ft
+756 AM EDT Sat Oct 17 2026
+
+Date             Sat 10/17/26            Sun 10/18/26            Mon 10/19/26
+EDT 3hrly     05 08 11 14 17 20 23 02 05 08 11 14 17 20 23 02 05 08 11 14 17 20
+UTC 3hrly     09 12 15 18 21 00 03 06 09 12 15 18 21 00 03 06 09 1215 18 21 00
+
+Max/Min                      54          31          62          36          66
+Temp             43 46 52 53 47 40 37 35 34 50 61 62 52 45 42 39 37 55 64 65 54
+Dewpt            39 40 37 35 35 35 34 32 31 33 32 30 33 32 32 31 31 34 34 33 38
+RH               86 79 56 50 63 82 89 89 89 52 33 30 48 60 67 73 79 45 32 30 54
+Wind dir          N  N  N  N  N NE NE NE NE  E  E  E  E  E  E  N  E  E NE NE NE
+Wind spd         11 10  8  8  3  2  2  1  2  4  6  5  3  2  2  0  1  1  2  3  2
+Clouds           FW B1 SC FW CL CL CL FW FW CL CL CL CL CL CL CL CL CL CL CL CL
+PoP 12hr                      0           0           0           0           0
+QPF 12hr                      0           0           0           0           0
+Snow 12hr                 00-00       00-00       00-00                        
+Drizzle                                                                        
+Wind chill       37                                                            
+Min chill        37    36          37    34    36                36            
+Freeze                              W  W  W                                    
+
+
+Date          Tue 10/20/26  Wed 10/21/26  Thu 10/22/26  Fri 10/23/26
+EDT 6hrly     02 08 14 20   02 08 14 20   02 08 14 20   02 08 14 20
+UTC 6hrly     06 12 18 00   06 12 18 00   06 12 18 00   06 12 18 00
+
+Min/Max          36    68      40    71      41    72      44    72
+Temp          42 38 67 60   45 41 68 61   46 42 69 63   49 45 71 63
+Dewpt         37 37 38 42   43 41 43 45   46 42 43 45   47 44 45 45
+PWind dir        NE    NE      NE    NE      NE     N      NE    NE
+Wind char        LT    LT      LT    LT      LT    LT      LT    LT
+Avg clouds    CL CL CL CL   CL FW FW FW   CL CL FW FW   FW FW FW FW
+PoP 12hr          0     0       0     0       0     0       0     0
+
+$$
+KYZ107-172000-
+PAINTSVILLE-JOHNSON KY 
+37.81N  82.82W Elev. 620 ft
+756 AM EDT Sat Oct 17 2026
+
+Date             Sat 10/17/26            Sun 10/18/26            Mon 10/19/26
+EDT 3hrly     05 08 11 14 17 20 23 02 05 08 11 14 17 20 23 02 05 08 11 14 17 20
+UTC 3hrly     09 12 15 18 21 00 03 06 09 12 15 18 21 00 03 06 09 12 15 18 21 00
+
+Max/Min                      53          33          61          29          65
+Temp             46 47 52 52 44 40 37 35 33 47 59 60 47 36 32 29 30 50 62 64 49
+Dewpt            44 44 39 36 35 35 34 33 32 34 33 33 37 34 32 29 30 35 35 35 39
+RH               93 89 61 54 70 82 89 92 96 60 37 36 68 92100100100 56 36 34 68
+Wind dir          N  N  N  N  N  N  N  N  N NE NE NE  N  N  N  N  N  N NE NE  N
+Wind spd          5  5  4  3  0  0  0  0  0  1  3  2  0  0  0  0  0  0  1  1  0
+Wind gust        17                                                            
+Clouds           B1 B2 B1 FW CL CL CL CL CL CL CL CL CL CL CL FW FW CL FW CL CL
+PoP 12hr                     50           0           0           0           0
+QPF 12hr                   0.01           0           0           0           0
+Snow 12hr                 00-00       00-00       00-00                        
+Drizzle           C  C                                                         
+Obvis                              PF PF  F                                    
+Frost                               Y  Y  Y                                    
+
+
+Date          Tue 10/20/26  Wed 10/21/26  Thu 10/22/26  Fri 10/23/26
+EDT 6hrly     02 08 14 20   02 08 14 20   02 08 14 20   02 08 14 20
+UTC 6hrly     06 12 18 00   06 12 18 00   06 12 18 00   06 12 18 00
+
+Min/Max          34    66      40    68      41    69      43    69
+Temp          36 37 64 57   45 41 67 58   47 43 68 60   49 44 68 59
+Dewpt         36 37 39 47   45 41 48 50   47 43 48 51   48 44 50 51
+PWind dir         N     N       N    NE       N     N       N    NE
+Wind char        LT    LT      LT    LT      LT    LT      LT    LT
+Avg clouds    CL FW FW CL   CL FW FW FW   CL FWFW FW   FW FW FW FW
+PoP 12hr          0     0       0     0       0     0       0     0
+
+$$
+KYZ107-172000-
+PAINTSVILLE LAKE STATE PARK-JOHNSON KY 
+37.85N  82.84W Elev. 710 ft
+756 AM EDT Sat Oct 17 2026
+
+Date             Sat 10/17/26            Sun 10/18/26            Mon 10/19/26
+EDT 3hrly     05 08 11 14 17 20 23 02 05 08 11 14 17 20 23 02 05 08 11 14 17 20
+UTC 3hrly     09 12 15 18 21 00 03 06 09 12 15 18 21 00 03 06 09 12 15 18 21 00
+
+Max/Min                      53          33          61          30          65
+Temp             46 45 52 52 44 40 36 35 33 47 59 60 46 38 33 31 32 51 62 64 49
+Dewpt            43 43 38 36 35 35 34 33 32 33 33 32 36 34 33 31 31 34 34 35 40
+RH               89 93 59 54 70 82 92 92 96 58 37 35 68 85100100 96 52 35 34 71
+Wind dir          N  N  N NE  N  N  N  N  N NE  E NE NE  N  N  N  N  N NE NE  N
+Wind spd          5  5  4  3  1  0  0  0  0  1  3  2  1  0  0  0  0  0  1  1  0
+Wind gust        17                                                            
+Clouds           B1 B2 B1 FW CL CL CL CL CL CL CL CL CL CL CL FW FW CL FW CL CL
+PoP 12hr                     50           0           0           0           0
+QPF 12hr                   0.01           0           0           0           0
+Snow 12hr                 00-00       00-00       00-00                        
+Drizzle           C  C                                                         
+Obvis                              PF PF  F                                    
+Frost                               Y  Y  Y                                    
+
+
+Date          Tue 10/20/26  Wed 10/21/26  Thu 10/22/26  Fri 10/23/26
+EDT 6hrly     02 08 14 20   02 08 14 20   02 08 14 20   02 08 14 20
+UTC 6hrly     06 12 18 00   06 12 18 00   06 12 18 00   06 12 18 00
+
+Min/Max          34    66      40    68      41    69      43    69
+Temp          37 36 64 56   45 41 67 58   46 43 68 60   49 44 68 59
+Dewpt         37 36 39 47   44 41 46 50   46 42 46 50   48 44 49 51
+PWind dir         N     N       N    NE       N     N       N    NE
+Wind char        LT    LT      LT    LT      LT    LT      LT    LT
+Avg clouds    CL FW FW CL   CL FW FW FW   CL FW FW FW   CL FW FW FW
+PoP 12hr          0     0       0     0       0     0       0     0
+
+$$
+KYZ120-172000-
+PIKEVILLE-PIKE KY 
+37.48N  82.51W Elev. 685 ft
+756 AM EDT Sat Oct 17 2026
+
+Date             Sat 10/17/26            Sun 10/18/26            Mon 10/19/26
+EDT 3hrly     05 08 11 14 17 20 23 02 05 08 11 14 17 20 23 02 05 08 11 14 17 20
+UTC 3hrly     09 12 15 18 21 00 03 06 09 12 15 18 21 00 03 06 09 12 15 18 21 00
+
+Max/Min                      55          35          63          30          66
+Temp             49 47 54 54 47 42 38 36 35 50 62 63 50 38 33 30 31 51 63 65 51
+Dewpt            47 46 41 38 35 34 33 32 32 34 34 33 36 33 31 29 29 35 35 36 39
+RH               93 96 61 54 63 73 82 85 89 54 35 32 58 82 92 96 92 54 35 34 63
+Wind dir          N  N  N  N  N  N  N  N  N NE NE NE  N  N  N  N  N  N  N  N  N
+Wind spd         10  8  6  6  1  0  0  0  0  1  4  3  0  0  0  0  0  0  1  2  0
+Wind gust        21                                                            
+Clouds           B2 OV B1 FW FW CL CL CL CL CL CL CL CL CL CL FW FW FW FW FW FW
+PoP 12hr                     60           0           0           0           0
+QPF 12hr                   0.01           0           0           0           0
+Snow 12hr                 00-00       00-00       00-00                        
+Drizzle           L  C                                                         
+Rain                                                                           
+Obvis                                    PF                                    
+Frost                               Y  Y  Y                                    
+
+
+Date          Tue 10/20/26  Wed 10/21/26  Thu 10/22/26  Fri 10/23/26
+EDT 6hrly02 08 14 20   02 08 14 20   02 08 14 20   02 08 14 20
+UTC 6hrly     06 12 18 00   06 12 18 00   06 12 18 00   06 12 18 00
+
+Min/Max          35    68      41    70      44    71      47    71
+Temp          37 38 66 58   46 42 69 59   48 45 68 61   51 48 70 61
+Dewpt         37 37 40 47   45 42 50 49   47 44 50 50   48 47 53 50
+PWind dir         N     N       N     N       N     N       N     N
+Wind char        LT    LT      LT    LT      LT    LT      LT    LT
+Avg clouds    FW FW FW FW   CL FW FW CL   CL FW FW FW   FW FW FW CL
+PoP 12hr          0     0       0     0       0     0       0     0
+
+$$
+KYZ087-172000-
+PINE MOUNTAIN STATE PARK-BELL KY 
+36.72N  83.70W Elev. 2205 ft
+756 AM EDT Sat Oct 17 2026
+
+Date             Sat 10/17/26            Sun 10/18/26            Mon 10/19/26
+EDT 3hrly     05 08 11 14 17 20 23 02 05 08 11 14 17 20 23 02 05 08 11 14 17 20
+UTC 3hrly     09 12 15 18 21 00 03 06 09 12 15 18 21 00 03 06 09 12 15 18 21 00
+
+Max/Min                      55          34          66          34          69
+Temp             46 44 53 54 46 39 36 35 34 50 65 65 51 44 41 37 35 53 66 67 53
+Dewpt            44 42 39 36 36 35 33 32 30 30 31 30 34 33 31 29 29 33 35 36 38
+RH               93 93 59 50 68 85 89 89 85 46 28 27 52 65 67 72 78 46 32 32 57
+Wind dir          N  N  N  N  N  N  N  N  N  E  E  E  E  N  N  N  N  N  N  N  N
+Wind spd          9  9  8  8  2  1  0  0  0  2  4  3  1  0  0  0  0  0  1  2  1
+Wind gust        24                                                            
+Clouds           B2 OV B2 FW FW CL FW FW FW CL CL CL CL CL FW FW FW CL CL CL CL
+PoP 12hr                     50           5           0           0           0
+QPF 12hr                   0.01           0           0           0           0
+Snow 12hr                 00-00       00-00       00-00                        
+Drizzle           C  C                                                         
+Rain                                                                           
+Frost                               Y  Y  Y                                    
+
+
+Date          Tue 10/20/26  Wed 10/21/26  Thu 10/22/26  Fri 10/23/26
+EDT 6hrly     02 08 14 20   02 08 14 20   02 08 14 20   02 08 14 20
+UTC 6hrly     06 12 18 00   06 12 18 00   06 12 18 00   06 12 18 00
+
+Min/Max          39    72      41    75      43    74      44    75
+Temp          43 40 70 59   45 42 72 60   46 44 71 61   49 45 74 61
+Dewpt         37 37 40 45   43 40 43 47   45 43 45 49   47 45 47 50
+PWind dir         N     N      NE     N      NE     N       N     N
+Wind char        LT    LT      LT    LT      LT    LT      LT    LT
+Avg clouds    CL FW FW CL   CL FW FW CL   CL FW FW CL   CL FW FW CL
+PoP 12hr          0     0       0     0       0     0       0     0
+
+$$
+KYZ087-172000-
+PINEVILLE-BELL KY 
+36.75N  83.76W Elev. 1015 ft
+756 AM EDT Sat Oct 17 2026
+
+Date             Sat 10/17/26            Sun 10/18/26            Mon 10/19/26
+EDT 3hrly     05 08 11 14 17 20 23 02 05 08 11 14 17 20 23 02 05 08 11 14 17 20
+UTC 3hrly     09 12 15 18 21 00 03 06 09 12 15 18 21 00 03 06 09 12 15 18 21 00
+
+Max/Min                      55          33          66          30          69
+Temp             45 43 52 55 45 39 35 34 33 50 65 66 48 40 36 32 32 52 66 67 51
+Dewpt            43 41 39 36 36 35 33 31 30 29 30 30 34 33 30 29 29 33 35 35 38
+RH               93 93 61 49 70 85 92 89 89 44 27 26 58 76 79 88 88 48 32 30 61
+Wind dir          N  N  N  N  N  N  N  N  N  E  E  E  N  N  N  N  N  N  N  N  N
+Wind spd          8  8  6  6  1  0  0  0  0  1  3  2  0  0  0  0  0  0  1  1  0
+Wind gust        23                                                            
+Clouds           B2 OV B2 FW FW CL FW FW FW CL CL CL CL CL FW FW FW CL CL CL CL
+PoP 12hr                     50           5           0           0           0
+QPF 12hr                   0.01           0           00           0
+Snow 12hr                 00-00       00-00       00-00                        
+Drizzle           C  C                                                         
+Rain                                                                           
+Obvis                              PF PF PF                                    
+Frost                               Y  Y  Y                                    
+
+
+Date          Tue 10/20/26  Wed 10/21/26  Thu 10/22/26  Fri 10/23/26
+EDT 6hrly     02 08 14 20   02 08 14 20   02 08 14 20   02 08 14 20
+UTC 6hrly     06 12 18 00   06 12 18 00   06 12 18 00   06 12 18 00
+
+Min/Max          36    72      41    74      43    73      45    75
+Temp          40 38 70 58   46 42 72 60   46 44 71 61   49 46 73 62
+Dewpt         36 37 39 44   43 40 42 46   45 43 43 49   47 45 46 49
+PWind dir         N     N      NE     N      NE     N      NE     N
+Wind char        LT    LT      LT    LT      LT    LT      LT    LT
+Avg clouds    CL FW FW CL   CL FW FW CL   CL FW FW CL   CL FW FW CL
+PoP 12hr          0     0       0     0       0     0       0     0
+
+$$
+KYZ110-172000-
+PRESTONSBURG-FLOYD KY 
+37.66N  82.76W Elev. 642 ft
+756 AM EDT Sat Oct 17 2026
+
+Date             Sat 10/17/26            Sun 10/18/26            Mon 10/19/26
+EDT 3hrly     05 08 11 14 17 20 23 02 05 08 11 14 17 20 23 02 05 08 11 14 17 20
+UTC 3hrly     09 12 15 18 21 00 03 06 09 12 15 18 21 00 03 06 09 12 15 18 21 00
+
+Max/Min                      56          34          63          30          67
+Temp             47 49 55 55 47 42 38 36 34 50 61 63 49 38 32 30 30 52 64 66 52
+Dewpt            43 44 40 37 35 35 34 33 32 34 33 33 37 34 32 30 30 35 35 35 39
+RH               86 83 57 51 63 76 85 89 92 54 35 32 63 85100100100 52 34 32 61
+Wind dir          N  N  N  N  N  N  N  N  N NE NE NE  N  N  N  N  N  N NE  N  N
+Wind spd          6  6  5  4  0  0  0  0  0  1  3  2  0  0  0  0  0  0  1  1  0
+Wind gust        18                                                            
+Clouds           B2 B2 B1 FW CL CL CL CL CL CL CL CL CL CL CL FW FW CL FW CL CL
+PoP 12hr                     50           0           0           0           0
+QPF 12hr                   0.01           0           0           0           0
+Snow 12hr                 00-00       00-00       00-00                        
+Drizzle           C  S                                                         
+Rain                                                                           
+Obvis                                 PF PF                                    
+Frost                               Y  Y  Y                                    
+
+
+Date          Tue 10/20/26  Wed 10/21/26  Thu 10/22/26  Fri 10/23/26
+EDT 6hrly     02 08 14 20   02 08 14 20   02 08 14 20   02 08 14 20
+UTC 6hrly     06 12 18 00   06 12 18 00   06 12 18 00   06 12 18 00
+
+Min/Max          34    68      40    71      42    72      44    72
+Temp          37 37 67 58   45 41 69 60   46 43 69 61   49 45 71 60
+Dewpt         37 37 40 46   44 41 47 48   46 43 48 50   48 45 51 50
+PWind dir         N     N       N    NE       N     N       N    NE
+Wind char        LT    LT      LT    LT      LT    LT      LT    LT
+Avg clouds    FW FW FW CL   CL FW FW FW   CL FW FW FW   FW FW FW FW
+PoP 12hr          0     0       0     0       0     0       0     0
+
+$$
+KYZ059-172000-
+RED RIVER GORGE-POWELL KY 
+37.82N  83.64W Elev. 707 ft
+756 AM EDT Sat Oct 17 2026
+
+Date             Sat 10/17/26            Sun 10/18/26            Mon 10/19/26
+EDT 3hrly     05 08 11 14 17 20 23 02 05 08 11 14 17 20 23 02 05 08 11 14 17 20
+UTC 3hrly     09 12 15 18 21 00 03 06 09 12 15 18 21 00 03 06 09 12 15 18 21 00
+
+Max/Min                      54          33          61          31          65
+Temp             44 46 51 54 45 40 37 35 33 48 59 61 46 39 36 32 32 52 63 64 51
+Dewpt            42 43 39 37 35 35 35 33 33 34 33 31 35 33 33 31 32 36 35 35 38
+RH               93 89 63 52 68 82 92 92100 58 37 32 65 79 89 96100 54 35 34 61
+Wind dir          N  N  N  N  N  N  N  N  N  E  E  E  N  N  N  N  N  N  N  N  N
+Wind spd          4  3  3  2  0  0  0  0  0  1  3  1  0  0  0  0  0  0  0  0  0
+Wind gust        14                                                            
+Clouds           B1 B1 B1 FW CL CL CL CL CL CL CL CL CL CL CL CL CL CL CL CL CL
+PoP 12hr                     30           0           0           0           0
+QPF 12hr                   0.01           0           0           0           0
+Snow 12hr                 00-00       00-00       00-00                        
+Drizzle           C                                                            
+Rain                                                                           
+Obvis                              PF PF F+                                    
+Frost                               Y  Y  Y                                    
+
+
+Date          Tue 10/20/26  Wed 10/21/26  Thu 10/22/26  Fri 10/23/26
+EDT 6hrly     02 08 14 20   02 08 14 20   02 08 14 20   02 08 14 20
+UTC 6hrly     06 12 18 00   06 12 18 00   06 12 18 00   06 12 18 00
+
+Min/Max          36    67      41    71      42    72      44    72
+Temp          40 38 65 58   46 42 68 60   47 43 69 61   50 45 70 62
+Dewpt         38 37 39 43   43 42 45 46   46 43 46 48   47 45 48 48
+PWind dir         N    NE      NE    NE       N     N       N    NE
+Wind char        LT    LT      LT    LT      LT    LT      LT    LT
+Avg clouds    CL CL CL CL   CL FW FW CL   CL CL CL CL   FW FW FW CL
+PoP 12hr          0     0       0     0       0     0       0     0
+
+$$
+KYZ109-172000-
+SALYERSVILLE-MAGOFFIN KY 
+37.74N  83.06W Elev. 854 ft
+756 AM EDT Sat Oct 17 2026
+
+Date             Sat 10/17/26            Sun 10/18/26            Mon 10/19/26
+EDT 3hrly     05 08 11 14 17 20 23 02 05 08 11 14 17 20 23 02 05 08 11 14 17 20
+UTC 3hrly     09 12 15 18 21 00 03 06 09 12 15 18 21 00 03 06 09 12 15 18 21 00
+
+Max/Min                      53          33          61          29          65
+Temp             44 44 51 52 45 39 36 35 33 46 58 61 46 39 34 31 31 50 62 64 49
+Dewpt            42 43 39 36 35 34 34 33 32 34 33 32 36 34 33 31 31 35 34 35 39
+RH               93 96 63 54 68 82 92 92 96 63 39 33 68 82 96100100 56 35 34 68
+Wind dir          N  N  N  N  N  N  N  N  N  E  E  E  N  N  N  N  N  N NE NE  N
+Wind spd          5  5  4  3  0  0  0  0  0  2  3  2  0  0  0  0  0  0  1  1  0
+Clouds           B1 OV B1 FW CL CL CL CL CL CL CL CL CL CL CL FW FW CL CL CL CL
+PoP 12hr                     40           0           0           0           0
+QPF 12hr                   0.01           0           0           0           0
+Snow 12hr                 00-00       00-00       00-00                        
+Drizzle           C  C                                                         
+Rain                                                                           
+Obvis                              PF PF  F                                    
+Frost                               Y  Y  Y                                    
+
+
+Date          Tue 10/20/26  Wed 10/21/26  Thu 10/22/26  Fri 10/23/26
+EDT 6hrly     02 08 14 20   02 08 14 20   02 08 14 20   02 08 14 20
+UTC 6hrly     06 12 18 00   06 12 18 00   06 12 18 00   06 12 18 00
+
+Min/Max          34    67      40    69      41    70      44    70
+Temp          38 36 65 56   44 41 67 58   46 43 68 60   48 45 69 59
+Dewpt         38 36 39 46   44 41 46 48   46 43 47 50   47 45 49 50
+PWind dir         N    NE      NE    NE      NE     N       N    NE
+Wind char        LT    LT      LT    LT      LT    LT      LT    LT
+Avg clouds    CL FW CL CL   CL FW FW CL   FW FW FW CL   FW FW FW CL
+PoP 12hr          0     0       0     0       0     0       0     0
+
+$$
+KYZ104-172000-
+SANDYHOOK-ELLIOT KY 
+38.10N  83.13W Elev. 775 ft
+756 AM EDT Sat Oct 17 2026
+
+Date             Sat 10/17/26            Sun 10/18/26            Mon 10/19/26
+EDT 3hrly     05 08 11 14 17 20 23 02 05 08 11 14 17 20 23 02 05 08 11 14 17 20
+UTC 3hrly     09 12 15 18 21 00 03 06 09 12 15 18 21 00 03 06 09 12 15 18 21 00
+
+Max/Min                      54          32          61          29          65
+Temp             44 47 52 53 44 39 36 33 32 47 59 61 46 38 34 31 31 51 62 64 49
+Dewpt            40 44 39 36 36 35 35 33 32 34 33 31 35 33 33 31 31 34 35 35 39
+RH               86 89 61 52 73 85 96100100 60 37 32 65 82 96100100 52 36 34 68
+Wind dir          N  N  N  N  N  N  N  N  N  E  E  E  N  N  N  N  N  N NE NE  N
+Wind spd          6  6  5  4  0  0  0  0  0  2  4  3  0  0  0  0  0  0  1  1  0
+Clouds           SC B1 SC FW CL CL CL CL FW CL CL CL CL CL CL CL CL CL CL CL CL
+PoP 12hr                     20           0           0           0           0
+QPF 12hr                   0.01           0           0           0           0
+Snow 12hr                 00-00       00-00       00-00                        
+Drizzle                                                                        
+Obvis                               F F+ F+                                    
+Frost                               Y  Y  Y                                    
+
+
+Date          Tue 10/20/26  Wed 10/21/26  Thu 10/22/26  Fri 10/23/26
+EDT 6hrly     02 08 14 20   02 08 14 20   02 08 14 20   02 08 14 20
+UTC 6hrly     06 12 18 00   06 12 18 00   06 12 18 00   06 12 18 00
+
+Min/Max          34    67      39    70      40    71      42    70
+Temp          38 35 64 57   44 40 67 58   46 42 68 60   48 43 69 60
+Dewpt         37 35 39 47   44 40 47 49   46 42 47 50   48 43 50 50
+PWind dir         N    NE      NE    NE      NE     N      NE    NE
+Wind char        LT    LT      LT    LT      LT    LT      LT    LT
+Avg clouds    CL FW CL CL   CL FW FW CL   CL CL FW CL   CL FW FW CL
+PoP 12hr          0     0       0     0       0     0       0     0
+
+$$
+KYZ079-172000-
+SOMERSET-PULASKI KY 
+37.05N  84.61W Elev. 927 ft
+756 AM EDT Sat Oct 17 2026
+
+Date             Sat 10/17/26            Sun 10/18/26            Mon 10/19/26
+EDT 3hrly     05 08 11 14 17 20 23 02 05 08 11 14 17 20 23 02 05 08 11 14 17 20
+UTC 3hrly     09 12 15 18 21 00 03 06 09 12 15 18 21 00 03 06 09 12 15 18 21 00
+
+Max/Min                      57          35          66          33          68
+Temp             46 47 55 57 48 43 39 37 35 50 64 66 53 45 40 38 38 54 65 67 55
+Dewpt            44 42 40 37 35 35 34 33 32 34 33 32 35 34 34 32 34 36 37 35 39
+RH               93 83 57 47 60 73 82 85 89 54 31 28 50 65 79 79 85 50 35 30 55
+Wind dir          N  N  N  N  N NE NE NE NE  E  E  E NE  E  N  N  N  N  N  N  N
+Wind spd         12 12 10  9  4  3  2  2  3  5  6  5  4  2  0  0  0  0  2  3  3
+Clouds           SC B1 B1 FW CL CL CL CL CL CL CL CL CL CL CL CL FW CL CL CL CL
+PoP 12hr                     10           0           0           0           0
+QPF 12hr                      0           0           0           0           0
+Snow 12hr                 00-00       00-00       00-00                        
+Drizzle                                                                        
+Frost                               Y  Y  Y                                    
+
+
+Date          Tue 10/20/26  Wed 10/21/26  Thu 10/22/26  Fri 10/23/26
+EDT 6hrly     02 08 14 20   02 08 14 20   02 08 14 20   02 08 14 20
+UTC 6hrly     06 12 18 00   06 12 18 00   06 12 18 00   06 12 18 00
+
+Min/Max          37    70      42    74      42    75      44    77
+Temp          43 41 67 61   47 43 72 63   49 43 71 65   51 45 73 65
+Dewpt         37 38 40 44   43 41 47 46   46 43 47 47   47 45 49 47
+PWind dir        NE    NE      NE    NE      NE     N      NE    NE
+Wind char        LT    LT      LT    LT      LT    LTLT    LT
+Avg clouds    CL CL CL CL   CL FW FW CL   CL CL FW CL   CL FW FW CL
+PoP 12hr          0     0       0     0       0     0       0     0
+
+$$
+KYZ120-172000-
+SOUTH WILLIAMSON-PIKE KY 
+37.66N  82.27W Elev. 665 ft
+756 AM EDT Sat Oct 17 2026
+
+Date             Sat 10/17/26            Sun 10/18/26            Mon 10/19/26
+EDT 3hrly     05 08 11 14 17 20 23 02 05 08 11 14 17 20 23 02 05 08 11 14 17 20
+UTC 3hrly     09 12 15 18 21 00 03 06 09 12 15 18 21 00 03 06 09 12 15 18 21 00
+
+Max/Min                      56          35          64          31          66
+Temp             49 48 54 56 48 42 40 37 35 51 62 64 51 39 36 33 33 53 64 65 52
+Dewpt            46 44 39 37 34 34 33 32 32 33 34 34 36 33 30 29 29 34 35 36 39
+RH               89 86 57 49 58 73 76 82 89 50 35 32 56 79 79 85 85 48 34 34 61
+Wind dir          N  N  N  N  N  N  N  N  N  E  E NE NE  N  N  N  N  N  N  N  N
+Wind spd          9  9  8  6  2  0  0  0  0  1  3  3  1  0  0  0  0  0  2  2  0
+Wind gust        23                                                            
+Clouds           B2 OV B1 FW CL CL CL CL CL CL CL CL CL CL CL FW FW FW FW FW FW
+PoP 12hr                     60           0           0           0           0
+QPF 12hr                   0.01           0           0           0           0
+Snow 12hr                 00-00       00-00       00-00                        
+Drizzle           L  C                                                         
+Rain                                                                           
+Obvis                                    PF                                    
+Frost                               Y  Y  Y                                    
+
+
+Date          Tue 10/20/26  Wed 10/21/26  Thu 10/22/26  Fri 10/23/26
+EDT 6hrly     02 08 14 20   02 08 14 20   02 08 14 20   02 08 14 20
+UTC 6hrly     06 12 18 00   06 12 18 00   06 12 18 00   06 12 18 00
+
+Min/Max          35    68      42    71      44    71      46    71
+Temp          38 39 66 58   47 43 69 60   49 45 69 61   52 47 69 61
+Dewpt         38 38 40 45   45 42 48 47   47 45 49 48   49 47 52 49
+PWind dir         N     N       N     N       N     N       N     N
+Wind char        LT    LT      LT    LT      LT    LT      LT    LT
+Avg clouds    FW FW FW FW   CL FW FW FW   CL FW FW FW   FW FW FW CL
+PoP 12hr          0     0       0     0       0     0       0     0
+
+$$
+KYZ059-172000-
+STANTON-POWELL KY 
+37.84N  83.86W Elev. 659 ft
+756 AM EDT Sat Oct 17 2026
+
+Date             Sat 10/17/26            Sun 10/18/26            Mon 10/19/26
+EDT 3hrly     05 08 11 14 17 20 23 02 05 08 11 14 17 20 23 02 05 08 11 14 17 20
+UTC 3hrly     09 12 15 18 21 00 03 06 09 12 15 18 21 00 03 06 09 12 15 18 21 00
+
+Max/Min                      55          33          63          32          66
+Temp             44 48 53 55 47 40 38 34 33 50 61 63 50 42 38 35 35 53 63 65 52
+Dewpt            40 42 40 37 36 36 35 33 32 34 34 32 35 32 33 32 32 36 36 35 38
+RH               86 80 61 51 65 85 89 96 96 54 36 31 56 67 82 89 89 52 36 33 59
+Wind dir          N  N  N  N  N  N  N  N  N  E  E  E  N  N  N  N  N  N  N  N  N
+Wind spd          5  4  3  2  0  0  0  0  0  1  3  1  0  0  0  0  0  0  0  0  0
+Wind gust        19                                                            
+Clouds           B1 B1 B1 FW CL CL CL CL CL CL CL CL CL CL CL CL CL CL CL CL CL
+PoP 12hr                     30           0           0           0           0
+QPF 12hr                   0.01           0           0           0           0
+Snow 12hr                 00-00       00-00       00-00                        
+Drizzle           C                                                            
+Obvis                              PF  F  F                                    
+Frost                               Y  Y  Y                                    
+
+
+Date          Tue 10/20/26  Wed 10/21/26  Thu 10/22/26  Fri 10/23/26
+EDT 6hrly     02 08 14 20   02 08 14 20   02 08 14 20   02 08 14 20
+UTC 6hrly     06 12 18 00   06 12 18 00   06 12 18 00   06 12 18 00
+
+Min/Max          36    69      40    73      41    73      44    74
+Temp          41 37 66 60   46 41 70 62   47 43 70 64   50 45 72 63
+Dewpt         38 37 40 44   44 41 47 47   46 43 47 48   48 45 49 48
+PWind dir         N    NE       N    NE       N     N       N    NE
+Wind char        LT    LT      LT    LT      LT    LT      LT    LT
+Avg clouds    CL FW CL CL   CL FW FW CL   CL CL FW CL   FW FW CL CL
+PoP 12hr          0     0       0     0       0     0       0     0
+
+$$
+KYZ106-172000-
+WEST LIBERTY-MORGAN KY 
+37.92N  83.27W Elev. 830 ft
+756 AM EDT Sat Oct 17 2026
+
+Date             Sat 10/17/26            Sun 10/18/26            Mon 10/19/26
+EDT 3hrly     05 08 11 14 17 20 23 02 05 08 11 14 17 20 23 02 05 08 11 14 17 20
+UTC 3hrly     09 12 15 18 21 00 03 06 09 12 15 18 21 00 03 06 09 12 15 18 21 00
+
+Max/Min                      53          32          61          29          64
+Temp             43 46 51 53 44 39 35 34 32 47 58 61 46 39 34 31 31 51 62 63 50
+Dewpt            41 43 39 37 35 35 34 33 32 34 32 31 35 33 33 31 31 35 34 34 39
+RH               93 89 63 54 70 85 96 96100 60 37 32 65 79 96100100 54 35 34 66
+Wind dir          N  N  N  N  N  N  N  N  N  E  E  E  N  N  N  N  N  N NE NE  N
+Wind spd          5  5  4  3  0  0  0  0  0  2  4  3  0  0  0  0  0  0  1  1  0
+Clouds           FW B1 B1 FW CL CL CL CL CL CL CL CL CL CL CL CL CL CL CL CL CL
+PoP 12hr                      5           0           0           0           0
+QPF 12hr                   0.01           0           0           0           0
+Snow 12hr                 00-00       00-00       00-00                        
+Rain                                                                           
+Obvis                               F  F F+                                    
+Frost                               Y  Y  Y                                    
+
+
+Date          Tue 10/20/26  Wed 10/21/26  Thu 10/22/26  Fri 10/23/26
+EDT 6hrly     02 08 14 20   02 08 14 20   02 08 14 20   02 08 14 20
+UTC 6hrly     06 12 18 00   06 12 18 00   06 12 18 00   06 12 18 00
+
+Min/Max          35    67      39    70      40    71      43    71
+Temp          38 36 65 57   44 41 67 58   46 42 69 60   48 44 69 60
+Dewpt         38 36 39 46   43 40 45 48   45 42 45 49   47 44 48 50
+PWind dir         N    NE      NE    NE      NE     N      NE    NE
+Wind char        LT    LT      LT    LT      LT    LT      LT    LT
+Avg clouds    CL FW CL CL   CL FW FW CL   CL FW FW CL   FW FW FW CL
+PoP 12hr          0     0       0     0       0     0       0     0
+
+$$
+KYZ106-172000-
+WEST LIBERTY-MORGAN KY 
+37.90N  83.26W Elev. 830 ft
+756 AM EDT Sat Oct 17 2026
+
+Date             Sat 10/17/26            Sun 10/18/26            Mon 10/19/26
+EDT 3hrly     05 08 11 14 17 20 23 02 05 08 11 14 17 20 23 02 05 08 11 14 17 20
+UTC 3hrly     09 12 15 18 21 00 03 06 09 12 15 18 21 00 03 06 09 12 15 18 21 00
+
+Max/Min                      53          32          61          29          64
+Temp             43 46 51 53 44 39 35 34 32 47 58 61 46 39 34 31 31 51 62 63 50
+Dewpt            41 43 39 37 35 35 34 33 32 34 32 31 35 33 33 31 31 35 34 34 39
+RH               93 89 63 54 70 85 96 96100 60 37 32 65 79 96100100 54 35 34 66
+Wind dir          N  N  N  N  N  N  N  N  N  E  E  E  N  N  N  N  N  N NE NE  N
+Wind spd          5  5  4  3  0  0  0  0  0  2  4  3  0  0  0  0  0  0  1  1  0
+Clouds           FW B1 B1 FW CL CL CL CL CL CL CL CL CL CL CL CL CL CL CL CL CL
+PoP 12hr                      5           0           0           0           0
+QPF 12hr                   0.01           0           0           0           0
+Snow 12hr                 00-00       00-00       00-00                        
+RainObvis                               F  F F+                                    
+Frost                               Y  Y  Y                                    
+
+
+Date          Tue 10/20/26  Wed 10/21/26  Thu 10/22/26  Fri 10/23/26
+EDT 6hrly     02 08 14 20   02 08 14 20   02 08 14 20   02 08 14 20
+UTC 6hrly     06 12 18 00   06 12 18 00   06 12 18 00   06 12 18 00
+
+Min/Max          35    67      39    70      40    71      43    71
+Temp          38 36 65 57   44 41 67 58   46 42 69 60   48 44 69 60
+Dewpt         38 36 39 46   43 40 45 48   45 42 45 49   47 44 48 50
+PWind dir         N    NE      NE    NE      NE     N      NE    NE
+Wind char        LT    LT      LT    LT      LT    LT      LT    LT
+Avg clouds    CL FW CL CL   CL FW FW CL   CL FW FW CL   FW FW FW CL
+PoP 12hr          0     0       0     0       0     0       0     0
+
+$$
+KYZ118-172000-
+WHITESBURG-LETCHER KY 
+37.11N  82.81W Elev. 1164 ft
+756 AM EDT Sat Oct 17 2026
+
+Date             Sat 10/17/26            Sun 10/18/26            Mon 10/19/26
+EDT 3hrly     05 08 11 14 17 20 23 02 05 08 11 14 17 20 23 02 05 08 11 14 17 20
+UTC 3hrly     09 12 15 18 21 00 03 06 09 12 15 18 21 00 03 06 09 12 15 18 21 00
+
+Max/Min                      54          34          65          30          68
+Temp             48 46 53 53 44 41 37 35 34 51 64 64 46 38 34 30 32 55 66 66 51
+Dewpt            46 45 41 37 36 34 32 31 30 30 33 33 36 30 27 27 27 33 34 36 38
+RH               93 96 64 54 73 76 82 85 85 44 31 31 68 73 75 88 81 43 30 33 61
+Wind dir          N  N  N  N NE NE  N  N  N  E  E  E  E  N  N  N  N  N  N  N  N
+Wind spd          8  6  6  5  1  1  0  0  0  2  4  2  1  0  0  0  0  0  2  2  0
+Wind gust        18                                                            
+Clouds           OV OV B2 SC SC CL FW FW FW CL CL CL CL CL FW FW FW CL CL CL CL
+PoP 12hr                     70          20           0           0           0
+QPF 12hr                   0.04           0           0           0           0
+Snow 12hr                 00-00       00-00       00-00                        
+Rain              L  C  C  C  S                                                
+Frost                               Y  Y  Y                                    
+
+
+Date          Tue 10/20/26  Wed 10/21/26  Thu 10/22/26  Fri 10/23/26
+EDT 6hrly     02 08 14 20   02 08 14 20   02 08 14 20   02 08 14 20
+UTC 6hrly     06 12 18 00   06 12 18 00   06 12 18 00   06 12 18 00
+
+Min/Max          36    70      44    73      45    72      48    72
+Temp          38 40 69 57   47 45 71 59   48 46 70 60   51 49 71 60
+Dewpt         36 35 39 47   42 39 45 49   45 42 46 50   47 44 50 51
+PWind dir         N    NE       E     N      NE     N      NE    NE
+Wind char        LT    LT      LT    LT      LT    LT      LT    LT
+Avg clouds    FW FW FW CL   CL FW FW CL   CL FW FW CL   FW FW FW CL
+PoP 12hr          0     0       0     0       0     0       0     0
+
+$$
+KYZ084-172000-
+WHITLEY CITY-MCCREARY KY 
+36.73N  84.48W Elev. 1321 ft
+756 AM EDT Sat Oct 17 2026
+
+Date             Sat 10/17/26            Sun 10/18/26            Mon 10/19/26
+EDT 3hrly     05 08 11 14 17 20 23 02 05 08 11 14 17 20 23 02 05 08 11 14 17 20
+UTC 3hrly     09 12 15 18 21 00 03 06 09 12 15 18 21 00 03 06 09 12 15 18 21 00
+
+Max/Min                      55          36          65          40          67
+Temp             46 46 53 54 48 43 40 37 36 50 63 65 54 47 44 42 41 55 64 66 55
+Dewpt            46 42 39 37 36 35 35 33 32 33 32 30 32 33 33 30 31 34 36 35 38
+RH              100 86 59 52 63 73 82 85 85 52 31 27 43 58 65 62 67 45 35 32 53
+Wind dir          N  N  N  N NE NE  E NE  E  E  E  E  E  E SE SE SE  N  N  N  N
+Wind spd         11 10  9  8  4  3  3  3  3  4  6  4  3  2  2  1  1  1  4  4  3
+Wind gust        23 20 20Clouds           B1 B2 B1 FW FW CL CL FW FW CL CL CL CL CL CL FW FW CL CL CL CL
+PoP 12hr                     40           0           0           0           0
+QPF 12hr                   0.01           0           0           0           0
+Snow 12hr                 00-00       00-00       00-00                        
+Drizzle           C  S                                                         
+Rain                                                                           
+Frost                               Y  Y  Y                                    
+
+
+Date          Tue 10/20/26  Wed 10/21/26  Thu 10/22/26  Fri 10/23/26
+EDT 6hrly     02 08 14 20   02 08 14 20   02 08 14 20   02 08 14 20
+UTC 6hrly     06 12 18 00   06 12 18 00   06 12 18 00   06 12 18 00
+
+Min/Max          42    69      43    73      44    73      47    74
+Temp          45 43 66 60   49 44 71 61   50 45 71 63   53 48 72 64
+Dewpt         37 38 40 42   44 42 44 43   46 45 45 45   48 46 47 45
+PWind dir        NE    NE      NE    NE      NE     N      NE    NE
+Wind char        LT    LT      LT    LT      LT    LT      LT    LT
+Avg clouds    CL FW CL CL   CL CL FW CL   CL CL FW CL   CL CL CL CL
+PoP 12hr          0     0       0     0       0     0       0     0
+
+$$
+KYZ085-172000-
+WILLIAMSBURG-WHITLEY KY 
+36.74N  84.17W Elev. 951 ft
+756 AM EDT Sat Oct 17 2026
+
+Date             Sat 10/17/26            Sun 10/18/26            Mon 10/19/26
+EDT 3hrly     05 08 11 14 17 20 23 02 05 08 11 14 17 20 23 02 05 08 11 14 17 20
+UTC 3hrly     09 12 15 18 21 00 03 06 09 12 15 18 21 00 03 06 09 12 15 18 21 00
+
+Max/Min                      55          35          65          31          68
+Temp             47 46 53 55 48 42 39 37 35 51 62 65 50 42 37 34 34 53 65 67 53
+Dewpt            43 43 40 37 36 35 34 33 32 33 33 30 33 34 33 31 31 35 36 35 38
+RH               86 89 61 51 63 76 82 85 89 50 33 27 52 73 85 89 89 50 34 30 57
+Wind dir          N  N  N  N  N NE NE  N  N  E  E  E  E  N  N  N  N  N  N  N  N
+Wind spd         11 10  9  8  2  1  1  0  0  2  4  3  1  0  0  0  0  0  2  3  1
+Wind gust        21                                                            
+Clouds           B2 OV B1 FW FW FW FW FW FW CL CL CL CL CL FW FW FW CL CL CL CL
+PoP 12hr                     40           0           0           0           0
+QPF 12hr                   0.01           0           0           0           0
+Snow 12hr                 00-00       00-00       00-00                        
+Drizzle           C  C                                                         
+Obvis                                    PF                                    
+Frost                               Y  Y  Y                                    
+
+
+Date          Tue 10/20/26  Wed 10/21/26  Thu 10/22/26  Fri 10/23/26
+EDT 6hrly     02 08 14 20   02 08 14 20   02 08 14 20   02 08 14 20
+UTC 6hrly     06 12 18 00   06 12 18 00   06 12 18 00   06 12 18 00
+
+Min/Max          37    70      42    74      44    73      46    75
+Temp          41 39 67 60   48 43 72 62   49 45 71 63   52 47 73 63
+Dewpt         37 38 40 43   43 41 46 44   46 44 46 46   47 46 48 47
+PWind dir         N    NE      NE     N      NE     N      NE    NE
+Wind char        LT    LT      LT    LT      LT    LT      LT    LT
+Avg clouds    CL FW CL CL   CL FW FW CL   CL CL FW CL   CL FW FW CL
+PoP 12hr          0     0       0     0       0     0       0     0
+
+$$
+KYZ087-172000-
+MIDDLESBORO BELL COUNTY AIRPORT 
+36.61N  83.74W Elev. 1154 ft
+756 AM EDT Sat Oct 17 2026
+
+Date             Sat 10/17/26            Sun 10/18/26            Mon 10/19/26
+EDT 3hrly     05 08 11 14 17 20 23 02 05 08 11 14 17 20 23 02 05 08 11 14 17 20
+UTC 3hrly     09 12 15 18 21 00 03 06 09 12 15 18 21 00 03 06 09 12 15 18 21 00
+
+Max/Min                      56          34          66          31          70
+Temp             48 46 54 56 4640 36 35 34 49 64 65 48 40 36 33 35 52 67 68 52
+Dewpt            47 44 40 38 37 35 33 32 31 30 31 31 35 32 31 29 30 33 36 37 39
+RH               96 93 59 51 71 82 89 89 89 48 29 28 60 73 82 85 82 48 32 32 61
+Wind dir          N  N  N  N  N  N  N  N  N  E  E  E NE  N  N  N  N  N  N  N  N
+Wind spd         11 10  8  8  3  2  0  0  0  2  5  4  1  0  0  0  0  0  0  1  1
+Wind gust        21                                                            
+Clouds           B2 OV B1 FW FW FW FW FW FW CL CL CL CL CL FW FW FW CL CL CL CL
+PoP 12hr                     60          10           0           0           0
+QPF 12hr                   0.01           0           0           0           0
+Snow 12hr                 00-00       00-00       00-00                        
+Drizzle           L  C                                                         
+Rain                                                                           
+Obvis                              PF PF PF                                    
+Frost                               Y  Y  Y                                    
+
+
+Date          Tue 10/20/26  Wed 10/21/26  Thu 10/22/26  Fri 10/23/26
+EDT 6hrly     02 08 14 20   02 08 14 20   02 08 14 20   02 08 14 20
+UTC 6hrly     06 12 18 00   06 12 18 00   06 12 18 00   06 12 18 00
+
+Min/Max          37    73      44    75      45    74      47    75
+Temp          40 40 71 60   46 45 73 61   47 46 72 62   49 48 73 62
+Dewpt         37 37 40 46   42 40 46 48   45 44 47 50   47 46 50 50
+PWind dir         N     N       N     N       N     N       N     N
+Wind char        LT    LT      LT    LT      LT    LT      LT    LT
+Avg clouds    CL FW FW CL   CL FW FW CL   CL FW FW CL   CL FW FW CL
+PoP 12hr          0     0       0     0       0     0       0     0
+
+$$
+KYZ120-172000-
+PIKE COUNTY AIRPORT 
+37.56N  82.57W Elev. 1472 ft
+756 AM EDT Sat Oct 17 2026
+
+Date             Sat 10/17/26            Sun 10/18/26            Mon 10/19/26
+EDT 3hrly     05 08 11 14 17 20 23 02 05 08 11 14 17 20 23 02 05 08 11 14 17 20
+UTC 3hrly     09 12 15 18 21 00 03 06 09 12 15 18 21 00 03 06 09 12 15 18 21 00
+
+Max/Min                      53          36          62          41          64
+Temp             47 45 52 53 48 42 40 38 36 48 60 62 52 46 44 43 41 53 62 63 52
+Dewpt            44 44 39 36 34 33 33 32 32 33 32 32 36 32 30 29 29 32 34 33 38
+RH               89 96 61 52 58 70 76 79 85 56 35 32 54 58 57 57 62 44 35 32 59
+Wind dir          N  N  N  N  N NE NE NE NE  E NE NE NE  E  E  E SE  E  N  N  N
+Wind spd         11  9  8  6  3  2  1  1  1  2  4  3  3  2  2  1  2  1  2  3  2
+Wind gust        21                                                            
+Clouds           B2 B2 B1 FW CL CL CL CL CL CL CL CL CL CL CL FW FW FW FW CL FW
+PoP 12hr                     50           0           0           0           0
+QPF 12hr                   0.01           0           0           0           0
+Snow 12hr                 00-00       00-00       00-00                        
+Drizzle           C  C                                                         
+Rain                                                                           
+Frost                               Y  Y  Y                                    
+
+
+Date          Tue 10/20/26  Wed 10/21/26  Thu 10/22/26  Fri 10/23/26
+EDT 6hrly     02 08 14 20   02 08 14 20   02 08 14 20   02 08 14 20
+UTC 6hrly     06 12 18 00   06 12 18 00   06 12 18 00   06 12 18 00
+
+Min/Max          42    66      42    69      44    69      47    69
+Temp          44 42 64 57   46 42 66 59   48 45 66 60   51 48 68 60
+Dewpt         37 37 40 45   45 42 48 47   47 44 48 48   49 47 51 49
+PWind dir        NE     N      NE     N       N     N       N     N
+Wind char        LT    LT      LT    LT      LT    LT      LT    LT
+Avg clouds    FW FW FW FW   CL FW FW CL   CL FW FW FW   FW FW FW CL
+PoP 12hr          0     00     0       0     0       0     0
+
+$$
+KYZ120-172000-
+PIKE COUNTY AIRPORT 
+37.50N  82.52W Elev. 1472 ft
+756 AM EDT Sat Oct 17 2026
+
+Date             Sat 10/17/26            Sun 10/18/26            Mon 10/19/26
+EDT 3hrly     05 08 11 14 17 20 23 02 05 08 11 14 17 20 23 02 05 08 11 14 17 20
+UTC 3hrly     09 12 15 18 21 00 03 06 09 12 15 18 21 00 03 06 09 12 15 18 21 00
+
+Max/Min                      53          36          62          41          64
+Temp             47 45 52 53 48 42 40 38 36 48 60 62 52 46 44 43 41 53 62 63 52
+Dewpt            44 44 39 36 34 33 33 32 32 33 32 32 36 32 30 29 29 32 34 33 38
+RH               89 96 61 52 58 70 76 79 85 56 35 32 54 58 57 57 62 44 35 32 59
+Wind dir          N  N  N  N  N NE NE NE NE  E NE NE NE  E  E  E SE  E  N  N  N
+Wind spd         11  9  8  6  3  2  1  1  1  2  4  3  3  2  2  1  2  1  2  3  2
+Wind gust        21                                                            
+Clouds           B2 B2 B1 FW CL CL CL CL CL CL CL CL CL CL CL FW FW FW FW CL FW
+PoP 12hr                     50           0           0           0           0
+QPF 12hr                   0.01           0           0           0           0
+Snow 12hr                 00-00       00-00       00-00                        
+Drizzle           C  C                                                         
+Rain                                                                           
+Frost                               Y  Y  Y                                    
+
+
+Date          Tue 10/20/26  Wed 10/21/26  Thu 10/22/26  Fri 10/23/26
+EDT 6hrly     02 08 14 20   02 08 14 20   02 08 14 20   02 08 14 20
+UTC 6hrly     06 12 18 00   06 12 18 00   06 12 18 00   06 12 18 00
+
+Min/Max          42    66      42    69      44    69      47    69
+Temp          44 42 64 57   46 42 66 59   48 45 66 60   51 48 68 60
+Dewpt         37 37 40 45   45 42 48 47   47 44 48 48   49 47 51 49
+PWind dir        NE     N      NE     N       N     N       N     N
+Wind char        LT    LT      LT    LT      LT    LT      LT    LT
+Avg clouds    FW FW FW FW   CL FW FW CL   CL FW FW FW   FW FW FW CL
+PoP 12hr          0     0       0     0       0     0       0     0
+
+$$
+KYZ044-172000-
+FLEMING-MASON COUNTY AIRPORT 
+38.54N  83.74W Elev. 913 ft
+756 AM EDT Sat Oct 17 2026
+
+Date             Sat 10/17/26            Sun 10/18/26            Mon 10/19/26
+EDT 3hrly     05 08 11 14 17 20 23 02 05 08 11 14 17 20 23 02 05 08 11 14 17 20
+UTC 3hrly     09 12 15 18 21 00 03 06 09 12 15 18 21 00 03 06 09 12 15 18 21 00
+
+Max/Min                      54          32          62          35          65
+Temp             41 47 53 53 45 41 37 35 33 50 61 61 49 44 42 38 36 54 64 64 53
+Dewpt            39 41 38 36 35 34 34 32 31 33 31 29 33 31 32 31 32 35 36 35 38
+RH               92 79 57 52 68 76 89 89 92 52 32 29 54 60 67 76 85 48 35 34 57
+Wind dir          N  N  N  N  N NE NE  E  E  E  E  E  E  E  E  E  E  E NE NE NE
+Wind spd         12 12 10  8  3  3  2  2  2  5  8  5  3  3  3  1  2  2  4  4  3
+Clouds           CL B1 SC FW CL CL CL FW FW CL CL CL CL CL CL CL CL CL CL CL CL
+PoP 12hr                      0           0           0           0           0
+QPF 12hr                      0           0           0           0           0
+Snow 12hr                 00-00       00-00       00-00                        
+Drizzle                                                                        
+Wind chill       34                                                            
+Min chill        34    34          37    33    36                35            
+
+
+Date          Tue 10/20/26  Wed 10/21/26  Thu 10/22/26  Fri 10/23/26
+EDT 6hrly     02 08 14 20   02 08 14 20   02 08 14 20   02 08 14 20
+UTC 6hrly     06 12 18 00   06 12 18 00   06 12 18 00   06 12 18 00
+
+Min/Max          37    68      40    70      41    71      44    71
+Temp          42 3866 58   46 42 68 60   47 43 69 61   50 45 70 61
+Dewpt         37 36 38 43   43 41 46 46   46 43 45 47   47 45 48 47
+PWind dir        NE    NE      NE    NE      NE     N      NE    NE
+Wind char        LT    LT      LT    LT      LT    LT      LT    LT
+Avg clouds    CL CL CL CL   CL FW FW FW   CL CL FW FW   FW CL FW FW
+PoP 12hr          0     0       0     0       0     0       0     0
+
+$$
+KYZ050-172000-
+MONTGOMERY COUNTY AIRPORT 
+38.06N  83.98W Elev. 1020 ft
+756 AM EDT Sat Oct 17 2026
+
+Date             Sat 10/17/26            Sun 10/18/26            Mon 10/19/26
+EDT 3hrly     05 08 11 14 17 20 23 02 05 08 11 14 17 20 23 02 05 08 11 14 17 20
+UTC 3hrly     09 12 15 18 21 00 03 06 09 12 15 18 21 00 03 06 09 12 15 18 21 00
+
+Max/Min                      54          31          62          36          65
+Temp             43 45 52 53 46 40 36 34 33 50 61 62 51 45 42 38 37 54 63 64 54
+Dewpt            38 40 39 36 34 34 33 32 31 33 32 30 34 31 32 31 31 35 36 35 38
+RH               82 82 61 52 63 79 89 92 92 52 33 30 52 58 67 76 79 48 36 34 54
+Wind dir          N  N  N  N  N NE NE  E  E  E  E  E  E  E  E  E  E  E NE NE NE
+Wind spd         11 10  8  6  3  3  2  2  2  4  6  5  3  3  2  1  1  2  3  3  2
+Clouds           FW B1 SC FW CL CL CL CL FW CL CL CL CL CL CL CL CL CL CL CL CL
+PoP 12hr                      0           0           0           0           0
+QPF 12hr                      0           0           0           0           0
+Snow 12hr                 00-00       00-00       00-00                        
+Drizzle                                                                        
+Wind chill       37                                                            
+Min chill        37    36          36    33    34                36            
+Freeze                              W  W  W                                    
+
+
+Date          Tue 10/20/26  Wed 10/21/26  Thu 10/22/26  Fri 10/23/26
+EDT 6hrly     02 08 14 20   02 08 14 20   02 08 14 20   02 08 14 20
+UTC 6hrly     06 12 18 00   06 12 18 00   06 12 18 00   06 12 18 00
+
+Min/Max          37    68      40    71      40    72      43    73
+Temp          42 39 67 59   45 41 69 61   46 42 70 63   49 44 71 63
+Dewpt         37 36 40 42   43 41 46 45   45 42 45 46   47 44 47 46
+PWind dir        NE    NE      NE    NE      NE     N      NE    NE
+Wind char        LT    LT      LT    LT      LT    LT      LT    LT
+Avg clouds    CL FW CL CL   CL FW FW FW   CL CL FW FW   FW FW FW FW
+PoP 12hr          0     0       0     0       0     0       0     0
+
+$$
+KYZ115-172000-
+WENDELL H. FORD AIRPORT 
+37.39N  83.26W Elev. 1253 ft
+756 AM EDT Sat Oct 17 2026
+
+Date             Sat 10/17/26            Sun 10/18/26            Mon 10/19/26
+EDT 3hrly     05 08 11 14 17 20 23 02 05 08 11 14 17 20 23 02 05 08 11 14 17 20
+UTC 3hrly     09 12 15 18 21 00 03 06 09 12 15 18 21 00 03 06 09 12 15 18 21 00
+
+Max/Min                      55          35          63          30          67
+Temp             46 48 54 55 45 41 38 36 35 50 62 63 48 41 36 33 33 53 64 66 50
+Dewpt            45 43 39 37 35 34 34 33 32 34 33 33 35 34 32 31 30 35 35 34 37
+RH               96 83 57 51 68 76 85 89 89 54 33 32 60 76 85 92 89 50 34 30 61
+Wind dir          N  N  N  N NE NE  N NE NE  E  E  E NE  E  N  N  N  N  N  N NE
+Wind spd          6  4  4  3  1  1  0  1  1  2  3  2  1  1  0  0  0  0  1  1  1
+Clouds           B1 B2 B1 FW CL CL CL CL CL CL CL CL CL CL FW FW FW CL CL CL CL
+PoP 12hr                     40           0           0           0           0
+QPF 12hr                   0.01           0           0           0           0
+Snow 12hr                 00-00       00-00       00-00                        
+Drizzle           C  S                                                         
+Rain                                                                           
+FrostY  Y  Y                                    
+
+
+Date          Tue 10/20/26  Wed 10/21/26  Thu 10/22/26  Fri 10/23/26
+EDT 6hrly     02 08 14 20   02 08 14 20   02 08 14 20   02 08 14 20
+UTC 6hrly     06 12 18 00   06 12 18 00   06 12 18 00   06 12 18 00
+
+Min/Max          36    68      41    73      43    72      45    72
+Temp          40 38 66 58   46 42 70 59   48 44 69 61   49 46 70 61
+Dewpt         37 37 39 44   44 42 45 45   46 44 46 47   48 46 49 48
+PWind dir        NE    NE      NE    NE      NE     N      NE    NE
+Wind char        LT    LT      LT    LT      LT    LT      LT    LT
+Avg clouds    CL FW FW CL   CL FW FW CL   CL FW FW CL   CL FW FW CL
+PoP 12hr          0     0       0     0       0     0       0     0
+
+$$
+KYZ110-172000-
+BIG SANDY REGIONAL AIRPORT 
+37.75N  82.64W Elev. 1221 ft
+756 AM EDT Sat Oct 17 2026
+
+Date             Sat 10/17/26            Sun 10/18/26            Mon 10/19/26
+EDT 3hrly     05 08 11 14 17 20 23 02 05 08 11 14 17 20 23 02 05 08 11 14 17 20
+UTC 3hrly     09 12 15 18 21 00 03 06 09 12 15 18 21 00 03 06 09 12 15 18 21 00
+
+Max/Min                      54          36          62          40          65
+Temp             46 45 53 54 47 42 40 37 36 48 60 62 51 46 43 42 41 53 63 64 53
+Dewpt            43 43 39 36 34 34 34 32 32 34 33 33 36 33 32 30 30 34 34 34 39
+RH               89 93 59 50 60 73 79 82 85 58 36 33 56 60 65 62 65 48 34 32 59
+Wind dir          N  N  N  N  N NE NE NE NE NE NE NE NE  E  E  E  E  E NE  N  N
+Wind spd          9  8  6  5  3  2  2  2  2  3  4  3  3  2  2  1  2  2  3  3  2
+Wind gust              17                                                      
+Clouds           B2 B2 B1 FW CL CL CL CL CL CL CL CL CL CL CL FW FW CL FW CL CL
+PoP 12hr                     50           0           0           0           0
+QPF 12hr                   0.01           0           0           0           0
+Snow 12hr                 00-00       00-00       00-00                        
+Drizzle           C  S                                                         
+Rain                                                                           
+Frost                               Y  Y  Y                                    
+
+
+Date          Tue 10/20/26  Wed 10/21/26  Thu 10/22/26  Fri 10/23/26
+EDT 6hrly     02 08 14 20   02 08 14 20   02 08 14 20   02 08 14 20
+UTC 6hrly     06 12 18 00   06 12 18 00   06 12 18 00   06 12 18 00
+
+Min/Max          41    67      41    69      43    70      46    70
+Temp          44 42 65 57   46 42 66 58   48 45 67 60   50 47 67 59
+Dewpt         38 38 39 45   45 42 48 47   47 45 48 48   49 47 50 49
+PWind dir         N     N       N     N       N     N       N     N
+Wind char        LT    LT      LT    LT      LT    LT      LT    LT
+Avg clouds    FW FW FW FW   CL FW FW FW   CL FW FW FW   FW FW FW FW
+PoP 12hr          0     0       0     0       0     0       0     0
+
+$$

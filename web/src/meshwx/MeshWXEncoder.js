@@ -86,7 +86,7 @@ export class MeshWXEncodeError extends Error {
 
   /**
    * A Radar tile carried an echo in a cell its own `bounds` say the picture never covered
-   * (spec §7D). Outside the bounds a cell is *unknown* and is encoded as level 0, so a wet cell
+   * (spec §13). Outside the bounds a cell is *unknown* and is encoded as level 0, so a wet cell
    * out there is a tile that contradicts itself and there is no way to put it on the wire.
    */
   static radarCellOutsideBounds({ row, col }) {
@@ -96,7 +96,7 @@ export class MeshWXEncodeError extends Error {
     );
   }
 
-  /** A Radar tile's `bounds` named rows or columns its own grid does not have (spec §7D). */
+  /** A Radar tile's `bounds` named rows or columns its own grid does not have (spec §13). */
   static radarBoundsOutsideGrid({ row0, row1, col0, col1, size }) {
     return new MeshWXEncodeError(
       'radarBoundsOutsideGrid', { row0, row1, col0, col1, size },
@@ -128,7 +128,7 @@ export class MeshWXEncodeError extends Error {
   }
 }
 
-// MARK: - Little-endian appenders (spec §2.4)
+// MARK: - Little-endian appenders (spec §1.3)
 
 class Writer {
   constructor() {
@@ -262,7 +262,7 @@ function encodePolygon(polygon) {
 /**
  * The counted run list of spec §3. A warning sets the tag bit only when it has runs, so an empty
  * list has no encoding there; a Coverage message counts them the same way but may legitimately
- * carry none (`k` = 0, spec §7A), hence `allowingEmpty`.
+ * carry none (`k` = 0, spec §10), hence `allowingEmpty`.
  */
 function encodeAreas(areas, { what = 'area runs', allowingEmpty = false } = {}) {
   const low = allowingEmpty ? 0 : 1;
@@ -564,7 +564,7 @@ export function forecast({ seq, bot, pointIndex, issuedMinutes, firstPeriod, per
   return writer.done('forecast');
 }
 
-// MARK: - Coverage (type 8, spec §7A)
+// MARK: - Coverage (type 8, spec §10)
 
 /**
  * The app never sends this — only a bot states its own coverage — but the vector round trip and
@@ -608,13 +608,13 @@ export function coverage({
   return writer.done('coverage');
 }
 
-// MARK: - Text (type 6, spec §8.1)
+// MARK: - Text (type 6, spec §8)
 
 /**
  * Encode one Text chunk.
  *
  * `wasCut` says the reply ran past `MeshWXWire.maxTextChunks` and the bot dropped the tail
- * (spec §8.1, revision 7). Every chunk of a cut reply carries it, not only the last.
+ * (spec §8, revision 7). Every chunk of a cut reply carries it, not only the last.
  */
 export function text({
   seq, bot, subject, group, index, total, text: body, wasCut = false, source = 0,
@@ -653,7 +653,7 @@ export function text({
  * chunks, not one — carry at most 157 text bytes, share `group = seqStart`, and take consecutive
  * sequence numbers wrapping 255 → 0.
  *
- * `wasCut` says the caller already dropped the product's tail to make it fit (spec §8.1,
+ * `wasCut` says the caller already dropped the product's tail to make it fit (spec §8,
  * revision 7). Marked on every chunk, because a reader missing the last one still has to know
  * the reply is short of the product. The cutting itself is the bot's, at a sentence boundary;
  * this never truncates on its own — past `MeshWXWire.maxTextChunks` it still throws.
@@ -688,7 +688,7 @@ export function textChunks({ seqStart, bot, subject, text: body, wasCut = false,
   }));
 }
 
-// MARK: - Not available (type 7, spec §8.3)
+// MARK: - Not available (type 7, spec §9)
 
 /**
  * Encode a Not-available reply.
@@ -714,7 +714,7 @@ export function notAvailable({ seq, bot, request, requestCode, reason }) {
   return writer.done('not_available');
 }
 
-// MARK: - Request (type 9, spec §7B)
+// MARK: - Request (type 9, spec §11)
 
 function senderBytes(senderPrefix) {
   const bytes = typeof senderPrefix === 'string'
@@ -735,7 +735,7 @@ function senderBytes(senderPrefix) {
 }
 
 /**
- * The app's own `>` request, as the datagram it is flooded on `#meshwx` as (spec §7B).
+ * The app's own `>` request, as the datagram it is flooded on `#meshwx` as (spec §11).
  *
  * The one message this app transmits, so this is the one encoder whose output goes on the air
  * rather than into a test. Strict about all three variable things — a six-byte key prefix, a
@@ -746,7 +746,7 @@ function senderBytes(senderPrefix) {
  * - `bot`: the bot asked; `MeshWXRequest.anyBot` asks them all.
  * - `senderPrefix`: the first six bytes of this phone's public key, as bytes or 12 hex chars.
  * - `timestamp`: Unix seconds on the sender's clock; a resend repeats it.
- * - `text`: the §8.2 request, starting with `>`.
+ * - `text`: the §14 request, starting with `>`.
  */
 export function request({ seq, bot, senderPrefix, timestamp, text: body }) {
   const sender = senderBytes(senderPrefix);
@@ -763,7 +763,7 @@ export function request({ seq, bot, senderPrefix, timestamp, text: body }) {
   return writer.done('request');
 }
 
-// MARK: - Area sweep (type 10, spec §7C)
+// MARK: - Area sweep (type 10, spec §12)
 
 /**
  * One packet of a national sweep. The app never sends one — only a bot builds them — but the
@@ -802,7 +802,7 @@ export function areaSweep({
       what: 'area sweep scope', count: states.length, allowed: [0, MeshWXWire.maxSweepScopeStates],
     });
   }
-  // Spec §7C, revision 10: the scope entries "count toward the 38 per packet". They are entries
+  // Spec §12, revision 10: the scope entries "count toward the 38 per packet". They are entries
   // like any other on the wire, so the packet budget is the same budget.
   if (states.length + entries.length > MeshWXWire.maxAreaSweepEntries) {
     throw MeshWXEncodeError.badCount({
@@ -822,7 +822,7 @@ export function areaSweep({
   writer.u8(requireRange(group, 0, 255, 'group'));
   writer.u8(index);
   // Bit 7 rides on the count byte, so a national sweep encodes to exactly the bytes it always
-  // did and a scoped one is one bit different (spec §7C, revision 10).
+  // did and a scoped one is one bit different (spec §12, revision 10).
   writer.u8(total | (isScoped ? MeshWXWire.sweepScopedBit : 0));
   // The scope first, as the decoder lifted it: `XXZ000` — event 0, kind zone, start 0, run 1.
   for (const state of states) {
@@ -850,7 +850,7 @@ export function areaSweep({
   return writer.done('area sweep');
 }
 
-// MARK: - Radar (type 11, spec §7D)
+// MARK: - Radar (type 11, spec §13)
 
 /**
  * The cells as a quadtree, most significant bit first, padded with zero bits to the end of the
@@ -902,7 +902,7 @@ function packRadarCells(rows) {
 }
 
 /**
- * One tile of a radar picture (spec §7D, revision 11).
+ * One tile of a radar picture (spec §13, revision 11).
  *
  * `rows` is the grid, north row first, west column first, each cell 0-3: `MeshWXWire.radarGrid`
  * rows of that many for a fine tile, `radarCoarseGrid` for a coarse one, and **which it is is

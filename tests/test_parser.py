@@ -117,7 +117,7 @@ def test_ingest_skips_products_already_held():
     assert parsed == [fresh["filename"]]          # the 2 known ones never reached the parser
 
 
-# -- Where the products came from (spec 2.2.1, revision 7) --------------------
+# -- Where the products came from (spec 2.3, revision 7) --------------------
 
 
 def _sourced(emwin_id: str, source: str) -> dict:

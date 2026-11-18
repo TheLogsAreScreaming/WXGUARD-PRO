@@ -1,7 +1,7 @@
 // Port of MC1Services/Tests/MC1ServicesTests/Weather/Screen/WeatherZipPlaceTests.swift
 //
 // A searched ZIP as the place the screen answers for, and town rows named as the weather bot
-// names places (spec §9.1).
+// names places (spec §16.2).
 
 import test from 'node:test'
 import assert from 'node:assert/strict'
@@ -24,7 +24,7 @@ test("a zip is a searched place at its own point with the bot's label", () => {
 })
 
 test('the zip label is the town row with the zip', () => {
-  // A ZIP reads as its town's row does, with the ZIP after it: one rule (spec §9.1) for both.
+  // A ZIP reads as its town's row does, with the ZIP after it: one rule (spec §16.2) for both.
   const kitchen = tables.zip('10019')
   assert.ok(kitchen != null)
   assert.equal(MeshWXZip.label(kitchen), "Hell's Kitchen, NY 10019")
@@ -91,7 +91,7 @@ test('town rows read as the bot names them', () => {
 // MARK: - What the Places search offers a reader (docs/MESHWX_UI.md §3.1 U-22, U-23)
 
 test('a town the table holds twice is one row', () => {
-  // The bundle's own San Juan, PR: the municipio and its zona urbana, which spec §9.1 strips, so
+  // The bundle's own San Juan, PR: the municipio and its zona urbana, which spec §16.2 strips, so
   // both rows read "San Juan, PR" — 7 km apart, and the live search showed both.
   const found = tables.searchPlaces({ query: 'San Juan', limit: 25 })
   const labels = found.map((place) => WeatherNames.placeLabel({ name: place.name, state: place.state }))

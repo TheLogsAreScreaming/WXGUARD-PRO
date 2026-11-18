@@ -9,8 +9,10 @@ build/
 .venv/
 venv/
 
-# Environment
+# Environment (and every backup copy of it: they hold the admin key and bridge token)
 .env
+.env.*
+.env-*
 
 # Data cache
 data/*.txt
@@ -19,6 +21,7 @@ data/*.json
 data/*.jsonl
 data/*.jsonl.1
 data/emwin_cache/
+data/emwin_internet/
 !data/.gitkeep
 
 # Dev-box cache for bundle builder shapefile downloads
